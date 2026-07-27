@@ -47,8 +47,12 @@ next-env.d.ts
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# cursor (local IDE state)
+# cursor / AI (local only — not pushed to remote)
 .cursor/
+AGENTS.md
+CLAUDE.md
+.cursorrules
+*.cursorrules
 
 # turbo
 .turbo
