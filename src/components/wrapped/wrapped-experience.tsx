@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/layout/page-shell";
 import { CommitsSlide } from "@/components/wrapped/slides/commits-slide";
@@ -10,7 +11,6 @@ import { useRandomWrappedStats } from "@/lib/wrapped/use-random-wrapped-stats";
 import { useApp } from "@/providers/app-provider";
 
 const TOTAL_SLIDES = 6;
-const USERNAME = "erickpe8";
 
 const HEATMAP_COLORS = [
   "bg-surface-variant/30",
@@ -28,9 +28,12 @@ const slideMotion = {
 
 export function WrappedExperience() {
   const { t, setHeaderProgress } = useApp();
+  const { data: session } = useSession();
   useViewI18n("wrapped");
   const [slide, setSlide] = useState(0);
   const { stats, regenerate } = useRandomWrappedStats();
+  const username =
+    session?.user?.login ?? session?.user?.name ?? "developer";
 
   const restart = useCallback(() => {
     regenerate();
@@ -85,7 +88,7 @@ export function WrappedExperience() {
                 {t("introHey")}
               </p>
               <h2 className="glow-text font-display text-[40px] font-extrabold text-on-surface max-[390px]:text-[36px] md:text-7xl">
-                @{USERNAME}
+                @{username}
               </h2>
               <p className="mt-4 text-on-surface-variant max-[390px]:text-sm md:mt-6">
                 {t("yearLabel")}
@@ -198,7 +201,7 @@ export function WrappedExperience() {
                 <h2 className="i18n-text mb-2 font-display text-2xl font-extrabold max-[390px]:text-xl md:text-3xl">
                   {t("your2026")}
                 </h2>
-                <p className="mb-8 text-on-surface-variant">@{USERNAME}</p>
+                <p className="mb-8 text-on-surface-variant">@{username}</p>
 
                 <div className="mb-8 grid grid-cols-2 gap-3 text-left">
                   <div className="rounded-lg border border-white/5 bg-surface-container p-3">
@@ -248,7 +251,7 @@ export function WrappedExperience() {
         {slide < TOTAL_SLIDES - 1 && (
           <div className="pointer-events-none absolute bottom-8 left-0 right-0 flex justify-center">
             <p className="text-xs text-on-surface-variant/50">
-              tap / →
+              tap / next
             </p>
           </div>
         )}

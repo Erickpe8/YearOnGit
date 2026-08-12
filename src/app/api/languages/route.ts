@@ -31,7 +31,7 @@ function getNativeName(code: string, fallback: string): string {
     const native = new Intl.DisplayNames([code], { type: "language" }).of(code);
     if (native && native !== english) return native;
   } catch {
-    // ignore invalid locale codes
+    return fallback;
   }
   return fallback;
 }

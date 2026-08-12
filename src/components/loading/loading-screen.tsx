@@ -1,18 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IconLoader } from "@/components/ui/icons";
 import { PageShell } from "@/components/layout/page-shell";
+import { interpolate } from "@/lib/i18n/interpolate";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
 
 export function LoadingScreen() {
   const { t } = useApp();
+  const { data: session } = useSession();
   useViewI18n("loading");
   const router = useRouter();
   const [progress, setProgress] = useState(0);
+  const displayName =
+    session?.user?.login ?? session?.user?.name ?? null;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,6 +50,16 @@ export function LoadingScreen() {
         >
           <IconLoader className="h-10 w-10 animate-spin text-primary" />
         </motion.div>
+
+        {displayName ? (
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="i18n-text mb-2 font-display text-sm font-semibold text-primary"
+          >
+            {interpolate(t("welcomeBack"), { name: displayName })}
+          </motion.p>
+        ) : null}
 
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
