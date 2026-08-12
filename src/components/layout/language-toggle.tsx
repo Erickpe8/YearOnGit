@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { IconGlobe, IconLoader, IconSearch } from "@/components/ui/icons";
+import { IconCheck, IconGlobe, IconLoader, IconSearch } from "@/components/ui/icons";
 import type { LanguageOption } from "@/lib/i18n/language-types";
 import { useApp } from "@/providers/app-provider";
 
@@ -172,13 +172,11 @@ export function LanguageToggle() {
                           {language.nativeName}
                         </span>
                         <span className="block truncate text-[10px] text-on-surface-variant">
-                          {language.name} · {language.code.toUpperCase()}
+                          {language.name} / {language.code.toUpperCase()}
                         </span>
                       </span>
                       {selected ? (
-                        <span className="shrink-0 text-[10px] font-bold text-primary">
-                          ✓
-                        </span>
+                        <IconCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
                       ) : null}
                     </button>
                   </li>

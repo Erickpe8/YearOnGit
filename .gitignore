@@ -47,12 +47,17 @@ next-env.d.ts
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# cursor / AI (local only — not pushed to remote)
+# cursor / agents / AI 
 .cursor/
+.agents/
 AGENTS.md
 CLAUDE.md
 .cursorrules
 *.cursorrules
+skills-lock.json
 
 # turbo
 .turbo
+
+# prisma
+/src/generated/prisma

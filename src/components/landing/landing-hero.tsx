@@ -1,7 +1,9 @@
 "use client";
 
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { IconArrowRight, IconLock } from "@/components/ui/icons";
+import { interpolate } from "@/lib/i18n/interpolate";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
 import {
@@ -22,7 +24,12 @@ function GitHubIcon() {
 
 export function LandingHero() {
   const { t } = useApp();
+  const { data: session, status } = useSession();
   useViewI18n("landing");
+
+  const displayName =
+    session?.user?.login ?? session?.user?.name ?? null;
+  const isAuthenticated = status === "authenticated" && Boolean(session?.user);
 
   return (
     <LandingCardCluster>
@@ -33,14 +40,19 @@ export function LandingHero() {
         </span>
       </div>
 
-      {/* Headline + cards capa 2 */}
       <div className="relative z-40 mb-4 max-[390px]:mb-3">
         <CommitsDecorCard />
         <ReposDecorCard />
         <h1 className="hero-headline i18n-text relative z-40 font-display text-[32px] font-extrabold text-on-surface max-[390px]:text-[26px] md:text-[48px]">
-          {t("taglinePrefix")}
-          <span className="text-[#39d353] italic"> GitHub</span>
-          {t("taglineSuffix")}
+          {isAuthenticated && displayName ? (
+            interpolate(t("welcomeBack"), { name: displayName })
+          ) : (
+            <>
+              {t("taglinePrefix")}
+              <span className="text-[#39d353] italic"> GitHub</span>
+              {t("taglineSuffix")}
+            </>
+          )}
         </h1>
       </div>
 
@@ -48,25 +60,37 @@ export function LandingHero() {
         {t("landingDescription")}
       </p>
 
-      {/* CTA + cards capa 3 */}
       <div className="relative z-40 mx-auto flex w-full max-w-sm flex-col items-center gap-3 max-[390px]:max-w-[300px]">
         <div className="relative w-full">
           <HeatmapCard />
           <LanguagesCard />
-          <Link
-            href="/loading"
-            className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
-          >
-            <GitHubIcon />
-            <span className="i18n-cta text-center">{t("continueWithGitHub")}</span>
-            <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/loading"
+              className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
+            >
+              <span className="i18n-cta text-center">{t("viewMyWrapped")}</span>
+              <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => signIn("github", { callbackUrl: "/loading" })}
+              className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
+            >
+              <GitHubIcon />
+              <span className="i18n-cta text-center">{t("continueWithGitHub")}</span>
+              <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+            </button>
+          )}
         </div>
 
-        <p className="i18n-micro relative z-40 flex max-w-xs flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-display text-[10px] font-semibold text-on-surface-variant/70 max-[390px]:max-w-[280px] max-[390px]:text-[9px]">
-          <IconLock className="h-3.5 w-3.5 shrink-0" />
-          <span>{t("privacyNote")}</span>
-        </p>
+        {!isAuthenticated ? (
+          <p className="i18n-micro relative z-40 flex max-w-xs flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-display text-[10px] font-semibold text-on-surface-variant/70 max-[390px]:max-w-[280px] max-[390px]:text-[9px]">
+            <IconLock className="h-3.5 w-3.5 shrink-0" />
+            <span>{t("privacyNote")}</span>
+          </p>
+        ) : null}
       </div>
     </LandingCardCluster>
   );
