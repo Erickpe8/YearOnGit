@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
+import { AppProvider } from "@/providers/app-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -7,14 +8,15 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "YearOnGit",
-  description: "Your year on GitHub, wrapped.",
+  title: "YearOnGit | Your GitHub Wrapped",
+  description:
+    "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
 };
 
 export default function RootLayout({
@@ -25,9 +27,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${inter.variable} h-full dark`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full bg-background text-on-background antialiased">
+        <AppProvider>{children}</AppProvider>
+      </body>
     </html>
   );
 }
