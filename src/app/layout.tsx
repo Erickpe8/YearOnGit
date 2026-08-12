@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
 import { AppProvider } from "@/providers/app-provider";
+import { AuthSessionProviderServer } from "@/providers/auth-session-provider-server";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,7 +32,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-on-background antialiased">
-        <AppProvider>{children}</AppProvider>
+        <AuthSessionProviderServer>
+          <AppProvider>{children}</AppProvider>
+        </AuthSessionProviderServer>
       </body>
     </html>
   );

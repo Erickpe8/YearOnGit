@@ -308,7 +308,7 @@ body::-webkit-scrollbar {
 }
 
 .noise-overlay {
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  background-image: url("/noise.svg");
   opacity: 0.03;
   filter: contrast(150%) brightness(100%);
 }

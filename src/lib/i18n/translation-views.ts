@@ -4,6 +4,8 @@ export const TRANSLATION_VIEWS = {
   common: [
     "hideHeader",
     "showHeader",
+    "signOut",
+    "headerGreeting",
     "language",
     "searchLanguage",
     "noLanguagesFound",
@@ -21,6 +23,8 @@ export const TRANSLATION_VIEWS = {
     "taglineSuffix",
     "landingDescription",
     "continueWithGitHub",
+    "viewMyWrapped",
+    "welcomeBack",
     "privacyNote",
     "editionLive",
     "globalImpact",
@@ -30,7 +34,7 @@ export const TRANSLATION_VIEWS = {
     "commitsThisYear",
     "previewStreak",
   ],
-  loading: ["buildingRecap", "gatheringCommits"],
+  loading: ["buildingRecap", "gatheringCommits", "welcomeBack"],
   wrapped: [
     "introHey",
     "yearLabel",
