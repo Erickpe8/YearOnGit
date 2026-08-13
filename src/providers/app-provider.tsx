@@ -25,6 +25,7 @@ import {
   type TranslationBundle,
 } from "@/lib/i18n/translation-cache";
 import type { TranslationView } from "@/lib/i18n/translation-views";
+import { brandName } from "@/lib/brand/assets";
 
 type HeaderProgress = {
   current: number;
@@ -75,11 +76,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const applyDocumentLocale = useCallback((next: Locale, bundle?: TranslationBundle) => {
     document.documentElement.lang = next;
-
-    const title = isStaticLocale(next)
-      ? translations[next].metadataTitle
-      : bundle?.metadataTitle ?? dynamicTranslations.metadataTitle ?? translations.en.metadataTitle;
-    document.title = title;
+    document.title = brandName;
 
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
@@ -90,7 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           translations.en.metadataDescription;
       meta.setAttribute("content", description);
     }
-  }, [dynamicTranslations.metadataDescription, dynamicTranslations.metadataTitle]);
+  }, [dynamicTranslations.metadataDescription]);
 
   const mergeBundle = useCallback((bundle: TranslationBundle) => {
     setDynamicTranslations((prev) => ({ ...prev, ...bundle }));

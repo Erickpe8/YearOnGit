@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconLoader } from "@/components/ui/icons";
+import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { PageShell } from "@/components/layout/page-shell";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { saveWrappedPayload } from "@/lib/wrapped/storage";
@@ -115,9 +115,9 @@ export function LoadingScreen() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-card mb-10 flex h-20 w-20 items-center justify-center rounded-2xl"
+          className="glass-card brand-wordmark-glow mb-10 rounded-2xl px-8 py-6"
         >
-          <IconLoader className="h-10 w-10 animate-spin text-primary" />
+          <BrandWordmark size="lg" />
         </motion.div>
 
         {displayName ? (

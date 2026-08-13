@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
+import { brandAssets, brandName } from "@/lib/brand/assets";
 import { AppProvider } from "@/providers/app-provider";
 import { AuthSessionProviderServer } from "@/providers/auth-session-provider-server";
 import "./globals.css";
@@ -15,9 +16,25 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "YearOnGit | Your GitHub Wrapped",
+  title: brandName,
   description:
     "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+  applicationName: brandName,
+  openGraph: {
+    title: "YearOnGit | Your GitHub Wrapped",
+    description:
+      "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+    siteName: brandName,
+    type: "website",
+    images: [{ url: brandAssets.og, alt: brandName }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "YearOnGit | Your GitHub Wrapped",
+    description:
+      "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+    images: [brandAssets.og],
+  },
 };
 
 export default function RootLayout({

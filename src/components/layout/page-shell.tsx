@@ -1,6 +1,5 @@
 "use client";
 
-import { useApp } from "@/providers/app-provider";
 import { AmbientBackground } from "@/components/ui/ambient-background";
 import { NoiseOverlay } from "@/components/ui/noise-overlay";
 import { GlassHeader } from "./glass-header";
@@ -26,18 +25,14 @@ export function PageShell({
   showFooterLinks = true,
   fitContent = false,
 }: PageShellProps) {
-  const { headerVisible } = useApp();
+  const headerOffset = "pt-14 md:pt-16";
 
   if (wrapped) {
     return (
       <>
         <GlassHeader />
         <HeaderRestorePill />
-        <div
-          className={`wrapped-root relative flex flex-col ${
-            headerVisible ? "wrapped-root--header" : ""
-          } ${className}`}
-        >
+        <div className={`wrapped-root wrapped-root--header relative flex flex-col ${className}`}>
           <AmbientBackground />
           {children}
           <NoiseOverlay />
@@ -46,18 +41,12 @@ export function PageShell({
     );
   }
 
-  const topPadding = headerVisible
-    ? "pt-14 md:pt-16"
-    : immersive
-      ? "pt-0"
-      : "pt-4";
-
   return (
     <>
       <GlassHeader />
       <HeaderRestorePill />
       <div
-        className={`relative flex min-h-screen flex-col ${topPadding} ${className}`}
+        className={`relative flex min-h-screen flex-col ${headerOffset} ${className}`}
       >
         <AmbientBackground />
         <div className={fitContent ? "flex flex-col" : "flex flex-1 flex-col"}>

@@ -1838,3 +1838,17 @@ body::-webkit-scrollbar {
     animation-delay: 0ms !important;
   }
 }
+
+@keyframes brand-wordmark-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 32px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+}
+
+.brand-wordmark-glow {
+  animation: brand-wordmark-glow 2.8s ease-in-out infinite;
+}

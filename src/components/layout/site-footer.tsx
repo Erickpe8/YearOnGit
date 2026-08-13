@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useApp } from "@/providers/app-provider";
-
-const GITHUB_URL = "https://github.com/Erickpe8";
+import { BrandWordmark } from "@/components/brand/brand-wordmark";
+import { useApp } from "@/providers/app-provider";const GITHUB_URL = "https://github.com/Erickpe8";
 
 type SiteFooterProps = {
   compact?: boolean;
@@ -20,7 +19,8 @@ export function SiteFooter({ compact = false, showLinks = true }: SiteFooterProp
       }`}
     >
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
-        <div className="flex flex-col items-center gap-1 sm:items-start">
+        <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
+          <BrandWordmark size="sm" className="opacity-90" />
           <a
             href={GITHUB_URL}
             target="_blank"
