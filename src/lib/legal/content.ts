@@ -1,4 +1,4 @@
-import type { StaticLocale } from "@/lib/i18n/supported-locales";
+type LegalLocale = "en" | "es";
 
 export type LegalSection = {
   title: string;
@@ -14,7 +14,7 @@ export type LegalDocument = {
 };
 
 export const legalContent: Record<
-  StaticLocale,
+  LegalLocale,
   { privacy: LegalDocument; terms: LegalDocument }
 > = {
   en: {

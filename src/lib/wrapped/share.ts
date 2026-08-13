@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { getAppBaseUrl } from "@/lib/app-url";
 import type { WrappedPayload, WrappedStats } from "@/lib/wrapped/types";
 import { WRAPPED_YEAR } from "@/lib/wrapped/year";
 
@@ -8,18 +9,6 @@ export function generateShareSlug(): string {
   return randomBytes(SHARE_SLUG_BYTES).toString("hex");
 }
 
-export function getAppBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  }
-  if (process.env.AUTH_URL) {
-    return process.env.AUTH_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
-  }
-  return "http://localhost:3000";
-}
 
 export function buildShareUrl(slug: string, baseUrl = getAppBaseUrl()): string {
   return `${baseUrl}/share/${slug}`;

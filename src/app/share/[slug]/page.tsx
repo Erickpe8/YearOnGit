@@ -5,10 +5,10 @@ import {
   buildShareMetaDescription,
   buildShareMetaTitle,
   buildShareUrl,
-  getAppBaseUrl,
   isValidShareSlug,
   isWrappedStats,
 } from "@/lib/wrapped/share";
+import { getAppBaseUrl } from "@/lib/app-url";
 import type { WrappedPayload, WrappedStats } from "@/lib/wrapped/types";
 import { SharedWrappedExperience } from "@/components/wrapped/shared-wrapped-experience";
 

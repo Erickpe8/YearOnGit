@@ -1,5 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap");
 @import "tailwindcss";
+@import "country-flag-icons/3x2/flags.css";
+
+.locale-flag {
+  --CountryFlagIcon-height: 0.875rem;
+  flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.locale-flag--sm {
+  --CountryFlagIcon-height: 0.875rem;
+}
+
+.locale-flag--md {
+  --CountryFlagIcon-height: 1rem;
+}
 
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
