@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { IconEye } from "@/components/ui/icons";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { useApp } from "@/providers/app-provider";
 
 export function HeaderRestorePill() {
@@ -20,8 +20,7 @@ export function HeaderRestorePill() {
           aria-label={t("showHeader")}
           className="glass-pill fixed top-3 right-3 z-50 flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-on-surface-variant transition-colors hover:text-primary md:top-4 md:right-4"
         >
-          <IconEye className="h-4 w-4" />
-          <span className="hidden sm:inline">YearOnGit</span>
+          <BrandLogo size="sm" href={null} />
         </motion.button>
       )}
     </AnimatePresence>
