@@ -3,7 +3,7 @@ import { translations } from "@/lib/i18n/translations";
 import type { TranslationView } from "@/lib/i18n/translation-views";
 import { getViewKeys } from "@/lib/i18n/translation-views";
 
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_PREFIX = `yearongit-i18n-${CACHE_VERSION}`;
 
 export type TranslationBundle = Partial<Record<TranslationKey, string>>;

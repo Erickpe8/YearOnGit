@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { IconChart } from "@/components/ui/icons";
-import { interpolate } from "@/lib/i18n/interpolate";
 import { useApp } from "@/providers/app-provider";
 
 const CONTRIBUTION_LEVELS = [
@@ -50,7 +49,7 @@ export function LandingPreview() {
                 {t("globalImpact")}
               </h3>
               <p className="text-xs text-on-surface-variant max-[390px]:text-[11px]">
-                {interpolate(t("contributions2026"), { count: 847 })}
+                {t("contributions2026", { count: 847 })}
               </p>
             </div>
             <IconChart className="h-5 w-5 text-primary/40" />

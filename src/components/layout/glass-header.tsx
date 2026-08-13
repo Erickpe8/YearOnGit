@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { IconChevronUp } from "@/components/ui/icons";
-import { interpolate } from "@/lib/i18n/interpolate";
 import { useApp } from "@/providers/app-provider";
 import { LanguageToggle } from "./language-toggle";
 
@@ -31,27 +30,48 @@ export function GlassHeader() {
             </div>
 
             {headerProgress ? (
-              <div className="flex flex-1 items-center justify-center px-2">
-                <div className="hidden items-center gap-1.5 sm:flex">
-                  {Array.from({ length: headerProgress.total }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-1 rounded-full transition-all duration-300 ${
-                        i < headerProgress.current
-                          ? "w-5 bg-primary"
-                          : "w-2 bg-white/15"
-                      }`}
-                    />
-                  ))}
+              <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-1 sm:gap-3 sm:px-2">
+                <div
+                  className="flex max-w-[min(100%,280px)] flex-1 items-center gap-1 sm:max-w-md sm:gap-1.5"
+                  aria-hidden
+                >
+                  {Array.from({ length: headerProgress.total }).map((_, index) => {
+                    const activeIndex = headerProgress.current - 1;
+                    const isPast = index < activeIndex;
+                    const isActive = index === activeIndex;
+
+                    return (
+                      <div
+                        key={`${headerProgress.cycleKey}-${index}`}
+                        className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-white/15"
+                      >
+                        {isPast || (isActive && headerProgress.fillMode === "complete") ? (
+                          <div className="h-full w-full rounded-full bg-primary" />
+                        ) : isActive && headerProgress.fillMode === "animate" ? (
+                          <div
+                            className={`wrapped-progress-segment h-full w-full rounded-full bg-primary${
+                              headerProgress.paused ? " is-paused" : ""
+                            }`}
+                            style={{
+                              animationDuration: `${
+                                headerProgress.settleMs + headerProgress.dwellMs
+                              }ms`,
+                              animationDelay: "0ms",
+                            }}
+                          />
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
-                <span className="font-display text-xs font-medium text-on-surface-variant sm:ml-3">
+                <span className="shrink-0 font-display text-xs font-medium text-on-surface-variant">
                   {headerProgress.current}/{headerProgress.total}
                 </span>
               </div>
             ) : isAuthenticated && displayName ? (
               <div className="flex min-w-0 flex-1 items-center justify-center px-2">
                 <p className="truncate font-display text-xs font-semibold text-on-surface md:text-sm">
-                  {interpolate(t("headerGreeting"), { name: displayName })}
+                  {t("headerGreeting", { name: displayName })}
                 </p>
               </div>
             ) : (
