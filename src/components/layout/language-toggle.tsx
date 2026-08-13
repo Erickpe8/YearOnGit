@@ -1,57 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { IconCheck, IconGlobe, IconLoader, IconSearch } from "@/components/ui/icons";
-import type { LanguageOption } from "@/lib/i18n/language-types";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { LocaleFlag } from "@/components/i18n/locale-flag";
+import { IconCheck, IconSearch } from "@/components/ui/icons";
+import {
+  filterLanguages,
+  SUPPORTED_LANGUAGES,
+  sortLanguages,
+} from "@/lib/i18n/language-cache";
+import { resolveLocale, type Locale } from "@/lib/i18n/supported-locales";
 import { useApp } from "@/providers/app-provider";
 
-const FALLBACK_LANGUAGES: LanguageOption[] = [
-  { code: "en", name: "English", nativeName: "English" },
-  { code: "es", name: "Spanish", nativeName: "Español" },
-  { code: "fr", name: "French", nativeName: "Français" },
-  { code: "de", name: "German", nativeName: "Deutsch" },
-  { code: "pt", name: "Portuguese", nativeName: "Português" },
-  { code: "it", name: "Italian", nativeName: "Italiano" },
-  { code: "ja", name: "Japanese", nativeName: "日本語" },
-  { code: "zh", name: "Chinese", nativeName: "中文" },
-  { code: "ko", name: "Korean", nativeName: "한국어" },
-  { code: "ar", name: "Arabic", nativeName: "العربية" },
-];
-
-const POPULAR_CODES = ["en", "es", "fr", "de", "pt", "it", "ja", "zh", "ko", "ar"];
-
 export function LanguageToggle() {
-  const { locale, setLocale, t, localeLoading } = useApp();
+  const { locale, setLocale, t } = useApp();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [languages, setLanguages] = useState<LanguageOption[]>([]);
-  const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
-
-  const fetchLanguages = useCallback(async (search: string) => {
-    setLoading(true);
-    try {
-      const params = search ? `?q=${encodeURIComponent(search)}` : "";
-      const response = await fetch(`/api/languages${params}`);
-      if (!response.ok) throw new Error("Failed to fetch languages");
-      const data = (await response.json()) as LanguageOption[];
-      setLanguages(data.length > 0 ? data : FALLBACK_LANGUAGES);
-    } catch {
-      setLanguages(FALLBACK_LANGUAGES);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const timer = window.setTimeout(() => {
-      void fetchLanguages(query);
-    }, 200);
-    return () => window.clearTimeout(timer);
-  }, [open, query, fetchLanguages]);
 
   useEffect(() => {
     if (!open) return;
@@ -82,22 +48,15 @@ export function LanguageToggle() {
     }
   }, [open]);
 
+  const visibleLanguages = useMemo(
+    () => sortLanguages(filterLanguages(SUPPORTED_LANGUAGES, query)),
+    [query],
+  );
+
   const handleSelect = (code: string) => {
-    setLocale(code.toLowerCase());
+    setLocale(resolveLocale(code) as Locale);
     setOpen(false);
   };
-
-  const sortedLanguages = [...languages].sort((a, b) => {
-    const aPopular = POPULAR_CODES.indexOf(a.code);
-    const bPopular = POPULAR_CODES.indexOf(b.code);
-    if (aPopular !== -1 || bPopular !== -1) {
-      if (aPopular === -1) return 1;
-      if (bPopular === -1) return -1;
-      return aPopular - bPopular;
-    }
-
-    return a.name.localeCompare(b.name);
-  });
 
   return (
     <div ref={containerRef} className="relative">
@@ -112,11 +71,7 @@ export function LanguageToggle() {
           open ? "text-primary" : "text-on-surface-variant hover:text-primary"
         }`}
       >
-        {localeLoading ? (
-          <IconLoader className="h-4 w-4 shrink-0 animate-spin" />
-        ) : (
-          <IconGlobe className="h-4 w-4 shrink-0" />
-        )}
+        <LocaleFlag locale={locale} />
         <span className="i18n-label font-display text-[10px] font-bold uppercase">
           {locale}
         </span>
@@ -144,16 +99,12 @@ export function LanguageToggle() {
             aria-label={t("language")}
             className="max-h-64 overflow-y-auto p-1.5"
           >
-            {loading ? (
-              <li className="flex items-center justify-center gap-2 px-3 py-6 text-on-surface-variant">
-                <IconLoader className="h-4 w-4 animate-spin" />
-              </li>
-            ) : sortedLanguages.length === 0 ? (
+            {visibleLanguages.length === 0 ? (
               <li className="px-3 py-6 text-center text-xs text-on-surface-variant">
                 {t("noLanguagesFound")}
               </li>
             ) : (
-              sortedLanguages.map((language) => {
+              visibleLanguages.map((language) => {
                 const selected = locale === language.code;
 
                 return (
@@ -161,13 +112,14 @@ export function LanguageToggle() {
                     <button
                       type="button"
                       onClick={() => handleSelect(language.code)}
-                      className={`flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors ${
+                      className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors ${
                         selected
                           ? "bg-primary/15 text-primary"
                           : "text-on-surface hover:bg-white/5"
                       }`}
                     >
-                      <span className="min-w-0">
+                      <LocaleFlag locale={language.code} size="md" />
+                      <span className="min-w-0 flex-1">
                         <span className="block truncate font-display text-xs font-semibold">
                           {language.nativeName}
                         </span>
@@ -187,11 +139,7 @@ export function LanguageToggle() {
 
           <div className="border-t border-white/8 px-3 py-2">
             <p className="text-[10px] text-on-surface-variant">
-              {localeLoading
-                ? locale === "es"
-                  ? "Traduciendo..."
-                  : "Translating..."
-                : `${languages.length} ${t("languagesCount")}`}
+              {SUPPORTED_LANGUAGES.length} {t("languagesCount")}
             </p>
           </div>
         </div>

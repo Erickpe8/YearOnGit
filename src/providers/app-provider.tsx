@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import {
@@ -15,16 +14,9 @@ import {
 } from "@/lib/i18n/translations";
 import { interpolate } from "@/lib/i18n/interpolate";
 import {
-  isStaticLocale,
   resolveLocale,
   type Locale,
 } from "@/lib/i18n/supported-locales";
-import {
-  readViewBundle,
-  writeViewBundle,
-  type TranslationBundle,
-} from "@/lib/i18n/translation-cache";
-import type { TranslationView } from "@/lib/i18n/translation-views";
 import { brandName } from "@/lib/brand/assets";
 
 type HeaderProgress = {
@@ -44,8 +36,6 @@ type AppContextValue = {
   setLocale: (locale: Locale) => void;
   t: (key: TranslationKey, values?: TranslationValues) => string;
   localeLoading: boolean;
-  preloadView: (view: TranslationView) => Promise<void>;
-  viewReady: (view: TranslationView) => boolean;
   headerVisible: boolean;
   toggleHeader: () => void;
   showHeader: () => void;
@@ -61,116 +51,18 @@ const HEADER_KEY = "yearongit-header-visible";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
-  const [dynamicTranslations, setDynamicTranslations] = useState<TranslationBundle>({});
-  const [readyViews, setReadyViews] = useState<Set<string>>(new Set());
-  const [localeLoading, setLocaleLoading] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [headerProgress, setHeaderProgress] = useState<HeaderProgress>(null);
-  const memoryCacheRef = useRef<Map<string, TranslationBundle>>(new Map());
-  const inflightRef = useRef<Map<string, Promise<void>>>(new Map());
 
-  const viewCacheKey = useCallback(
-    (view: TranslationView) => `${locale}:${view}`,
-    [locale],
-  );
-
-  const applyDocumentLocale = useCallback((next: Locale, bundle?: TranslationBundle) => {
+  const applyDocumentLocale = useCallback((next: Locale) => {
     document.documentElement.lang = next;
     document.title = brandName;
 
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      const description = isStaticLocale(next)
-        ? translations[next].metadataDescription
-        : bundle?.metadataDescription ??
-          dynamicTranslations.metadataDescription ??
-          translations.en.metadataDescription;
-      meta.setAttribute("content", description);
+      meta.setAttribute("content", translations[next].metadataDescription);
     }
-  }, [dynamicTranslations.metadataDescription]);
-
-  const mergeBundle = useCallback((bundle: TranslationBundle) => {
-    setDynamicTranslations((prev) => ({ ...prev, ...bundle }));
   }, []);
-
-  const markViewReady = useCallback((view: TranslationView) => {
-    setReadyViews((prev) => {
-      const key = viewCacheKey(view);
-      if (prev.has(key)) return prev;
-      const next = new Set(prev);
-      next.add(key);
-      return next;
-    });
-  }, [viewCacheKey]);
-
-  const preloadView = useCallback(
-    async (view: TranslationView) => {
-      const cacheKey = viewCacheKey(view);
-
-      if (isStaticLocale(locale)) {
-        markViewReady(view);
-        return;
-      }
-
-      const memoryBundle = memoryCacheRef.current.get(cacheKey);
-      if (memoryBundle) {
-        mergeBundle(memoryBundle);
-        markViewReady(view);
-        return;
-      }
-
-      const cached = readViewBundle(locale, view);
-      if (cached) {
-        memoryCacheRef.current.set(cacheKey, cached);
-        mergeBundle(cached);
-        markViewReady(view);
-        return;
-      }
-
-      const inflight = inflightRef.current.get(cacheKey);
-      if (inflight) {
-        await inflight;
-        return;
-      }
-
-      const request = (async () => {
-        setLocaleLoading(true);
-        try {
-          const response = await fetch(
-            `/api/translate-ui?locale=${encodeURIComponent(locale)}&view=${encodeURIComponent(view)}`,
-          );
-          if (!response.ok) throw new Error("Translation request failed");
-
-          const bundle = (await response.json()) as TranslationBundle;
-          const firstKey = Object.keys(bundle)[0] as TranslationKey | undefined;
-          const translated =
-            firstKey && bundle[firstKey] !== translations.en[firstKey];
-
-          if (translated) {
-            memoryCacheRef.current.set(cacheKey, bundle);
-            writeViewBundle(locale, view, bundle);
-            mergeBundle(bundle);
-          }
-        } finally {
-          markViewReady(view);
-          setLocaleLoading(false);
-          inflightRef.current.delete(cacheKey);
-        }
-      })();
-
-      inflightRef.current.set(cacheKey, request);
-      await request;
-    },
-    [locale, viewCacheKey, markViewReady, mergeBundle],
-  );
-
-  const viewReady = useCallback(
-    (view: TranslationView) => {
-      if (isStaticLocale(locale)) return true;
-      return readyViews.has(viewCacheKey(view));
-    },
-    [locale, readyViews, viewCacheKey],
-  );
 
   useEffect(() => {
     const storedLocale = localStorage.getItem(LOCALE_KEY);
@@ -180,6 +72,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const resolved = resolveLocale(storedLocale);
       setLocaleState(resolved);
       document.documentElement.lang = resolved;
+      if (resolved !== storedLocale) {
+        localStorage.setItem(LOCALE_KEY, resolved);
+      }
     }
 
     if (storedHeader === "false") {
@@ -188,20 +83,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    memoryCacheRef.current.clear();
-    inflightRef.current.clear();
-    setReadyViews(new Set());
-    setDynamicTranslations({});
-
-    if (isStaticLocale(locale)) {
-      setLocaleLoading(false);
-      applyDocumentLocale(locale);
-      return;
-    }
-
     applyDocumentLocale(locale);
-    void preloadView("common");
-  }, [locale, applyDocumentLocale, preloadView]);
+  }, [locale, applyDocumentLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     const resolved = resolveLocale(next);
@@ -230,13 +113,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey, values?: TranslationValues) => {
-      const template = isStaticLocale(locale)
-        ? translations[locale][key]
-        : (dynamicTranslations[key] ?? translations.en[key]);
-
+      const template =
+        translations[locale][key] ?? translations.en[key];
       return values ? interpolate(template, values) : template;
     },
-    [locale, dynamicTranslations],
+    [locale],
   );
 
   const value = useMemo(
@@ -244,9 +125,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       locale,
       setLocale,
       t,
-      localeLoading,
-      preloadView,
-      viewReady,
+      localeLoading: false,
       headerVisible,
       toggleHeader,
       showHeader,
@@ -258,9 +137,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       locale,
       setLocale,
       t,
-      localeLoading,
-      preloadView,
-      viewReady,
       headerVisible,
       toggleHeader,
       showHeader,
