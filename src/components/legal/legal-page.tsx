@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { PageShell } from "@/components/layout/page-shell";
 import { IconArrowLeft } from "@/components/ui/icons";
 import {
@@ -23,10 +24,10 @@ export function LegalPage({ type }: LegalPageProps) {
       <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-4 py-10 max-[390px]:px-3 max-[390px]:py-8 md:px-8 md:py-14">
         <Link
           href="/"
-          className="group mb-8 inline-flex items-center gap-2 font-display text-sm text-on-surface-variant transition-colors hover:text-primary"
+          className="group mb-8 inline-flex items-center gap-3 font-display text-sm text-on-surface-variant transition-colors hover:text-primary"
         >
           <IconArrowLeft className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-0.5" />
-          YearOnGit
+          <BrandLogo href={null} className="opacity-90 transition-opacity group-hover:opacity-100" />
         </Link>
 
         <article className="glass-card rounded-2xl p-6 max-[390px]:p-5 md:p-10">

@@ -48,7 +48,7 @@ export const translations = {
     comingSoon: "Coming soon",
     selectLanguage: "Select language",
     languagesCount: "languages",
-    metadataTitle: "YearOnGit | Your GitHub Wrapped",
+    metadataTitle: "YearOnGit",
     metadataDescription:
       "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
     topRepos: "Top Repos",
@@ -312,7 +312,7 @@ export const translations = {
     comingSoon: "Próximamente",
     selectLanguage: "Seleccionar idioma",
     languagesCount: "idiomas",
-    metadataTitle: "YearOnGit | Tu año en GitHub, en un Wrapped",
+    metadataTitle: "YearOnGit",
     metadataDescription:
       "Descubre tus commits, repos más activos, lenguajes y más. Tu año en GitHub, en un Wrapped.",
     topRepos: "Top repos",

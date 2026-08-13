@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { IconChevronUp } from "@/components/ui/icons";
 import { useApp } from "@/providers/app-provider";
 import { LanguageToggle } from "./language-toggle";
@@ -25,9 +26,7 @@ export function GlassHeader() {
           className="glass-header fixed top-0 right-0 left-0 z-50 h-14 md:h-16"
         >
           <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-3 max-[390px]:gap-1.5 md:gap-3 md:px-6">
-            <div className="truncate font-display text-base font-extrabold tracking-tighter text-primary max-[390px]:max-w-[88px] max-[390px]:text-sm md:text-xl">
-              YearOnGit
-            </div>
+            <BrandLogo size="sm" />
 
             {headerProgress ? (
               <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-1 sm:gap-3 sm:px-2">
