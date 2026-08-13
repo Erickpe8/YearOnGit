@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { brandAssets, brandName } from "@/lib/brand/assets";
 import { AppProvider } from "@/providers/app-provider";
 import { AuthSessionProviderServer } from "@/providers/auth-session-provider-server";
@@ -16,6 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppBaseUrl()),
   title: brandName,
   description:
     "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",

@@ -1,7 +1,18 @@
-export const STATIC_LOCALES = ["en", "es"] as const;
+export const STATIC_LOCALES = [
+  "en",
+  "es",
+  "fr",
+  "de",
+  "pt",
+  "it",
+  "ja",
+  "zh",
+  "ko",
+  "ar",
+] as const;
 
 export type StaticLocale = (typeof STATIC_LOCALES)[number];
-export type Locale = string;
+export type Locale = StaticLocale;
 
 export function normalizeLocale(code: string): string {
   return code.trim().toLowerCase();
@@ -15,5 +26,5 @@ export function isStaticLocale(code: string): code is StaticLocale {
 export function resolveLocale(code: string): Locale {
   const normalized = normalizeLocale(code);
   if (isStaticLocale(normalized)) return normalized;
-  return normalized;
+  return "en";
 }
