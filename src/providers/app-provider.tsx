@@ -13,6 +13,7 @@ import {
   type TranslationKey,
   translations,
 } from "@/lib/i18n/translations";
+import { interpolate } from "@/lib/i18n/interpolate";
 import {
   isStaticLocale,
   resolveLocale,
@@ -25,12 +26,22 @@ import {
 } from "@/lib/i18n/translation-cache";
 import type { TranslationView } from "@/lib/i18n/translation-views";
 
-type HeaderProgress = { current: number; total: number } | null;
+type HeaderProgress = {
+  current: number;
+  total: number;
+  cycleKey: string;
+  settleMs: number;
+  dwellMs: number;
+  fillMode: "animate" | "complete";
+  paused?: boolean;
+} | null;
+
+type TranslationValues = Record<string, string | number>;
 
 type AppContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, values?: TranslationValues) => string;
   localeLoading: boolean;
   preloadView: (view: TranslationView) => Promise<void>;
   viewReady: (view: TranslationView) => boolean;
@@ -221,11 +232,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: TranslationKey) => {
-      if (isStaticLocale(locale)) {
-        return translations[locale][key];
-      }
-      return dynamicTranslations[key] ?? translations.en[key];
+    (key: TranslationKey, values?: TranslationValues) => {
+      const template = isStaticLocale(locale)
+        ? translations[locale][key]
+        : (dynamicTranslations[key] ?? translations.en[key]);
+
+      return values ? interpolate(template, values) : template;
     },
     [locale, dynamicTranslations],
   );

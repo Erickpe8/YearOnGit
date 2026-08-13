@@ -3,7 +3,6 @@
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { IconArrowRight, IconLock } from "@/components/ui/icons";
-import { interpolate } from "@/lib/i18n/interpolate";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
 import {
@@ -45,7 +44,7 @@ export function LandingHero() {
         <ReposDecorCard />
         <h1 className="hero-headline i18n-text relative z-40 font-display text-[32px] font-extrabold text-on-surface max-[390px]:text-[26px] md:text-[48px]">
           {isAuthenticated && displayName ? (
-            interpolate(t("welcomeBack"), { name: displayName })
+            t("welcomeBack", { name: displayName })
           ) : (
             <>
               {t("taglinePrefix")}

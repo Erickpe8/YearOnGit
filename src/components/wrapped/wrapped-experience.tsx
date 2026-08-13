@@ -1,260 +1,518 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AchievementsSlide, achievementsCarouselSettleMs } from "@/components/wrapped/achievements-slide";
+import { ACHIEVEMENT_CATALOG } from "@/lib/wrapped/achievements-catalog";
+import { AnimatedCounter } from "@/components/wrapped/animated-counter";
+import { CommunitySlide } from "@/components/wrapped/community-slide";
+import {
+  ContributionCompositionSlide,
+  contributionStorySettleMs,
+  type ContributionStoryHandle,
+} from "@/components/wrapped/contribution-composition-slide";
+import {
+  FavoriteRepoRaceSlide,
+  type FavoriteRepoRaceHandle,
+} from "@/components/wrapped/favorite-repo-race-slide";
+import { HighlightSlide } from "@/components/wrapped/highlight-slide";
+import { LanguagesPodium } from "@/components/wrapped/languages-podium";
+import { OverviewIntroSlide } from "@/components/wrapped/overview-intro-slide";
 import { PageShell } from "@/components/layout/page-shell";
-import { CommitsSlide } from "@/components/wrapped/slides/commits-slide";
-import { interpolate } from "@/lib/i18n/interpolate";
+import { StreakSlide } from "@/components/wrapped/streak-slide";
+import { SummarySlide } from "@/components/wrapped/summary-slide";
+import { WrappedHeatmap } from "@/components/wrapped/wrapped-heatmap";
+import { WrappedSlideShell } from "@/components/wrapped/wrapped-slide-shell";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
-import { useRandomWrappedStats } from "@/lib/wrapped/use-random-wrapped-stats";
+import {
+  formatMonthName,
+  formatNumber,
+  formatWrappedDate,
+} from "@/lib/wrapped/format";
+import {
+  buildFavoriteRepoRace,
+  favoriteRepoRaceSettleMs,
+} from "@/lib/wrapped/favorite-repo-race";
+import { planWrappedSlides } from "@/lib/wrapped/plan-slides";
+import {
+  slideSettleMs,
+  WRAPPED_DWELL_MS,
+} from "@/lib/wrapped/slide-timing";
+import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useStoriesNavigation } from "@/lib/wrapped/use-stories-navigation";
+import type { WrappedPayload } from "@/lib/wrapped/types";
+import { useWrappedStats } from "@/lib/wrapped/use-wrapped-stats";
+import {
+  buildHeatmapStoryInsights,
+  heatmapStorySettleMs,
+} from "@/lib/wrapped/heatmap-story";
 import { useApp } from "@/providers/app-provider";
 
-const TOTAL_SLIDES = 6;
-
-const HEATMAP_COLORS = [
-  "bg-surface-variant/30",
-  "bg-primary/25",
-  "bg-primary/55",
-  "bg-primary",
-];
-
-const slideMotion = {
-  initial: { opacity: 0, x: 40 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
-  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+export type WrappedExperienceProps = {
+  mode?: "owner" | "shared";
+  initialPayload?: WrappedPayload | null;
 };
 
-export function WrappedExperience() {
-  const { t, setHeaderProgress } = useApp();
-  const { data: session } = useSession();
+export function WrappedExperience({
+  mode = "owner",
+  initialPayload = null,
+}: WrappedExperienceProps = {}) {
+  const { t, locale, setHeaderProgress } = useApp();
   useViewI18n("wrapped");
+  const router = useRouter();
   const [slide, setSlide] = useState(0);
-  const { stats, regenerate } = useRandomWrappedStats();
-  const username =
-    session?.user?.login ?? session?.user?.name ?? "developer";
+  const isShared = mode === "shared";
+  const { stats, username, payload, ready } = useWrappedStats({
+    initialPayload,
+    shared: isShared,
+  });
+  const reducedMotion = usePrefersReducedMotion();
+
+  const displayName = username ?? "developer";
+
+  const slides = useMemo(
+    () => (stats ? planWrappedSlides(stats) : []),
+    [stats],
+  );
+  const totalSlides = slides.length;
+  const current = slides[slide] ?? null;
+
+  const weekdayActivityPct = useMemo(() => {
+    if (!stats) return 0;
+    const total =
+      stats.weekdayContributionsTotal + stats.weekendContributions;
+    if (total === 0) return 0;
+    return Math.round((stats.weekdayContributionsTotal / total) * 1000) / 10;
+  }, [stats]);
+
+  const heatmapStory = useMemo(() => {
+    if (!stats) return null;
+    return buildHeatmapStoryInsights(
+      {
+        weekdayContributions: stats.weekdayContributions,
+        levels: stats.heatmap,
+        dates: stats.heatmapDates ?? stats.calendar?.heatmapDates,
+        totalContributions: stats.totalContributions,
+        activeDays: stats.activeDays,
+      },
+      locale,
+    );
+  }, [stats, locale]);
 
   const restart = useCallback(() => {
-    regenerate();
     setSlide(0);
-  }, [regenerate]);
-
-  useEffect(() => {
-    setHeaderProgress({ current: slide + 1, total: TOTAL_SLIDES });
-    return () => setHeaderProgress(null);
-  }, [slide, setHeaderProgress]);
+    if (!isShared) {
+      router.push("/loading");
+    }
+  }, [isShared, router]);
 
   const next = useCallback(() => {
-    setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1));
-  }, []);
+    setSlide((currentIndex) =>
+      Math.min(currentIndex + 1, Math.max(totalSlides - 1, 0)),
+    );
+  }, [totalSlides]);
 
   const prev = useCallback(() => {
-    setSlide((s) => Math.max(s - 1, 0));
+    setSlide((currentIndex) => Math.max(currentIndex - 1, 0));
+  }, []);
+
+  const [playbackPaused, setPlaybackPaused] = useState(false);
+  const playbackPausedRef = useRef(false);
+  const deadlineRef = useRef<number | null>(null);
+  const remainingWhilePausedRef = useRef<number | null>(null);
+  const progressConfigRef = useRef<{
+    current: number;
+    total: number;
+    cycleKey: string;
+    settleMs: number;
+    dwellMs: number;
+    fillMode: "animate" | "complete";
+    paused: boolean;
+  } | null>(null);
+
+  const pausePlayback = useCallback(() => {
+    if (playbackPausedRef.current) return;
+    playbackPausedRef.current = true;
+    if (deadlineRef.current != null) {
+      remainingWhilePausedRef.current = Math.max(
+        0,
+        deadlineRef.current - Date.now(),
+      );
+    }
+    setPlaybackPaused(true);
+    if (progressConfigRef.current) {
+      progressConfigRef.current = {
+        ...progressConfigRef.current,
+        paused: true,
+      };
+      setHeaderProgress(progressConfigRef.current);
+    }
+  }, [setHeaderProgress]);
+
+  const resumePlayback = useCallback(() => {
+    if (!playbackPausedRef.current) return;
+    playbackPausedRef.current = false;
+    if (remainingWhilePausedRef.current != null) {
+      deadlineRef.current = Date.now() + remainingWhilePausedRef.current;
+      remainingWhilePausedRef.current = null;
+    }
+    setPlaybackPaused(false);
+    if (progressConfigRef.current) {
+      progressConfigRef.current = {
+        ...progressConfigRef.current,
+        paused: false,
+      };
+      setHeaderProgress(progressConfigRef.current);
+    }
+  }, [setHeaderProgress]);
+
+  const contributionStoryRef = useRef<ContributionStoryHandle | null>(null);
+  const favoriteRepoRaceRef = useRef<FavoriteRepoRaceHandle | null>(null);
+
+  const isFavoriteRepoHighlight =
+    current?.kind === "highlight" && current.highlight.id === "favorite_repo";
+
+  const tryAdvanceStoryOrNext = useCallback(() => {
+    if (
+      current?.kind === "contribution-types" &&
+      contributionStoryRef.current?.tryAdvance()
+    ) {
+      return;
+    }
+    if (isFavoriteRepoHighlight && favoriteRepoRaceRef.current?.tryAdvance()) {
+      return;
+    }
+    if (slide < totalSlides - 1) next();
+  }, [current?.kind, isFavoriteRepoHighlight, slide, totalSlides, next]);
+
+  const storiesHandlers = useStoriesNavigation({
+    onNext: tryAdvanceStoryOrNext,
+    onPrev: () => {
+      if (slide > 0) prev();
+    },
+    onHoldStart: pausePlayback,
+    onHoldEnd: resumePlayback,
+  });
+
+  useEffect(() => {
+    if (totalSlides === 0 || !current) {
+      setHeaderProgress(null);
+      progressConfigRef.current = null;
+      deadlineRef.current = null;
+      remainingWhilePausedRef.current = null;
+      playbackPausedRef.current = false;
+      setPlaybackPaused(false);
+      return;
+    }
+
+    const isLast = slide >= totalSlides - 1;
+    let settleMs = slideSettleMs(current.kind, reducedMotion);
+    if (current.kind === "contribution-types" && stats) {
+      settleMs = contributionStorySettleMs(stats, reducedMotion);
+    } else if (isFavoriteRepoHighlight && stats) {
+      settleMs = favoriteRepoRaceSettleMs(
+        buildFavoriteRepoRace(stats),
+        reducedMotion,
+      );
+    } else if (current.kind === "heatmap" && stats && heatmapStory) {
+      const weekCount = Math.max(
+        1,
+        Math.ceil((stats.heatmap?.length ?? 0) / 7),
+      );
+      settleMs = heatmapStorySettleMs(
+        {
+          ...heatmapStory,
+          hasPeakDay: Boolean(stats.mostActiveDay),
+          hasPeakMonth: Boolean(stats.mostActiveMonth),
+        },
+        weekCount,
+        reducedMotion,
+      );
+    } else if (current.kind === "achievements") {
+      settleMs = achievementsCarouselSettleMs(
+        ACHIEVEMENT_CATALOG.length,
+        reducedMotion,
+      );
+    }
+    const config = {
+      current: slide + 1,
+      total: totalSlides,
+      cycleKey: `${slide}-${totalSlides}-${current.key}`,
+      settleMs,
+      dwellMs: WRAPPED_DWELL_MS,
+      fillMode: (isLast ? "complete" : "animate") as "animate" | "complete",
+      paused: false,
+    };
+    progressConfigRef.current = config;
+    setHeaderProgress(config);
+    playbackPausedRef.current = false;
+    setPlaybackPaused(false);
+    remainingWhilePausedRef.current = null;
+    deadlineRef.current = isLast
+      ? null
+      : Date.now() + settleMs + WRAPPED_DWELL_MS;
+  }, [
+    slide,
+    totalSlides,
+    current,
+    reducedMotion,
+    setHeaderProgress,
+    stats,
+    isFavoriteRepoHighlight,
+    heatmapStory,
+  ]);
+
+  useEffect(() => {
+    if (totalSlides === 0 || !current) return;
+    if (slide >= totalSlides - 1) return;
+    if (playbackPaused) return;
+    if (deadlineRef.current == null) return;
+
+    const ms = Math.max(0, deadlineRef.current - Date.now());
+    const advanceTimer = window.setTimeout(() => {
+      next();
+    }, ms);
+
+    return () => {
+      window.clearTimeout(advanceTimer);
+    };
+  }, [slide, totalSlides, current, next, playbackPaused]);
+
+  useEffect(() => {
+    return () => setHeaderProgress(null);
+  }, [setHeaderProgress]);
+
+  useEffect(() => {
+    setSlide(0);
+  }, [stats]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") next();
-      if (e.key === "ArrowLeft") prev();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        if (favoriteRepoRaceRef.current?.trySelectWithEnter()) {
+          event.preventDefault();
+          return;
+        }
+      }
+      if (event.key === "ArrowRight") tryAdvanceStoryOrNext();
+      if (event.key === "ArrowLeft") prev();
+      if (event.key === " " || event.key === "Spacebar") {
+        event.preventDefault();
+        tryAdvanceStoryOrNext();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev]);
+  }, [tryAdvanceStoryOrNext, prev]);
 
-  if (!stats) {
+  if (!ready || !stats || !current) {
     return (
-      <PageShell immersive>
-        <main className="relative z-10 flex min-h-[calc(100dvh-7rem)] flex-1 flex-col max-[390px]:min-h-[calc(100dvh-6.5rem)]" />
+      <PageShell wrapped>
+        <main className="wrapped-stage" aria-busy="true" />
       </PageShell>
     );
   }
 
   return (
-    <PageShell immersive>
+    <PageShell wrapped>
       <main
-        className="relative z-10 flex min-h-[calc(100dvh-7rem)] flex-1 flex-col max-[390px]:min-h-[calc(100dvh-6.5rem)]"
-        onClick={slide < TOTAL_SLIDES - 1 ? next : undefined}
+        className="wrapped-stage touch-manipulation select-none"
         role="presentation"
+        {...storiesHandlers}
       >
         <AnimatePresence mode="wait">
-          {slide === 0 && (
-            <motion.section
-              key="intro"
-              {...slideMotion}
-              className="flex flex-1 flex-col items-center justify-center px-4 text-center max-[390px]:px-3"
-            >
-              <p className="mb-3 font-display text-lg text-on-surface-variant max-[390px]:text-base md:mb-4 md:text-2xl">
-                {t("introHey")}
-              </p>
-              <h2 className="glow-text font-display text-[40px] font-extrabold text-on-surface max-[390px]:text-[36px] md:text-7xl">
-                @{username}
-              </h2>
-              <p className="mt-4 text-on-surface-variant max-[390px]:text-sm md:mt-6">
-                {t("yearLabel")}
-              </p>
-            </motion.section>
+          {current.kind === "overview" && (
+            <WrappedSlideShell slideKey="year-overview">
+              <OverviewIntroSlide
+                stats={stats}
+                displayName={displayName}
+                locale={locale}
+                t={t}
+              />
+            </WrappedSlideShell>
           )}
 
-          {slide === 1 && <CommitsSlide commits={stats.commits} />}
-
-          {slide === 2 && (
-            <motion.section
-              key="heatmap"
-              {...slideMotion}
-              className="flex flex-1 flex-col items-center justify-center px-5 md:px-12"
+          {current.kind === "contribution-types" && (
+            <WrappedSlideShell
+              slideKey="contribution-types"
+              className="wrapped-slide--composition"
             >
-              <h2 className="i18n-text mb-2 font-display text-2xl font-bold text-primary">
-                {t("globalImpact")}
+              <ContributionCompositionSlide
+                stats={stats}
+                locale={locale}
+                t={t}
+                storyRef={contributionStoryRef}
+              />
+            </WrappedSlideShell>
+          )}
+
+          {current.kind === "highlight" &&
+            current.highlight.id === "favorite_repo" && (
+              <FavoriteRepoRaceSlide
+                stats={stats}
+                locale={locale}
+                t={t}
+                storyRef={favoriteRepoRaceRef}
+              />
+            )}
+
+          {current.kind === "highlight" &&
+            current.highlight.id !== "favorite_repo" && (
+              <HighlightSlide
+                highlight={current.highlight}
+                locale={locale}
+                t={t}
+              />
+            )}
+
+          {current.kind === "heatmap" && (
+            <WrappedSlideShell slideKey="heatmap">
+              <h2 className="i18n-text wrapped-slide-title shrink-0 font-display font-bold text-primary">
+                {t("yearInPixels")}
               </h2>
-              <p className="i18n-text mb-8 text-sm leading-relaxed text-on-surface-variant">
-                {interpolate(t("contributions2026"), {
-                  count: stats.contributions,
+              <p className="i18n-text shrink-0 text-center text-xs text-on-surface-variant md:text-sm">
+                {t("contributions2026", {
+                  count: stats.totalContributions,
                 })}
               </p>
-              <div className="glass-card w-full max-w-3xl rounded-xl p-4 md:p-6">
-                <div className="heatmap-grid w-full">
-                  {stats.heatmap.map((level, i) => (
-                    <div
-                      key={i}
-                      className={`heatmap-cell ${HEATMAP_COLORS[level]}`}
-                    />
-                  ))}
-                </div>
+              <div className="flex min-h-0 w-full max-w-3xl flex-1 flex-col items-center justify-center gap-3 px-1">
+                <WrappedHeatmap
+                  levels={stats.heatmap}
+                  dates={stats.heatmapDates ?? stats.calendar?.heatmapDates}
+                  peakDate={stats.mostActiveDay}
+                  peakIndex={
+                    stats.heatmapPeakIndex ?? stats.calendar?.heatmapPeakIndex
+                  }
+                  peakDateLabel={
+                    stats.mostActiveDay
+                      ? formatWrappedDate(stats.mostActiveDay, locale)
+                      : null
+                  }
+                  peakCaption={t("heatmapPeakCaption")}
+                  peakCount={stats.mostActiveDayCount}
+                  peakCountLabel={t("heatmapPeakCountLabel")}
+                  teaserLines={[
+                    t("heatmapTeaserLine1", {
+                      count: formatNumber(stats.totalContributions, locale),
+                    }),
+                    t("heatmapTeaserLine2"),
+                    t("heatmapTeaserLine3"),
+                  ]}
+                  peakMonth={stats.mostActiveMonth}
+                  peakMonthLabel={
+                    stats.mostActiveMonth
+                      ? formatMonthName(stats.mostActiveMonth, locale)
+                      : null
+                  }
+                  peakMonthCaption={t("heatmapMonthCaption")}
+                  peakMonthCount={stats.mostActiveMonthCount}
+                  peakMonthCountLabel={t("heatmapMonthCountLabel")}
+                  monthTeaserLines={[
+                    t("heatmapMonthTeaserLine1"),
+                    t("heatmapMonthTeaserLine2"),
+                    t("heatmapMonthTeaserLine3"),
+                  ]}
+                  weekdayInsight={heatmapStory?.weekday ?? null}
+                  perfectWeeks={heatmapStory?.perfectWeeks ?? null}
+                  averages={heatmapStory?.averages ?? null}
+                  weekdayTeaserLines={[
+                    t("heatmapWeekdayTeaserLine1"),
+                    t("heatmapWeekdayTeaserLine2"),
+                    t("heatmapWeekdayTeaserLine3"),
+                  ]}
+                  weeksTeaserLines={[
+                    t("heatmapWeeksTeaserLine1"),
+                    t("heatmapWeeksTeaserLine2"),
+                    t("heatmapWeeksTeaserLine3"),
+                  ]}
+                  weekdayTitle={t("heatmapWeekdayFavorite")}
+                  weekdayCountLabel={t("heatmapWeekdayCountLabel")}
+                  perfectWeeksLead={t("heatmapPerfectWeeksLead")}
+                  perfectWeeksLabel={t("heatmapPerfectWeeksLabel")}
+                  perfectWeekLabelSingular={t(
+                    "heatmapPerfectWeekLabelSingular",
+                  )}
+                  mosaicLine={t("heatmapMosaicLine")}
+                  averageLead={t("heatmapAverageLead")}
+                  averageLabel={t("heatmapAverageLabel")}
+                  activeDaysLead={t("heatmapActiveDaysLead")}
+                  activeDaysLabel={t("heatmapActiveDaysLabel")}
+                  totalLead={t("heatmapTotalLead")}
+                  totalLabel={t("heatmapTotalLabel")}
+                  locale={locale}
+                />
               </div>
-            </motion.section>
+            </WrappedSlideShell>
           )}
 
-          {slide === 3 && (
-            <motion.section
-              key="languages"
-              {...slideMotion}
-              className="flex flex-1 flex-col items-center justify-center px-6"
-            >
-              <h2 className="i18n-text mb-10 font-display text-3xl font-bold">
-                {t("languages")}
+          {current.kind === "languages" && (
+            <WrappedSlideShell slideKey="languages">
+              <h2 className="i18n-text wrapped-slide-title shrink-0 font-display font-bold">
+                {t("yourStack")}
               </h2>
-              <div className="glass-card w-full max-w-md space-y-6 rounded-xl p-6">
-                {stats.languages.map((lang) => (
-                  <div key={lang.name}>
-                    <div className="mb-2 flex justify-between text-sm">
-                      <span className="flex items-center gap-2">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: lang.color }}
-                        />
-                        {lang.name}
-                      </span>
-                      <span className="font-display font-bold text-primary">
-                        {lang.pct}%
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-surface-variant">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${lang.pct}%` }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: lang.color }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.section>
-          )}
-
-          {slide === 4 && (
-            <motion.section
-              key="streak"
-              {...slideMotion}
-              className="flex flex-1 flex-col items-center justify-center px-6 text-center"
-            >
-              <p className="i18n-text mb-4 font-display text-xl text-on-surface-variant md:text-2xl">
-                {t("longestStreak")}
-              </p>
-              <div className="glow-text font-display text-[80px] font-extrabold leading-none text-primary md:text-[120px]">
-                {stats.streakDays}
-              </div>
-              <p className="i18n-label mt-2 font-display text-lg uppercase text-on-surface-variant">
-                {t("days")}
-              </p>
-              <p className="i18n-text mt-8 max-w-sm px-2 leading-relaxed text-on-surface-variant">
-                {interpolate(t("topContributors"), {
-                  percent: stats.topPercent,
+              {stats.topLanguage ? (
+                <p className="i18n-text shrink-0 text-center text-xs text-on-surface-variant md:text-sm">
+                  {t("topLanguage", {
+                    language: stats.topLanguage,
+                    percent: stats.topLanguagePercentage,
+                  })}
+                </p>
+              ) : null}
+              <LanguagesPodium
+                languages={stats.languages.languages}
+                t={t}
+              />
+              <p className="i18n-text shrink-0 text-xs text-on-surface-variant md:text-sm">
+                {t("languagePodiumFootnote", {
+                  shown: Math.min(5, stats.languageCount),
+                  total: stats.languageCount,
                 })}
               </p>
-            </motion.section>
+            </WrappedSlideShell>
           )}
 
-          {slide === 5 && (
-            <motion.section
-              key="summary"
-              {...slideMotion}
-              className="flex flex-1 flex-col items-center justify-center px-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="glass-card w-full max-w-md rounded-2xl p-8 text-center">
-                <span className="i18n-badge mb-4 inline-block rounded-full bg-primary/15 px-3 py-1 font-display text-xs font-bold uppercase text-primary">
-                  {t("wrapped26")}
-                </span>
-                <h2 className="i18n-text mb-2 font-display text-2xl font-extrabold max-[390px]:text-xl md:text-3xl">
-                  {t("your2026")}
-                </h2>
-                <p className="mb-8 text-on-surface-variant">@{username}</p>
+          {current.kind === "community" && (
+            <CommunitySlide stats={stats} locale={locale} t={t} />
+          )}
 
-                <div className="mb-8 grid grid-cols-2 gap-3 text-left">
-                  <div className="rounded-lg border border-white/5 bg-surface-container p-3">
-                    <p className="i18n-label text-[10px] font-bold uppercase text-on-surface-variant">
-                      {t("commitsLabel")}
-                    </p>
-                    <p className="font-display text-2xl font-bold text-primary">
-                      {stats.commits}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-white/5 bg-surface-container p-3">
-                    <p className="i18n-label text-[10px] font-bold uppercase text-on-surface-variant">
-                      {t("days")}
-                    </p>
-                    <p className="font-display text-2xl font-bold text-primary">
-                      {stats.streakDays}
-                    </p>
-                  </div>
-                </div>
+          {current.kind === "achievements" && (
+            <AchievementsSlide
+              achievements={current.achievements}
+              locale={locale}
+              t={t}
+            />
+          )}
 
-                <div className="flex flex-col gap-3">
-                  <button
-                    type="button"
-                    className="i18n-cta btn-primary w-full rounded-full py-3 font-bold text-white transition-transform hover:scale-[1.02] active:scale-95"
-                  >
-                    {t("shareOnX")}
-                  </button>
-                  <button
-                    type="button"
-                    className="i18n-cta glass-pill w-full py-3 font-display text-sm font-bold text-on-surface transition-colors hover:text-primary"
-                  >
-                    {t("copyLink")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={restart}
-                    className="text-sm text-on-surface-variant transition-colors hover:text-primary"
-                  >
-                    {t("viewAgain")}
-                  </button>
-                </div>
-              </div>
-            </motion.section>
+          {current.kind === "streak" && (
+            <StreakSlide
+              stats={stats}
+              locale={locale}
+              weekdayActivityPct={weekdayActivityPct}
+              t={t}
+            />
+          )}
+
+          {current.kind === "summary" && (
+            <SummarySlide
+              stats={stats}
+              locale={locale}
+              displayName={displayName}
+              isShared={isShared}
+              payload={payload}
+              onRestart={restart}
+              t={t}
+            />
           )}
         </AnimatePresence>
-
-        {slide < TOTAL_SLIDES - 1 && (
-          <div className="pointer-events-none absolute bottom-8 left-0 right-0 flex justify-center">
-            <p className="text-xs text-on-surface-variant/50">
-              tap / next
-            </p>
-          </div>
-        )}
       </main>
     </PageShell>
   );

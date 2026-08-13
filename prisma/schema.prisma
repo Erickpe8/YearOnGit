@@ -9,14 +9,15 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?        @unique
   emailVerified DateTime?
   image         String?
   login         String?
   accounts      Account[]
   sessions      Session[]
+  wrappedShares WrappedShare[]
 }
 
 model Account {
@@ -52,4 +53,26 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+/// Public, read-only snapshot of a user's Wrapped for a given year.
+/// Never stores tokens, emails, or session data.
+model WrappedShare {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  userId    String
+  username  String
+  year      Int
+  /// Serialized WrappedStats JSON (public metrics only).
+  stats     Json
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year])
+  @@index([slug, isActive])
+  @@index([username, year])
 }

@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { createContext, useContext, useEffect, useState } from "react";
 import { IconChart, IconCode } from "@/components/ui/icons";
-import { interpolate } from "@/lib/i18n/interpolate";
 import {
   darkenHex,
   generateLandingPreviewStats,
@@ -64,7 +63,7 @@ export function StreakWatermarkCard() {
           {stats.streak}
         </p>
         <p className="i18n-micro mb-2 text-center text-[9px] font-semibold uppercase leading-snug text-on-surface-variant">
-          {interpolate(t("previewStreak"), { count: stats.streak })}
+          {t("previewStreak", { count: stats.streak })}
         </p>
         <div className="flex h-11 w-full items-end justify-center gap-1.5 rounded-md bg-black/40 px-2 py-1.5">
           {stats.streakBars.map((value, i) => (
@@ -182,7 +181,7 @@ export function HeatmapCard() {
             {t("globalImpact")}
           </h3>
           <p className="i18n-micro text-[10px] leading-snug text-on-surface-variant max-[390px]:text-[9px]">
-            {interpolate(t("contributions2026"), { count: stats.contributions })}
+            {t("contributions2026", { count: stats.contributions })}
           </p>
         </div>
         <IconChart className="h-4 w-4 shrink-0 text-[#39d353]/40" />
