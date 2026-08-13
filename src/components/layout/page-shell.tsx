@@ -10,6 +10,7 @@ import { SiteFooter } from "./site-footer";
 type PageShellProps = {
   children: React.ReactNode;
   immersive?: boolean;
+  wrapped?: boolean;
   className?: string;
   footerCompact?: boolean;
   showFooterLinks?: boolean;
@@ -19,12 +20,31 @@ type PageShellProps = {
 export function PageShell({
   children,
   immersive = false,
+  wrapped = false,
   className = "",
   footerCompact = false,
   showFooterLinks = true,
   fitContent = false,
 }: PageShellProps) {
   const { headerVisible } = useApp();
+
+  if (wrapped) {
+    return (
+      <>
+        <GlassHeader />
+        <HeaderRestorePill />
+        <div
+          className={`wrapped-root relative flex flex-col ${
+            headerVisible ? "wrapped-root--header" : ""
+          } ${className}`}
+        >
+          <AmbientBackground />
+          {children}
+          <NoiseOverlay />
+        </div>
+      </>
+    );
+  }
 
   const topPadding = headerVisible
     ? "pt-14 md:pt-16"

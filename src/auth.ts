@@ -13,7 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({
       authorization: {
         params: {
-          scope: "read:user public_repo",
+          scope: "read:user repo read:org",
         },
       },
       profile(profile) {

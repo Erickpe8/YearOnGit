@@ -1,0 +1,367 @@
+"use client";
+
+import { motion } from "framer-motion";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { AnimatedCounter } from "@/components/wrapped/animated-counter";
+import type { TranslationKey } from "@/lib/i18n/translations";
+import { formatNumber } from "@/lib/wrapped/format";
+import type { WrappedStats } from "@/lib/wrapped/types";
+import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+
+type TranslationValues = Record<string, string | number>;
+
+type OverviewIntroSlideProps = {
+  stats: WrappedStats;
+  displayName: string;
+  locale: string;
+  t: (key: TranslationKey, values?: TranslationValues) => string;
+};
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const CONFETTI_COLORS = [
+  "#39d353",
+  "#56d364",
+  "#9be9a8",
+  "#26a641",
+  "#ffffff",
+];
+
+const STEP = {
+  eyebrow: 0,
+  username: 320,
+  hero: 700,
+  heroNote: 1_650,
+  commits: 2_200,
+  commitsNote: 2_900,
+  collab: 3_450,
+  collabNote: 4_000,
+  repos: 4_550,
+  reposNote: 5_050,
+  languages: 5_500,
+  languagesNote: 5_950,
+} as const;
+
+function Reveal({
+  show,
+  reducedMotion,
+  className = "",
+  children,
+}: {
+  show: boolean;
+  reducedMotion: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <motion.div
+      className={className}
+      initial={false}
+      animate={{
+        opacity: show ? 1 : 0,
+        y: show || reducedMotion ? 0 : 8,
+      }}
+      transition={
+        reducedMotion ? { duration: 0 } : { duration: 0.38, ease: EASE }
+      }
+      aria-hidden={!show}
+      style={{ pointerEvents: show ? "auto" : "none" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function useRevealStep(reducedMotion: boolean): number {
+  const [step, setStep] = useState(reducedMotion ? Number.POSITIVE_INFINITY : -1);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setStep(Number.POSITIVE_INFINITY);
+      return;
+    }
+
+    setStep(-1);
+    const timers = Object.values(STEP).map((delay) =>
+      window.setTimeout(() => {
+        setStep((current) => Math.max(current, delay));
+      }, delay),
+    );
+
+    return () => {
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [reducedMotion]);
+
+  return step;
+}
+
+function burstConfettiFromElement(element: HTMLElement | null) {
+  const rect = element?.getBoundingClientRect();
+  const x = rect
+    ? (rect.left + rect.width / 2) / window.innerWidth
+    : 0.5;
+  const y = rect
+    ? (rect.top + rect.height / 2) / window.innerHeight
+    : 0.32;
+
+  void import("canvas-confetti").then((mod) => {
+    const confetti = mod.default;
+    const shared = {
+      colors: CONFETTI_COLORS,
+      disableForReducedMotion: true,
+      zIndex: 80,
+    };
+
+    confetti({
+      ...shared,
+      particleCount: 55,
+      angle: 60,
+      spread: 58,
+      startVelocity: 38,
+      origin: { x: Math.max(0.12, x - 0.04), y },
+    });
+    confetti({
+      ...shared,
+      particleCount: 55,
+      angle: 120,
+      spread: 58,
+      startVelocity: 38,
+      origin: { x: Math.min(0.88, x + 0.04), y },
+    });
+    confetti({
+      ...shared,
+      particleCount: 40,
+      spread: 100,
+      startVelocity: 28,
+      origin: { x, y },
+      scalar: 0.9,
+    });
+  });
+}
+
+export function OverviewIntroSlide({
+  stats,
+  displayName,
+  locale,
+  t,
+}: OverviewIntroSlideProps) {
+  const reducedMotion = usePrefersReducedMotion();
+  const step = useRevealStep(reducedMotion);
+  const shown = (at: number) => reducedMotion || step >= at;
+  const heroValueRef = useRef<HTMLParagraphElement>(null);
+  const confettiFiredRef = useRef(false);
+
+  const handleHeroCountComplete = useCallback(() => {
+    if (reducedMotion || confettiFiredRef.current) return;
+    confettiFiredRef.current = true;
+    burstConfettiFromElement(heroValueRef.current);
+  }, [reducedMotion]);
+
+  const commitsLeadCode =
+    stats.totalContributions > 0 &&
+    stats.totalCommits / stats.totalContributions >= 0.55;
+  const hasCollab = stats.totalPullRequests > 0 || stats.totalIssues > 0;
+  const hasRepos = stats.activeRepositories > 0;
+  const hasLanguages = stats.languageCount > 0;
+
+  const heroNote =
+    stats.activeDays > 0
+      ? t("overviewActiveDaysNote", {
+          days: formatNumber(stats.activeDays, locale),
+        })
+      : stats.totalContributions >= 2000
+        ? t("overviewVolumeNote", {
+            count: formatNumber(
+              Math.floor(stats.totalContributions / 1000) * 1000,
+              locale,
+            ),
+          })
+        : t("overviewContributionsNote", {
+            count: formatNumber(stats.totalContributions, locale),
+            year: "2026",
+          });
+
+  return (
+    <div className="overview-intro mx-auto flex w-full max-w-md flex-col items-center text-center">
+      <div className="overview-intro__eyebrow">
+        <Reveal show={shown(STEP.eyebrow)} reducedMotion={reducedMotion}>
+          <p className="i18n-text font-display text-[0.7rem] uppercase tracking-[0.14em] text-primary md:text-xs">
+            {t("your2026")}
+          </p>
+        </Reveal>
+      </div>
+
+      <div className="overview-intro__username">
+        <Reveal show={shown(STEP.username)} reducedMotion={reducedMotion}>
+          <h2 className="glow-text wrapped-hero-title font-display font-extrabold text-on-surface">
+            @{displayName}
+          </h2>
+        </Reveal>
+      </div>
+
+      <div className="overview-intro__hero">
+        <Reveal show={shown(STEP.hero)} reducedMotion={reducedMotion}>
+          <p
+            ref={heroValueRef}
+            className="overview-intro__hero-value font-display font-extrabold leading-none text-primary"
+          >
+            <AnimatedCounter
+              value={stats.totalContributions}
+              locale={locale}
+              durationMs={1_100}
+              play={shown(STEP.hero)}
+              onComplete={handleHeroCountComplete}
+            />
+          </p>
+          <p className="mt-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] text-on-surface md:text-base">
+            {t("totalContributions")}
+          </p>
+        </Reveal>
+        <div className="overview-intro__hero-note">
+          <Reveal show={shown(STEP.heroNote)} reducedMotion={reducedMotion}>
+            <p className="i18n-text text-[11px] leading-snug text-on-surface-variant md:text-xs">
+              {heroNote}
+            </p>
+          </Reveal>
+        </div>
+      </div>
+
+      <div className="overview-intro__divider" aria-hidden />
+
+      <div className="glass-card overview-intro__card w-full rounded-2xl text-left">
+        <div className="overview-intro__metric">
+          <Reveal show={shown(STEP.commits)} reducedMotion={reducedMotion}>
+            <div className="overview-intro__metric-row">
+              <span className="overview-intro__metric-value text-primary">
+                <AnimatedCounter
+                  value={stats.totalCommits}
+                  locale={locale}
+                  durationMs={900}
+                  play={shown(STEP.commits)}
+                />
+              </span>
+              <span className="overview-intro__metric-label">
+                {t("overviewCommitsLabel")}
+              </span>
+            </div>
+          </Reveal>
+          <div className="overview-intro__metric-note">
+            <Reveal
+              show={shown(STEP.commitsNote) && commitsLeadCode}
+              reducedMotion={reducedMotion}
+            >
+              <p className="i18n-text text-[10px] leading-snug text-on-surface-variant md:text-[11px]">
+                {t("overviewCommitsNote")}
+              </p>
+            </Reveal>
+          </div>
+        </div>
+
+        <div className="overview-intro__metric">
+          <Reveal show={shown(STEP.collab)} reducedMotion={reducedMotion}>
+            <div className="overview-intro__metric-pair">
+              <div className="overview-intro__metric-row">
+                <span className="overview-intro__metric-value text-primary">
+                  <AnimatedCounter
+                    value={stats.totalPullRequests}
+                    locale={locale}
+                    durationMs={750}
+                    play={shown(STEP.collab)}
+                  />
+                </span>
+                <span className="overview-intro__metric-label">
+                  {t("overviewPrsLabel")}
+                </span>
+              </div>
+              <div className="overview-intro__metric-row">
+                <span className="overview-intro__metric-value text-primary">
+                  <AnimatedCounter
+                    value={stats.totalIssues}
+                    locale={locale}
+                    durationMs={750}
+                    play={shown(STEP.collab)}
+                  />
+                </span>
+                <span className="overview-intro__metric-label">
+                  {t("overviewIssuesLabel")}
+                </span>
+              </div>
+            </div>
+          </Reveal>
+          <div className="overview-intro__metric-note">
+            <Reveal
+              show={shown(STEP.collabNote) && hasCollab}
+              reducedMotion={reducedMotion}
+            >
+              <p className="i18n-text text-[10px] leading-snug text-on-surface-variant md:text-[11px]">
+                {t("overviewCollabNote")}
+              </p>
+            </Reveal>
+          </div>
+        </div>
+
+        <div className="overview-intro__metric">
+          <Reveal show={shown(STEP.repos)} reducedMotion={reducedMotion}>
+            <div className="overview-intro__metric-row">
+              <span className="overview-intro__metric-value text-primary">
+                <AnimatedCounter
+                  value={stats.activeRepositories}
+                  locale={locale}
+                  durationMs={700}
+                  play={shown(STEP.repos)}
+                />
+              </span>
+              <span className="overview-intro__metric-label">
+                {t("overviewReposLabel")}
+              </span>
+            </div>
+          </Reveal>
+          <div className="overview-intro__metric-note">
+            <Reveal
+              show={shown(STEP.reposNote) && hasRepos}
+              reducedMotion={reducedMotion}
+            >
+              <p className="i18n-text text-[10px] leading-snug text-on-surface-variant md:text-[11px]">
+                {t("overviewReposNote")}
+              </p>
+            </Reveal>
+          </div>
+        </div>
+
+        <div className="overview-intro__metric overview-intro__metric--last">
+          <Reveal show={shown(STEP.languages)} reducedMotion={reducedMotion}>
+            <div className="overview-intro__metric-row">
+              <span className="overview-intro__metric-value text-primary">
+                <AnimatedCounter
+                  value={stats.languageCount}
+                  locale={locale}
+                  durationMs={700}
+                  play={shown(STEP.languages)}
+                />
+              </span>
+              <span className="overview-intro__metric-label">
+                {t("overviewLanguagesLabel")}
+              </span>
+            </div>
+          </Reveal>
+          <div className="overview-intro__metric-note">
+            <Reveal
+              show={shown(STEP.languagesNote) && hasLanguages}
+              reducedMotion={reducedMotion}
+            >
+              <p className="i18n-text text-[10px] leading-snug text-on-surface-variant md:text-[11px]">
+                {t("overviewLanguagesNote")}
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

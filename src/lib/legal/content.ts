@@ -22,28 +22,28 @@ export const legalContent: Record<
       title: "Privacy Policy",
       updated: "Last updated: July 27, 2026",
       intro:
-        "YearOnGit helps you explore a year-in-review of your public GitHub activity. This policy explains what we access, what we store, and what we do not do with your data.",
+        "YearOnGit helps you explore a year-in-review of your GitHub activity, including public and private repositories you can access. This policy explains what we access, what we store, and what we do not do with your data.",
       sections: [
         {
           title: "What we access",
           paragraphs: [
-            "When you sign in with GitHub, we request permission to read your public profile and public repository activity. We use the GitHub API to generate your Wrapped stats, such as commits, contributions, languages, and streaks.",
+            "When you sign in with GitHub, we request permission to read your profile and repository activity, including private repositories you have access to. We use the GitHub API to generate your Wrapped stats, such as commits, contributions, languages, and streaks.",
           ],
           bullets: [
-            "Public profile information (username, avatar, display name)",
-            "Public contribution activity for the selected year",
-            "Public repository metadata needed to build your recap",
+            "Profile information (username, avatar, display name)",
+            "Contribution activity for the selected year",
+            "Repository metadata needed to build your recap",
           ],
         },
         {
           title: "What we do not access",
           paragraphs: [
-            "We do not ask for your GitHub password. We do not request access to private repositories in the MVP version of YearOnGit.",
+            "We do not ask for your GitHub password. We only read data needed for your recap and do not modify your repositories.",
           ],
           bullets: [
             "No passwords or credentials beyond the OAuth token",
-            "No private repositories or private contribution data",
             "No unrelated account data outside what is needed for your recap",
+            "No writing to your repositories or changing account settings",
           ],
         },
         {
@@ -92,7 +92,7 @@ export const legalContent: Record<
         {
           title: "About the service",
           paragraphs: [
-            "YearOnGit is an independent project that presents a Spotify Wrapped-style recap of your public GitHub activity. It is not affiliated with, endorsed by, or sponsored by GitHub, Inc.",
+            "YearOnGit is an independent project that presents a Spotify Wrapped-style recap of your GitHub activity. It is not affiliated with, endorsed by, or sponsored by GitHub, Inc.",
           ],
         },
         {
@@ -144,28 +144,28 @@ export const legalContent: Record<
       title: "Política de privacidad",
       updated: "Última actualización: 27 de julio de 2026",
       intro:
-        "YearOnGit te ayuda a explorar un resumen anual de tu actividad pública en GitHub. Esta política explica qué accedemos, qué guardamos y qué no hacemos con tus datos.",
+        "YearOnGit te ayuda a explorar un resumen anual de tu actividad en GitHub, incluidos repositorios públicos y privados a los que tienes acceso. Esta política explica qué accedemos, qué guardamos y qué no hacemos con tus datos.",
       sections: [
         {
           title: "Qué accedemos",
           paragraphs: [
-            "Cuando inicias sesión con GitHub, pedimos permiso para leer tu perfil público y la actividad de tus repositorios públicos. Usamos la API de GitHub para generar tus estadísticas del Wrapped, como commits, contribuciones, lenguajes y rachas.",
+            "Cuando inicias sesión con GitHub, pedimos permiso para leer tu perfil y la actividad de tus repositorios, incluidos los privados a los que tienes acceso. Usamos la API de GitHub para generar tus estadísticas del Wrapped, como commits, contribuciones, lenguajes y rachas.",
           ],
           bullets: [
-            "Información pública del perfil (usuario, avatar, nombre visible)",
-            "Actividad pública de contribuciones del año seleccionado",
-            "Metadatos de repositorios públicos necesarios para tu recap",
+            "Información del perfil (usuario, avatar, nombre visible)",
+            "Actividad de contribuciones del año seleccionado",
+            "Metadatos de repositorios necesarios para tu recap",
           ],
         },
         {
           title: "Qué no accedemos",
           paragraphs: [
-            "No pedimos tu contraseña de GitHub. En la versión MVP de YearOnGit no solicitamos acceso a repositorios privados.",
+            "No pedimos tu contraseña de GitHub. Solo leemos los datos necesarios para tu recap y no modificamos tus repositorios.",
           ],
           bullets: [
             "Sin contraseñas ni credenciales más allá del token OAuth",
-            "Sin repositorios privados ni contribuciones privadas",
             "Sin datos de la cuenta que no sean necesarios para tu recap",
+            "Sin escribir en tus repositorios ni cambiar la configuración de tu cuenta",
           ],
         },
         {
@@ -214,7 +214,7 @@ export const legalContent: Record<
         {
           title: "Sobre el servicio",
           paragraphs: [
-            "YearOnGit es un proyecto independiente que presenta un recap estilo Spotify Wrapped de tu actividad pública en GitHub. No está afiliado, respaldado ni patrocinado por GitHub, Inc.",
+            "YearOnGit es un proyecto independiente que presenta un recap estilo Spotify Wrapped de tu actividad en GitHub. No está afiliado, respaldado ni patrocinado por GitHub, Inc.",
           ],
         },
         {
