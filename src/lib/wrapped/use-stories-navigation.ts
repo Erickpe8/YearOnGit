@@ -2,9 +2,10 @@
 
 import { useCallback, useRef } from "react";
 
-const TAP_MAX_MS = 280;
-const TAP_MAX_MOVE_PX = 14;
-const SWIPE_THRESHOLD_PX = 48;
+const TAP_MAX_MS = 780;
+const TAP_MAX_MOVE_PX = 18;
+const SWIPE_THRESHOLD_PX = 40;
+const HOLD_DELAY_MS = 200;
 const SWIPE_MAX_VERTICAL_PX = 80;
 const PREV_ZONE_RATIO = 0.33;
 
@@ -47,12 +48,20 @@ export function useStoriesNavigation({
 }): StoriesNavigationHandlers {
   const pressRef = useRef<PressState | null>(null);
   const holdingRef = useRef(false);
+  const holdTimerRef = useRef<number | null>(null);
+
+  const clearHoldTimer = useCallback(() => {
+    if (holdTimerRef.current == null) return;
+    window.clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+  }, []);
 
   const endHold = useCallback(() => {
+    clearHoldTimer();
     if (!holdingRef.current) return;
     holdingRef.current = false;
     onHoldEnd();
-  }, [onHoldEnd]);
+  }, [clearHoldTimer, onHoldEnd]);
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent) => {
@@ -70,8 +79,14 @@ export function useStoriesNavigation({
         width: rect.width,
         moved: false,
       };
-      holdingRef.current = true;
-      onHoldStart();
+      holdingRef.current = false;
+      clearHoldTimer();
+      holdTimerRef.current = window.setTimeout(() => {
+        holdTimerRef.current = null;
+        if (!pressRef.current) return;
+        holdingRef.current = true;
+        onHoldStart();
+      }, HOLD_DELAY_MS);
 
       try {
         target.setPointerCapture(event.pointerId);
@@ -79,7 +94,7 @@ export function useStoriesNavigation({
         /* ignore */
       }
     },
-    [enabled, onHoldStart],
+    [enabled, onHoldStart, clearHoldTimer],
   );
 
   const onPointerMove = useCallback((event: React.PointerEvent) => {

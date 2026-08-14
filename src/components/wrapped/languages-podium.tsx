@@ -8,6 +8,7 @@ import {
 } from "@/lib/wrapped/language-icons";
 import type { WrappedLanguageStat } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 export const LANGUAGE_PODIUM_LIMIT = 5;
 
@@ -44,6 +45,7 @@ function LanguageBarIcon({ name, pct }: { name: string; pct: number }) {
 
 export function LanguagesPodium({ languages, t }: LanguagesPodiumProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const top = languages.slice(0, LANGUAGE_PODIUM_LIMIT);
   const maxPct = top[0]?.pct ?? 1;
 
@@ -116,6 +118,9 @@ export function LanguagesPodium({ languages, t }: LanguagesPodiumProps) {
                 style={{ backgroundColor: entry.color }}
                 initial={reducedMotion ? false : { height: 0, opacity: 0.4 }}
                 animate={{ height, opacity: 1 }}
+                onAnimationComplete={() => {
+                  if (entry.rank === 1) cue("lift");
+                }}
                 transition={
                   reducedMotion
                     ? { duration: 0 }

@@ -15,12 +15,16 @@ import type { TranslationKey } from "@/lib/i18n/translations";
 import {
   buildFavoriteRepoRace,
   QUIZ_ANSWER_WAIT_MS,
+  QUIZ_SHOW_ANSWER_MS,
+  QUIZ_WRONG_FEEDBACK_MS,
   type FavoriteRepoOption,
   type FavoriteRepoRace,
 } from "@/lib/wrapped/favorite-repo-race";
 import { formatNumber } from "@/lib/wrapped/format";
 import type { WrappedStats } from "@/lib/wrapped/types";
+import { MUSIC_BUILD_LEAD_MS } from "@/lib/audio/score";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 import { WrappedSlideShell } from "@/components/wrapped/wrapped-slide-shell";
 
 type TranslationValues = Record<string, string | number>;
@@ -48,7 +52,7 @@ const CONFETTI_COLORS = [
   "#ffffff",
 ];
 
-type Phase = "prompt" | "reveal" | "done";
+type Phase = "prompt" | "miss" | "answer" | "reveal" | "done";
 
 function burstConfetti(element: HTMLElement | null) {
   const rect = element?.getBoundingClientRect();
@@ -131,6 +135,7 @@ function QuizExperience({
   reducedMotion: boolean;
 }) {
   const isQuiz = race.mode === "quiz";
+  const { cue } = useSfx();
   const [phase, setPhase] = useState<Phase>(() => {
     if (reducedMotion) return "done";
     return isQuiz ? "prompt" : "reveal";
@@ -143,20 +148,45 @@ function QuizExperience({
   const [wasCorrect, setWasCorrect] = useState<boolean | null>(
     reducedMotion || !isQuiz ? true : null,
   );
-  const [focusIndex, setFocusIndex] = useState(0);
+  const [focusIndex, setFocusIndex] = useState(-1);
   const [locked, setLocked] = useState(reducedMotion || !isQuiz);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const confettiFiredRef = useRef(false);
   const answeredRef = useRef(reducedMotion || !isQuiz);
   const phaseRef = useRef(phase);
+  const timersRef = useRef<number[]>([]);
   phaseRef.current = phase;
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+    };
+  }, []);
+
+  const later = useCallback((fn: () => void, ms: number) => {
+    timersRef.current.push(window.setTimeout(fn, ms));
+  }, []);
 
   const fireConfetti = useCallback(() => {
     if (reducedMotion || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
     burstConfetti(cardRef.current);
   }, [reducedMotion]);
+
+  const goToResult = useCallback(
+    (delayMs: number) => {
+      later(() => cue("build"), Math.max(0, delayMs - MUSIC_BUILD_LEAD_MS));
+      later(() => {
+        fireConfetti();
+        cue("celebrate");
+        setPhase("reveal");
+      }, delayMs);
+      later(() => setPhase("done"), delayMs + (reducedMotion ? 0 : 2_200));
+    },
+    [cue, fireConfetti, later, reducedMotion],
+  );
 
   const beginReveal = useCallback(
     (option: FavoriteRepoOption | null, correct: boolean) => {
@@ -165,11 +195,28 @@ function QuizExperience({
       setLocked(true);
       setSelectedId(option?.id ?? null);
       setWasCorrect(correct);
-      setPhase("reveal");
-      window.setTimeout(() => fireConfetti(), reducedMotion ? 0 : 80);
-      window.setTimeout(() => setPhase("done"), reducedMotion ? 0 : 2_200);
+      setFocusIndex(-1);
+
+      if (correct) {
+        setPhase("answer");
+        goToResult(reducedMotion ? 0 : QUIZ_SHOW_ANSWER_MS);
+        return;
+      }
+
+      if (option) {
+        setPhase("miss");
+        later(() => {
+          setPhase("answer");
+        }, reducedMotion ? 0 : QUIZ_WRONG_FEEDBACK_MS);
+        goToResult(
+          reducedMotion ? 0 : QUIZ_WRONG_FEEDBACK_MS + QUIZ_SHOW_ANSWER_MS,
+        );
+        return;
+      }
+
+      goToResult(reducedMotion ? 0 : 80);
     },
-    [fireConfetti, reducedMotion],
+    [goToResult, later, reducedMotion],
   );
 
   const selectOption = useCallback(
@@ -183,11 +230,15 @@ function QuizExperience({
   useEffect(() => {
     if (isQuiz || reducedMotion) return;
     const timers = [
-      window.setTimeout(() => fireConfetti(), 400),
+      window.setTimeout(() => cue("build"), Math.max(0, 400 - MUSIC_BUILD_LEAD_MS)),
+      window.setTimeout(() => {
+        fireConfetti();
+        cue("celebrate");
+      }, 400),
       window.setTimeout(() => setPhase("done"), 2_200),
     ];
     return () => timers.forEach((id) => window.clearTimeout(id));
-  }, [fireConfetti, isQuiz, reducedMotion]);
+  }, [cue, fireConfetti, isQuiz, reducedMotion]);
 
   // Backup if animationend never fires (e.g. CSS kills the timer animation).
   useEffect(() => {
@@ -210,6 +261,7 @@ function QuizExperience({
       tryAdvance: () => phaseRef.current !== "done",
       trySelectWithEnter: () => {
         if (phaseRef.current !== "prompt" || answeredRef.current) return false;
+        if (focusIndex < 0) return false;
         const option = race.options[focusIndex];
         if (!option) return false;
         selectOption(option);
@@ -227,7 +279,8 @@ function QuizExperience({
         event.stopPropagation();
         setFocusIndex((index) => {
           const len = race.options.length;
-          if (len === 0) return 0;
+          if (len === 0) return -1;
+          if (index < 0) return event.key === "ArrowDown" ? 0 : len - 1;
           return event.key === "ArrowDown"
             ? (index + 1) % len
             : (index - 1 + len) % len;
@@ -245,16 +298,29 @@ function QuizExperience({
     return () => window.removeEventListener("keydown", onKey, true);
   }, [race.options, selectOption]);
 
-  const showPrompt = isQuiz && phase === "prompt";
+  const showPrompt =
+    isQuiz && (phase === "prompt" || phase === "miss" || phase === "answer");
   const showResult = phase === "reveal" || phase === "done";
 
   const optionState = (option: FavoriteRepoOption) => {
+    if (phase === "miss") {
+      if (selectedId === option.id) return "wrong";
+      return "idle";
+    }
+    if (phase === "answer") {
+      if (option.isCorrect) return "correct";
+      if (selectedId === option.id && !option.isCorrect) return "wrong";
+      return "dim";
+    }
     if (showResult) {
       if (option.isCorrect) return "correct";
       if (selectedId === option.id && !option.isCorrect) return "wrong";
       return "dim";
     }
-    return option.id === race.options[focusIndex]?.id ? "focus" : "idle";
+    if (focusIndex >= 0 && option.id === race.options[focusIndex]?.id) {
+      return "focus";
+    }
+    return "idle";
   };
 
   return (
@@ -279,6 +345,12 @@ function QuizExperience({
                 {t("raceQuestion")}
               </h2>
 
+              {phase === "miss" && (
+                <p className="i18n-text repo-quiz__miss font-display">
+                  {t("raceWrong")}
+                </p>
+              )}
+
               {phase === "prompt" && !reducedMotion && (
                 <div className="repo-quiz__timer" aria-hidden>
                   <span
@@ -301,6 +373,7 @@ function QuizExperience({
                       key={option.id}
                       type="button"
                       role="option"
+                      tabIndex={-1}
                       aria-selected={selectedId === option.id}
                       data-wrapped-nav-ignore
                       data-state={state}
@@ -317,7 +390,6 @@ function QuizExperience({
                         event.stopPropagation();
                         selectOption(option);
                       }}
-                      onFocus={() => setFocusIndex(index)}
                     >
                       <span className="repo-quiz__option-name font-display">
                         {option.name}

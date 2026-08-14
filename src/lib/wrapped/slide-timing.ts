@@ -1,34 +1,138 @@
-import type { PlannedSlide } from "@/lib/wrapped/plan-slides";
+import { achievementsCarouselSettleMs } from "@/components/wrapped/achievements-slide";
 import { HIGHLIGHT_BURST_SETTLE_MS } from "@/components/wrapped/number-burst";
+import { contributionStorySettleMs } from "@/components/wrapped/contribution-composition-slide";
+import { ACHIEVEMENT_CATALOG } from "@/lib/wrapped/achievements-catalog";
+import {
+  buildFavoriteRepoRace,
+  favoriteRepoRaceSettleMs,
+} from "@/lib/wrapped/favorite-repo-race";
+import {
+  heatmapStorySettleMs,
+  type HeatmapStoryInsights,
+  type HeatmapTeaserLines,
+} from "@/lib/wrapped/heatmap-story";
+import type { PlannedSlide } from "@/lib/wrapped/plan-slides";
+import type { WrappedStats } from "@/lib/wrapped/types";
 
-export const WRAPPED_DWELL_MS = 3_000;
+/** Fallback reading pause after animations on simple slides. */
+export const WRAPPED_DWELL_MS = 2_600;
+
+const STORY_CODA_MS = 900;
+
+export type SlideRuntime = {
+  settleMs: number;
+  dwellMs: number;
+  durationMs: number;
+};
 
 export function slideSettleMs(
   kind: PlannedSlide["kind"],
   reducedMotion: boolean,
 ): number {
-  if (reducedMotion) return 0;
+  if (reducedMotion) return 400;
 
   switch (kind) {
     case "overview":
-      return 6_500;
+      return 6_400;
     case "contribution-types":
-      return 28_000;
+      return 14_000;
     case "languages":
-      return 1400;
+      return 2_000;
     case "streak":
-      return 2_200;
+      return 2_000;
     case "highlight":
       return HIGHLIGHT_BURST_SETTLE_MS;
     case "achievements":
-      return 1_000;
-    case "heatmap":
       return 1_200;
+    case "heatmap":
+      return 1_400;
     case "community":
-      return 1100;
+      return 1_800;
     case "summary":
-      return 2_400;
+      return 2_600;
     default:
-      return 800;
+      return 900;
   }
+}
+
+function dwellForKind(kind: PlannedSlide["kind"]): number {
+  switch (kind) {
+    case "heatmap":
+    case "contribution-types":
+    case "achievements":
+      return STORY_CODA_MS;
+    case "overview":
+      return 1_600;
+    case "languages":
+    case "community":
+      return 1_800;
+    case "streak":
+      return 2_000;
+    case "highlight":
+      return 1_500;
+    case "summary":
+      return 0;
+    default:
+      return WRAPPED_DWELL_MS;
+  }
+}
+
+export function computeSlideRuntime({
+  slide,
+  reducedMotion,
+  stats,
+  heatmapStory,
+  heatmapTeasers,
+}: {
+  slide: PlannedSlide;
+  reducedMotion: boolean;
+  stats: WrappedStats | null;
+  heatmapStory: HeatmapStoryInsights | null;
+  heatmapTeasers?: HeatmapTeaserLines;
+}): SlideRuntime {
+  let settleMs = slideSettleMs(slide.kind, reducedMotion);
+
+  if (slide.kind === "contribution-types" && stats) {
+    settleMs = contributionStorySettleMs(stats, reducedMotion);
+  } else if (
+    slide.kind === "highlight" &&
+    slide.highlight.id === "favorite_repo" &&
+    stats
+  ) {
+    settleMs = favoriteRepoRaceSettleMs(
+      buildFavoriteRepoRace(stats),
+      reducedMotion,
+    );
+  } else if (slide.kind === "heatmap" && stats && heatmapStory) {
+    const weekCount = Math.max(1, Math.ceil((stats.heatmap?.length ?? 0) / 7));
+    settleMs = heatmapStorySettleMs(
+      {
+        ...heatmapStory,
+        hasPeakDay: Boolean(stats.mostActiveDay),
+        hasPeakMonth: Boolean(stats.mostActiveMonth),
+      },
+      weekCount,
+      reducedMotion,
+      heatmapTeasers,
+    );
+  } else if (slide.kind === "achievements") {
+    settleMs = achievementsCarouselSettleMs(
+      ACHIEVEMENT_CATALOG.length,
+      reducedMotion,
+    );
+  }
+
+  let dwellMs = reducedMotion
+    ? Math.min(dwellForKind(slide.kind), 1_200)
+    : dwellForKind(slide.kind);
+
+  if (slide.kind === "highlight" && slide.highlight.id === "favorite_repo") {
+    dwellMs = reducedMotion ? 800 : STORY_CODA_MS;
+  }
+
+  return {
+    settleMs,
+    dwellMs,
+    durationMs: settleMs + dwellMs,
+  };
 }

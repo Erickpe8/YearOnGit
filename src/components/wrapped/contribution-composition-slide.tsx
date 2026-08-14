@@ -5,6 +5,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
   type Ref,
@@ -20,6 +21,7 @@ import {
 import { formatNumber } from "@/lib/wrapped/format";
 import type { WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type TranslationValues = Record<string, string | number>;
 
@@ -90,26 +92,26 @@ function buildStages(insights: ContributionInsights): Stage[] {
   };
 
   push("title", 0);
-  push("intro", 1_400);
-  push("hero", 2_400);
-  push("bar", 2_500);
-  push("legend", 1_700);
-  push("codeFocus", 3_000);
+  push("intro", 800);
+  push("hero", 1_400);
+  push("bar", 1_400);
+  push("legend", 900);
+  push("codeFocus", 1_700);
 
   if (insights.collaborativeActions > 0) {
-    push("but", 2_800);
-    push("collab", 2_200);
-    push("collabPr", 2_400);
-    push("collabIssues", 1_200);
-    push("collabReviews", 1_200);
+    push("but", 1_500);
+    push("collab", 1_300);
+    push("collabPr", 1_400);
+    push("collabIssues", 700);
+    push("collabReviews", 700);
   }
 
   if (insights.commitsPerPullRequest != null) {
-    push("ratioHint", 2_600);
-    push("ratio", 2_000);
+    push("ratioHint", 1_400);
+    push("ratio", 1_100);
   }
 
-  push("conclusion", 2_800);
+  push("conclusion", 1_400);
   return stages;
 }
 
@@ -209,6 +211,15 @@ export function ContributionCompositionSlide({
   const stages = useMemo(() => buildStages(insights), [insights]);
   const lastIndex = stages.length - 1;
   const [stageIndex, setStageIndex] = useState(reducedMotion ? lastIndex : 0);
+  const { cue } = useSfx();
+  const lastCuedStage = useRef<StageId | null>(null);
+
+  useEffect(() => {
+    const id = stages[stageIndex]?.id;
+    if (!id || id === lastCuedStage.current) return;
+    lastCuedStage.current = id;
+    if (id === "conclusion") cue("lift");
+  }, [stageIndex, stages, cue]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -295,6 +306,7 @@ export function ContributionCompositionSlide({
                   fractionDigits={1}
                   suffix="%"
                   play={activeScene === "composition" && has("hero")}
+                  onComplete={() => cue("metric")}
                 />
               </p>
               <p className="composition-slide__hero-label font-display font-semibold uppercase tracking-[0.14em] text-on-surface">
@@ -544,5 +556,5 @@ export function contributionStorySettleMs(
   if (reducedMotion) return 0;
   const stages = buildStages(buildContributionInsights(stats));
   const lastAt = stages[stages.length - 1]?.at ?? 0;
-  return lastAt + 3_200;
+  return lastAt + 1_400;
 }

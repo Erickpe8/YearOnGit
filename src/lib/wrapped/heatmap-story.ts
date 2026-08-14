@@ -137,28 +137,45 @@ export const PEAK_MONTH_YELLOW = "#f5c518";
 export const WEEKDAY_HIGHLIGHT_BLUE = "#5ba8f5";
 export const PERFECT_WEEK_MAGENTA = "#c45b9f";
 
-export const STORY_INTRO_PAUSE_MS = 1_000;
-export const POST_QUESTION_PAUSE_MS = 2_000;
-export const TYPE_MS_PER_CHAR = 26;
-export const TYPE_LINE_PAUSE_MS = 320;
-export const DAY_TEASER_BUDGET_MS = 7_000;
-export const MONTH_TEASER_BUDGET_MS = 6_500;
-export const WEEKDAY_TEASER_BUDGET_MS = 5_500;
-export const WEEKS_TEASER_BUDGET_MS = 5_500;
-export const PEAK_DAY_HOLD_MS = 2_200;
-export const PEAK_MONTH_HOLD_MS = 2_200;
+export const TYPE_MS_PER_CHAR = 20;
+export const TYPE_LINE_PAUSE_MS = 240;
+export const DAY_TEASER_BUDGET_MS = 2_800;
+export const MONTH_TEASER_BUDGET_MS = 2_500;
+export const WEEKDAY_TEASER_BUDGET_MS = 2_300;
+export const WEEKS_TEASER_BUDGET_MS = 2_300;
+export const PEAK_DAY_HOLD_MS = 1_400;
+export const PEAK_MONTH_HOLD_MS = 1_400;
 export const WEEKDAY_WAVE_STAGGER_MS = 22;
-export const WEEKDAY_CELL_PULSE_MS = 420;
-export const WEEKDAY_REVEAL_HOLD_MS = 2_400;
-export const PERFECT_WEEK_STAGGER_MS = 90;
-export const PERFECT_WEEK_HOLD_MS = 2_400;
-export const MOSAIC_HOLD_MS = 2_800;
-export const RESTORE_MS = 1_200;
-export const SUMMARY_HOLD_MS = 3_600;
-export const FINALE_HOLD_MS = 900;
+export const WEEKDAY_CELL_PULSE_MS = 360;
+export const WEEKDAY_REVEAL_HOLD_MS = 1_400;
+export const PERFECT_WEEK_STAGGER_MS = 80;
+export const PERFECT_WEEK_HOLD_MS = 1_400;
+export const MOSAIC_HOLD_MS = 1_400;
+export const RESTORE_MS = 800;
+export const SUMMARY_HOLD_MS = 1_800;
+export const FINALE_HOLD_MS = 500;
+export const STORY_INTRO_PAUSE_MS = 600;
+export const POST_QUESTION_PAUSE_MS = 1_100;
 
 /** @deprecated */
 export const AVERAGE_HOLD_MS = SUMMARY_HOLD_MS;
+
+export function typewriterDurationMs(lines: string[]): number {
+  if (lines.length === 0) return 0;
+  let total = 0;
+  for (let i = 0; i < lines.length; i += 1) {
+    total += (lines[i]?.length ?? 0) * TYPE_MS_PER_CHAR;
+    if (i < lines.length - 1) total += TYPE_LINE_PAUSE_MS;
+  }
+  return total + POST_QUESTION_PAUSE_MS;
+}
+
+export type HeatmapTeaserLines = {
+  day?: string[];
+  month?: string[];
+  weekday?: string[];
+  weeks?: string[];
+};
 
 export function heatmapStorySettleMs(
   insights: HeatmapStoryInsights & {
@@ -167,21 +184,30 @@ export function heatmapStorySettleMs(
   },
   weekCount: number,
   reducedMotion: boolean,
+  teasers?: HeatmapTeaserLines,
 ): number {
   if (reducedMotion) return 1_400;
 
   let total = STORY_INTRO_PAUSE_MS;
 
   if (insights.hasPeakDay) {
-    total += DAY_TEASER_BUDGET_MS + PEAK_DAY_HOLD_MS;
+    total +=
+      (teasers?.day?.length
+        ? typewriterDurationMs(teasers.day)
+        : DAY_TEASER_BUDGET_MS) + PEAK_DAY_HOLD_MS;
   }
   if (insights.hasPeakMonth) {
-    total += MONTH_TEASER_BUDGET_MS + PEAK_MONTH_HOLD_MS;
+    total +=
+      (teasers?.month?.length
+        ? typewriterDurationMs(teasers.month)
+        : MONTH_TEASER_BUDGET_MS) + PEAK_MONTH_HOLD_MS;
   }
 
   if (insights.weekday) {
     total +=
-      WEEKDAY_TEASER_BUDGET_MS +
+      (teasers?.weekday?.length
+        ? typewriterDurationMs(teasers.weekday)
+        : WEEKDAY_TEASER_BUDGET_MS) +
       Math.max(0, weekCount - 1) * WEEKDAY_WAVE_STAGGER_MS +
       WEEKDAY_CELL_PULSE_MS +
       WEEKDAY_REVEAL_HOLD_MS;
@@ -189,9 +215,11 @@ export function heatmapStorySettleMs(
 
   if (insights.perfectWeeks.count > 0) {
     total +=
-      WEEKS_TEASER_BUDGET_MS +
+      (teasers?.weeks?.length
+        ? typewriterDurationMs(teasers.weeks)
+        : WEEKS_TEASER_BUDGET_MS) +
       insights.perfectWeeks.count * PERFECT_WEEK_STAGGER_MS +
-      350 +
+      280 +
       PERFECT_WEEK_HOLD_MS;
   }
 
