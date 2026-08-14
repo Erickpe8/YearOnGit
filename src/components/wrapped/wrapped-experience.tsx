@@ -3,13 +3,11 @@
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AchievementsSlide, achievementsCarouselSettleMs } from "@/components/wrapped/achievements-slide";
-import { ACHIEVEMENT_CATALOG } from "@/lib/wrapped/achievements-catalog";
+import { AchievementsSlide } from "@/components/wrapped/achievements-slide";
 import { AnimatedCounter } from "@/components/wrapped/animated-counter";
 import { CommunitySlide } from "@/components/wrapped/community-slide";
 import {
   ContributionCompositionSlide,
-  contributionStorySettleMs,
   type ContributionStoryHandle,
 } from "@/components/wrapped/contribution-composition-slide";
 import {
@@ -30,24 +28,18 @@ import {
   formatNumber,
   formatWrappedDate,
 } from "@/lib/wrapped/format";
-import {
-  buildFavoriteRepoRace,
-  favoriteRepoRaceSettleMs,
-} from "@/lib/wrapped/favorite-repo-race";
 import { planWrappedSlides } from "@/lib/wrapped/plan-slides";
 import {
-  slideSettleMs,
-  WRAPPED_DWELL_MS,
+  computeSlideRuntime,
 } from "@/lib/wrapped/slide-timing";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
 import { useStoriesNavigation } from "@/lib/wrapped/use-stories-navigation";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useWrappedStats } from "@/lib/wrapped/use-wrapped-stats";
-import {
-  buildHeatmapStoryInsights,
-  heatmapStorySettleMs,
-} from "@/lib/wrapped/heatmap-story";
+import { buildHeatmapStoryInsights } from "@/lib/wrapped/heatmap-story";
+import { sceneFromSlide } from "@/lib/audio/score";
 import { useApp } from "@/providers/app-provider";
+import { useSfx, useWrappedBeat } from "@/providers/sfx-provider";
 
 export type WrappedExperienceProps = {
   mode?: "owner" | "shared";
@@ -59,6 +51,8 @@ export function WrappedExperience({
   initialPayload = null,
 }: WrappedExperienceProps = {}) {
   const { t, locale, setHeaderProgress } = useApp();
+  const { setScene } = useSfx();
+  useWrappedBeat();
   useViewI18n("wrapped");
   const router = useRouter();
   const [slide, setSlide] = useState(0);
@@ -100,6 +94,34 @@ export function WrappedExperience({
     );
   }, [stats, locale]);
 
+  const heatmapTeasers = useMemo(() => {
+    if (!stats) return undefined;
+    return {
+      day: [
+        t("heatmapTeaserLine1", {
+          count: formatNumber(stats.totalContributions, locale),
+        }),
+        t("heatmapTeaserLine2"),
+        t("heatmapTeaserLine3"),
+      ],
+      month: [
+        t("heatmapMonthTeaserLine1"),
+        t("heatmapMonthTeaserLine2"),
+        t("heatmapMonthTeaserLine3"),
+      ],
+      weekday: [
+        t("heatmapWeekdayTeaserLine1"),
+        t("heatmapWeekdayTeaserLine2"),
+        t("heatmapWeekdayTeaserLine3"),
+      ],
+      weeks: [
+        t("heatmapWeeksTeaserLine1"),
+        t("heatmapWeeksTeaserLine2"),
+        t("heatmapWeeksTeaserLine3"),
+      ],
+    };
+  }, [locale, stats, t]);
+
   const restart = useCallback(() => {
     setSlide(0);
     if (!isShared) {
@@ -127,6 +149,7 @@ export function WrappedExperience({
     cycleKey: string;
     settleMs: number;
     dwellMs: number;
+    durationMs: number;
     fillMode: "animate" | "complete";
     paused: boolean;
   } | null>(null);
@@ -170,21 +193,9 @@ export function WrappedExperience({
   const contributionStoryRef = useRef<ContributionStoryHandle | null>(null);
   const favoriteRepoRaceRef = useRef<FavoriteRepoRaceHandle | null>(null);
 
-  const isFavoriteRepoHighlight =
-    current?.kind === "highlight" && current.highlight.id === "favorite_repo";
-
   const tryAdvanceStoryOrNext = useCallback(() => {
-    if (
-      current?.kind === "contribution-types" &&
-      contributionStoryRef.current?.tryAdvance()
-    ) {
-      return;
-    }
-    if (isFavoriteRepoHighlight && favoriteRepoRaceRef.current?.tryAdvance()) {
-      return;
-    }
     if (slide < totalSlides - 1) next();
-  }, [current?.kind, isFavoriteRepoHighlight, slide, totalSlides, next]);
+  }, [slide, totalSlides, next]);
 
   const storiesHandlers = useStoriesNavigation({
     onNext: tryAdvanceStoryOrNext,
@@ -207,40 +218,20 @@ export function WrappedExperience({
     }
 
     const isLast = slide >= totalSlides - 1;
-    let settleMs = slideSettleMs(current.kind, reducedMotion);
-    if (current.kind === "contribution-types" && stats) {
-      settleMs = contributionStorySettleMs(stats, reducedMotion);
-    } else if (isFavoriteRepoHighlight && stats) {
-      settleMs = favoriteRepoRaceSettleMs(
-        buildFavoriteRepoRace(stats),
-        reducedMotion,
-      );
-    } else if (current.kind === "heatmap" && stats && heatmapStory) {
-      const weekCount = Math.max(
-        1,
-        Math.ceil((stats.heatmap?.length ?? 0) / 7),
-      );
-      settleMs = heatmapStorySettleMs(
-        {
-          ...heatmapStory,
-          hasPeakDay: Boolean(stats.mostActiveDay),
-          hasPeakMonth: Boolean(stats.mostActiveMonth),
-        },
-        weekCount,
-        reducedMotion,
-      );
-    } else if (current.kind === "achievements") {
-      settleMs = achievementsCarouselSettleMs(
-        ACHIEVEMENT_CATALOG.length,
-        reducedMotion,
-      );
-    }
+    const runtime = computeSlideRuntime({
+      slide: current,
+      reducedMotion,
+      stats,
+      heatmapStory,
+      heatmapTeasers,
+    });
     const config = {
       current: slide + 1,
       total: totalSlides,
       cycleKey: `${slide}-${totalSlides}-${current.key}`,
-      settleMs,
-      dwellMs: WRAPPED_DWELL_MS,
+      settleMs: runtime.settleMs,
+      dwellMs: runtime.dwellMs,
+      durationMs: runtime.durationMs,
       fillMode: (isLast ? "complete" : "animate") as "animate" | "complete",
       paused: false,
     };
@@ -249,9 +240,7 @@ export function WrappedExperience({
     playbackPausedRef.current = false;
     setPlaybackPaused(false);
     remainingWhilePausedRef.current = null;
-    deadlineRef.current = isLast
-      ? null
-      : Date.now() + settleMs + WRAPPED_DWELL_MS;
+    deadlineRef.current = isLast ? null : Date.now() + runtime.durationMs;
   }, [
     slide,
     totalSlides,
@@ -259,8 +248,8 @@ export function WrappedExperience({
     reducedMotion,
     setHeaderProgress,
     stats,
-    isFavoriteRepoHighlight,
     heatmapStory,
+    heatmapTeasers,
   ]);
 
   useEffect(() => {
@@ -286,6 +275,12 @@ export function WrappedExperience({
   useEffect(() => {
     setSlide(0);
   }, [stats]);
+
+  useEffect(() => {
+    if (!current) return;
+    const scene = sceneFromSlide(current);
+    setScene(scene);
+  }, [current, setScene]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -400,13 +395,7 @@ export function WrappedExperience({
                   peakCaption={t("heatmapPeakCaption")}
                   peakCount={stats.mostActiveDayCount}
                   peakCountLabel={t("heatmapPeakCountLabel")}
-                  teaserLines={[
-                    t("heatmapTeaserLine1", {
-                      count: formatNumber(stats.totalContributions, locale),
-                    }),
-                    t("heatmapTeaserLine2"),
-                    t("heatmapTeaserLine3"),
-                  ]}
+                  teaserLines={heatmapTeasers?.day ?? []}
                   peakMonth={stats.mostActiveMonth}
                   peakMonthLabel={
                     stats.mostActiveMonth
@@ -416,24 +405,12 @@ export function WrappedExperience({
                   peakMonthCaption={t("heatmapMonthCaption")}
                   peakMonthCount={stats.mostActiveMonthCount}
                   peakMonthCountLabel={t("heatmapMonthCountLabel")}
-                  monthTeaserLines={[
-                    t("heatmapMonthTeaserLine1"),
-                    t("heatmapMonthTeaserLine2"),
-                    t("heatmapMonthTeaserLine3"),
-                  ]}
+                  monthTeaserLines={heatmapTeasers?.month ?? []}
                   weekdayInsight={heatmapStory?.weekday ?? null}
                   perfectWeeks={heatmapStory?.perfectWeeks ?? null}
                   averages={heatmapStory?.averages ?? null}
-                  weekdayTeaserLines={[
-                    t("heatmapWeekdayTeaserLine1"),
-                    t("heatmapWeekdayTeaserLine2"),
-                    t("heatmapWeekdayTeaserLine3"),
-                  ]}
-                  weeksTeaserLines={[
-                    t("heatmapWeeksTeaserLine1"),
-                    t("heatmapWeeksTeaserLine2"),
-                    t("heatmapWeeksTeaserLine3"),
-                  ]}
+                  weekdayTeaserLines={heatmapTeasers?.weekday ?? []}
+                  weeksTeaserLines={heatmapTeasers?.weeks ?? []}
                   weekdayTitle={t("heatmapWeekdayFavorite")}
                   weekdayCountLabel={t("heatmapWeekdayCountLabel")}
                   perfectWeeksLead={t("heatmapPerfectWeeksLead")}

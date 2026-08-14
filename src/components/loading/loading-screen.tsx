@@ -11,6 +11,7 @@ import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { saveWrappedPayload } from "@/lib/wrapped/storage";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useApp } from "@/providers/app-provider";
+import { useSfx, useWrappedBeat } from "@/providers/sfx-provider";
 
 type LoadState = "loading" | "error";
 
@@ -23,6 +24,7 @@ export function LoadingScreen() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  useWrappedBeat(loadState === "loading");
 
   const displayName =
     session?.user?.login ?? session?.user?.name ?? null;
@@ -65,7 +67,10 @@ export function LoadingScreen() {
     if (loadState !== "loading") return;
 
     const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 95 ? prev : prev + 2));
+      setProgress((prev) => {
+        if (prev >= 95) return prev;
+        return prev + 2;
+      });
     }, 60);
 
     return () => clearInterval(interval);

@@ -11,7 +11,9 @@ import {
   resolveHighlightValues,
 } from "@/lib/wrapped/format-highlight";
 import type { Highlight } from "@/lib/wrapped/modules/types";
+import { MUSIC_BUILD_LEAD_MS } from "@/lib/audio/score";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type HighlightSlideProps = {
   highlight: Highlight;
@@ -88,6 +90,7 @@ function burstConfetti(element: HTMLElement | null) {
 
 export function HighlightSlide({ highlight, locale, t }: HighlightSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const values = resolveHighlightValues(highlight, locale);
   const templateKey = isHighlightTemplateKey(highlight.templateKey)
     ? highlight.templateKey
@@ -112,20 +115,27 @@ export function HighlightSlide({ highlight, locale, t }: HighlightSlideProps) {
     setBurstActive(false);
     if (reducedMotion || burstValue == null) return;
 
+    const dropAt = TEXT_REVEAL_MS + POST_REVEAL_PAUSE_MS;
+    const buildTimer = window.setTimeout(() => {
+      cue("build");
+    }, Math.max(0, dropAt - MUSIC_BUILD_LEAD_MS));
+
     const confettiTimer = window.setTimeout(() => {
       fireConfetti();
+      cue("celebrate");
       setBurstActive(true);
-    }, TEXT_REVEAL_MS + POST_REVEAL_PAUSE_MS);
+    }, dropAt);
 
     const clearBurst = window.setTimeout(() => {
       setBurstActive(false);
     }, TEXT_REVEAL_MS + POST_REVEAL_PAUSE_MS + BURST_HOLD_MS);
 
     return () => {
+      window.clearTimeout(buildTimer);
       window.clearTimeout(confettiTimer);
       window.clearTimeout(clearBurst);
     };
-  }, [burstValue, fireConfetti, highlight.id, reducedMotion]);
+  }, [burstValue, cue, fireConfetti, highlight.id, reducedMotion]);
 
   return (
     <>

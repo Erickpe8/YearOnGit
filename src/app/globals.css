@@ -1310,11 +1310,22 @@ body::-webkit-scrollbar {
     0 8px 24px -12px rgba(0, 0, 0, 0.55);
 }
 
+.wrapped-heatmap-callout-card--summary {
+  min-height: 0;
+  gap: 0.3rem;
+  padding: 0.45rem 0.85rem 0.5rem;
+}
+
 @media (min-width: 768px) {
   .wrapped-heatmap-callout-card {
     width: 320px;
     min-height: 118px;
     padding: 1rem 1.15rem;
+  }
+
+  .wrapped-heatmap-callout-card--summary {
+    min-height: 0;
+    padding: 0.5rem 1rem 0.55rem;
   }
 }
 
@@ -1680,7 +1691,7 @@ body::-webkit-scrollbar {
 .repo-quiz__option {
   width: 100%;
   border-radius: 0.95rem;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border: 1px solid color-mix(in srgb, #8b949e 26%, transparent);
   background: color-mix(in srgb, #0d1117 88%, transparent);
   backdrop-filter: blur(8px);
   padding: 0.9rem 1rem;
@@ -1696,8 +1707,8 @@ body::-webkit-scrollbar {
 
 .repo-quiz__option:hover:not(:disabled),
 .repo-quiz__option[data-state="focus"] {
-  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  background: color-mix(in srgb, var(--color-primary) 12%, #0d1117);
+  border-color: color-mix(in srgb, #c9d1d9 42%, transparent);
+  background: color-mix(in srgb, #161b22 82%, transparent);
 }
 
 .repo-quiz__option[data-state="pending-pick"] {
@@ -1713,8 +1724,19 @@ body::-webkit-scrollbar {
 }
 
 .repo-quiz__option[data-state="wrong"] {
-  opacity: 0.5;
+  border-color: color-mix(in srgb, #f85149 48%, transparent);
+  background: color-mix(in srgb, #f85149 10%, #0d1117);
+  color: color-mix(in srgb, #f85149 82%, #ffffff);
+  box-shadow: 0 0 16px color-mix(in srgb, #f85149 14%, transparent);
   animation: repo-quiz-shake 0.42s ease;
+}
+
+.repo-quiz__miss {
+  color: color-mix(in srgb, #f85149 78%, #ffffff);
+  font-size: 0.92rem;
+  font-weight: 650;
+  text-align: center;
+  margin: 0;
 }
 
 .repo-quiz__option[data-state="dim"] {

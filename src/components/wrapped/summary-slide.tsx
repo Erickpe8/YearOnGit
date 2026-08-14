@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { AnimatedCounter } from "@/components/wrapped/animated-counter";
@@ -18,6 +19,7 @@ import type { Locale } from "@/lib/i18n/supported-locales";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import type { WrappedPayload, WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type SummarySlideProps = {
   stats: WrappedStats;
@@ -86,8 +88,13 @@ export function SummarySlide({
   t,
 }: SummarySlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const avatarUrl = stats.profile.avatarUrl;
   const login = stats.profile.login || displayName;
+
+  useEffect(() => {
+    cue("finale");
+  }, [cue]);
 
   const gridStats: GridStat[] = [
     {
@@ -226,6 +233,7 @@ export function SummarySlide({
               value={stats.totalContributions}
               locale={locale}
               durationMs={reducedMotion ? 0 : 1300}
+              onComplete={() => cue("metric")}
             />
           </motion.div>
 

@@ -9,10 +9,12 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatedCounter } from "@/components/wrapped/animated-counter";
+import { MUSIC_BUILD_LEAD_MS } from "@/lib/audio/score";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { formatNumber } from "@/lib/wrapped/format";
 import type { WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type TranslationValues = Record<string, string | number>;
 
@@ -152,16 +154,27 @@ export function OverviewIntroSlide({
   t,
 }: OverviewIntroSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const step = useRevealStep(reducedMotion);
   const shown = (at: number) => reducedMotion || step >= at;
   const heroValueRef = useRef<HTMLParagraphElement>(null);
   const confettiFiredRef = useRef(false);
 
+  useEffect(() => {
+    if (reducedMotion || step !== STEP.hero) return;
+    const timer = window.setTimeout(
+      () => cue("build"),
+      Math.max(0, 1_100 - MUSIC_BUILD_LEAD_MS),
+    );
+    return () => window.clearTimeout(timer);
+  }, [cue, reducedMotion, step]);
+
   const handleHeroCountComplete = useCallback(() => {
     if (reducedMotion || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
+    cue("celebrate");
     burstConfettiFromElement(heroValueRef.current);
-  }, [reducedMotion]);
+  }, [reducedMotion, cue]);
 
   const commitsLeadCode =
     stats.totalContributions > 0 &&
