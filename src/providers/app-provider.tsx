@@ -18,6 +18,7 @@ import {
   type Locale,
 } from "@/lib/i18n/supported-locales";
 import { brandName } from "@/lib/brand/assets";
+import { SfxProvider } from "@/providers/sfx-provider";
 
 type HeaderProgress = {
   current: number;
@@ -25,6 +26,7 @@ type HeaderProgress = {
   cycleKey: string;
   settleMs: number;
   dwellMs: number;
+  durationMs: number;
   fillMode: "animate" | "complete";
   paused?: boolean;
 } | null;
@@ -145,7 +147,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      <SfxProvider>{children}</SfxProvider>
+    </AppContext.Provider>
+  );
 }
 
 export function useApp() {

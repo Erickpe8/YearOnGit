@@ -30,6 +30,7 @@ import {
   type WeekdayInsight,
 } from "@/lib/wrapped/heatmap-story";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 const HEATMAP_COLORS = [
   "bg-surface-variant/30",
@@ -308,6 +309,7 @@ export function WrappedHeatmap({
   locale = "en",
 }: WrappedHeatmapProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const [phase, setPhase] = useState<StoryPhase>("idle");
   const [waveColumn, setWaveColumn] = useState(-1);
   const [litWeekCursor, setLitWeekCursor] = useState(-1);
@@ -375,6 +377,11 @@ export function WrappedHeatmap({
     showHighlights && rank >= phaseRank("weekdayWave") && hasWeekday;
   const showPerfect =
     showHighlights && rank >= phaseRank("weeksWave") && hasPerfectWeeks;
+
+  useEffect(() => {
+    if (phase === "peakDay") cue("record");
+    else if (phase === "summary") cue("metric");
+  }, [phase, cue]);
 
   const goAfterPeakDay = useCallback(() => {
     if (hasPeakMonth) {
@@ -997,7 +1004,7 @@ export function WrappedHeatmap({
 
           {hasSummary && averages ? (
             <motion.div
-              className="wrapped-heatmap-callout-card absolute inset-x-0 top-1/2 mx-auto flex -translate-y-1/2 flex-col items-center gap-3 rounded-xl border border-white/10 px-4 py-4 text-center"
+              className="wrapped-heatmap-callout-card wrapped-heatmap-callout-card--summary absolute inset-x-0 bottom-0 mx-auto flex flex-col items-center rounded-xl border border-white/10 text-center"
               initial={false}
               animate={{
                 opacity: showSummary ? 1 : 0,
@@ -1007,13 +1014,13 @@ export function WrappedHeatmap({
               style={{ pointerEvents: showSummary ? "auto" : "none" }}
               aria-hidden={!showSummary}
             >
-              <div>
+              <div className="flex flex-col items-center leading-tight">
                 {averageLead ? (
-                  <p className="i18n-text text-[11px] text-on-surface-variant md:text-sm">
+                  <p className="i18n-text text-[10px] text-on-surface-variant md:text-[11px]">
                     {averageLead}
                   </p>
                 ) : null}
-                <p className="font-display text-3xl font-extrabold text-primary md:text-4xl">
+                <p className="font-display text-2xl font-extrabold text-primary md:text-[1.75rem]">
                   <AnimatedCounter
                     value={averages.averagePerActiveDay}
                     locale={locale}
@@ -1023,20 +1030,15 @@ export function WrappedHeatmap({
                   />
                 </p>
                 {averageLabel ? (
-                  <p className="i18n-text text-[11px] text-on-surface-variant md:text-sm">
+                  <p className="i18n-text text-[10px] text-on-surface-variant md:text-[11px]">
                     {averageLabel}
                   </p>
                 ) : null}
               </div>
 
-              <div className="flex w-full max-w-sm items-start justify-center gap-6">
-                <div>
-                  {activeDaysLead ? (
-                    <p className="i18n-text text-[10px] text-on-surface-variant">
-                      {activeDaysLead}
-                    </p>
-                  ) : null}
-                  <p className="font-display text-xl font-bold text-on-surface md:text-2xl">
+              <div className="flex w-full items-baseline justify-center gap-5">
+                <div className="flex items-baseline gap-1.5">
+                  <p className="font-display text-base font-bold text-on-surface md:text-lg">
                     <AnimatedCounter
                       value={averages.activeDays}
                       locale={locale}
@@ -1044,19 +1046,14 @@ export function WrappedHeatmap({
                       durationMs={1000}
                     />
                   </p>
-                  {activeDaysLabel ? (
+                  {activeDaysLead ? (
                     <p className="i18n-text text-[10px] text-on-surface-variant">
-                      {activeDaysLabel}
+                      {activeDaysLead}
                     </p>
                   ) : null}
                 </div>
-                <div>
-                  {totalLead ? (
-                    <p className="i18n-text text-[10px] text-on-surface-variant">
-                      {totalLead}
-                    </p>
-                  ) : null}
-                  <p className="font-display text-xl font-bold text-on-surface md:text-2xl">
+                <div className="flex items-baseline gap-1.5">
+                  <p className="font-display text-base font-bold text-on-surface md:text-lg">
                     <AnimatedCounter
                       value={averages.totalContributions}
                       locale={locale}
@@ -1064,9 +1061,9 @@ export function WrappedHeatmap({
                       durationMs={1100}
                     />
                   </p>
-                  {totalLabel ? (
+                  {totalLead ? (
                     <p className="i18n-text text-[10px] text-on-surface-variant">
-                      {totalLabel}
+                      {totalLead}
                     </p>
                   ) : null}
                 </div>

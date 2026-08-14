@@ -13,6 +13,7 @@ import {
 } from "@/lib/wrapped/format";
 import type { WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type StreakSlideProps = {
   stats: WrappedStats;
@@ -31,6 +32,7 @@ export function StreakSlide({
   t,
 }: StreakSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const weekendPct = stats.weekendActivityPercentage;
   const weekdayName = stats.mostActiveWeekday
     ? formatWeekdayName(stats.mostActiveWeekday, locale)
@@ -88,6 +90,7 @@ export function StreakSlide({
                 value={stats.longestStreak}
                 locale={locale}
                 durationMs={reducedMotion ? 0 : 1200}
+                onComplete={() => cue("record")}
               />
             </div>
           </div>

@@ -7,6 +7,7 @@ import { BrandLogo } from "@/components/brand/brand-logo";
 import { IconChevronUp } from "@/components/ui/icons";
 import { useApp } from "@/providers/app-provider";
 import { LanguageToggle } from "./language-toggle";
+import { SoundToggle } from "./sound-toggle";
 
 export function GlassHeader() {
   const { headerVisible, toggleHeader, t, headerProgress } = useApp();
@@ -53,6 +54,7 @@ export function GlassHeader() {
                             }`}
                             style={{
                               animationDuration: `${
+                                headerProgress.durationMs ??
                                 headerProgress.settleMs + headerProgress.dwellMs
                               }ms`,
                               animationDelay: "0ms",
@@ -102,6 +104,7 @@ export function GlassHeader() {
                   </button>
                 </div>
               ) : null}
+              <SoundToggle />
               <LanguageToggle />
               <button
                 type="button"

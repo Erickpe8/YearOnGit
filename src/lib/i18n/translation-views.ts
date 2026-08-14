@@ -4,6 +4,8 @@ export const TRANSLATION_VIEWS = {
   common: [
     "hideHeader",
     "showHeader",
+    "muteSound",
+    "unmuteSound",
     "signOut",
     "headerGreeting",
     "language",
@@ -199,6 +201,7 @@ export const TRANSLATION_VIEWS = {
     "raceTitle",
     "raceQuestion",
     "raceCorrect",
+    "raceWrong",
     "raceDiscover",
     "raceYearProject",
     "raceCommitsLabel",

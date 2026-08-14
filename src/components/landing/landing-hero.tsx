@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IconArrowRight, IconLock } from "@/components/ui/icons";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
+import { useSfx } from "@/providers/sfx-provider";
 import {
   CommitsDecorCard,
   HeatmapCard,
@@ -23,6 +24,7 @@ function GitHubIcon() {
 
 export function LandingHero() {
   const { t } = useApp();
+  const { unlock } = useSfx();
   const { data: session, status } = useSession();
   useViewI18n("landing");
 
@@ -66,6 +68,9 @@ export function LandingHero() {
           {isAuthenticated ? (
             <Link
               href="/loading"
+              onClick={() => {
+                unlock();
+              }}
               className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
             >
               <span className="i18n-cta text-center">{t("viewMyWrapped")}</span>
@@ -74,7 +79,10 @@ export function LandingHero() {
           ) : (
             <button
               type="button"
-              onClick={() => signIn("github", { callbackUrl: "/loading" })}
+              onClick={() => {
+                unlock();
+                void signIn("github", { callbackUrl: "/loading" });
+              }}
               className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
             >
               <GitHubIcon />

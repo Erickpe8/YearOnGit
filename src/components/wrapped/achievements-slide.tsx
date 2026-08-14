@@ -48,6 +48,7 @@ import type {
   AchievementTier,
 } from "@/lib/wrapped/modules/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
+import { useSfx } from "@/providers/sfx-provider";
 
 type AchievementsSlideProps = {
   achievements: Achievement[];
@@ -57,8 +58,8 @@ type AchievementsSlideProps = {
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-export const ACHIEVEMENT_INTRO_MS = 800;
-export const ACHIEVEMENT_CARD_MS = 2_400;
+export const ACHIEVEMENT_INTRO_MS = 400;
+export const ACHIEVEMENT_CARD_MS = 1_400;
 
 export function achievementsCarouselSettleMs(
   count: number,
@@ -263,6 +264,7 @@ export function AchievementsSlide({
   t,
 }: AchievementsSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { cue } = useSfx();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const autoplayPausedRef = useRef(false);
@@ -327,6 +329,12 @@ export function AchievementsSlide({
       window.removeEventListener("resize", syncActiveFromScroll);
     };
   }, [syncActiveFromScroll]);
+
+  useEffect(() => {
+    const item = ordered[activeIndex];
+    if (!item?.unlocked) return;
+    if (activeIndex === 0 || item.tier === "gold") cue("lift");
+  }, [activeIndex, ordered, cue]);
 
   useEffect(() => {
     autoplayPausedRef.current = false;
