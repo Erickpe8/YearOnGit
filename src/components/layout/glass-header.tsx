@@ -10,7 +10,7 @@ import { LanguageToggle } from "./language-toggle";
 import { SoundToggle } from "./sound-toggle";
 
 export function GlassHeader() {
-  const { headerVisible, toggleHeader, t, headerProgress } = useApp();
+  const { headerVisible, toggleHeader, t } = useApp();
   const { data: session, status } = useSession();
   const user = session?.user;
   const displayName = user?.login ?? user?.name ?? null;
@@ -29,47 +29,7 @@ export function GlassHeader() {
           <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-3 max-[390px]:gap-1.5 md:gap-3 md:px-6">
             <BrandLogo size="sm" />
 
-            {headerProgress ? (
-              <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-1 sm:gap-3 sm:px-2">
-                <div
-                  className="flex max-w-[min(100%,280px)] flex-1 items-center gap-1 sm:max-w-md sm:gap-1.5"
-                  aria-hidden
-                >
-                  {Array.from({ length: headerProgress.total }).map((_, index) => {
-                    const activeIndex = headerProgress.current - 1;
-                    const isPast = index < activeIndex;
-                    const isActive = index === activeIndex;
-
-                    return (
-                      <div
-                        key={`${headerProgress.cycleKey}-${index}`}
-                        className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-white/15"
-                      >
-                        {isPast || (isActive && headerProgress.fillMode === "complete") ? (
-                          <div className="h-full w-full rounded-full bg-primary" />
-                        ) : isActive && headerProgress.fillMode === "animate" ? (
-                          <div
-                            className={`wrapped-progress-segment h-full w-full rounded-full bg-primary${
-                              headerProgress.paused ? " is-paused" : ""
-                            }`}
-                            style={{
-                              animationDuration: `${
-                                headerProgress.durationMs ??
-                                headerProgress.settleMs + headerProgress.dwellMs
-                              }ms`,
-                              animationDelay: "0ms",
-                            }}
-                          />
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-                <span className="shrink-0 font-display text-xs font-medium text-on-surface-variant">
-                  {headerProgress.current}/{headerProgress.total}
-                </span>
-              </div>
-            ) : isAuthenticated && displayName ? (
+            {isAuthenticated && displayName ? (
               <div className="flex min-w-0 flex-1 items-center justify-center px-2">
                 <p className="truncate font-display text-xs font-semibold text-on-surface md:text-sm">
                   {t("headerGreeting", { name: displayName })}

@@ -18,6 +18,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   wrappedShares WrappedShare[]
+  profileCards  ProfileCard[]
 }
 
 model Account {
@@ -75,4 +76,34 @@ model WrappedShare {
   @@unique([userId, year])
   @@index([slug, isActive])
   @@index([username, year])
+}
+
+/// Year-scoped README card for a Wrapped edition (e.g. 2026 only).
+/// Stable public URL: /cards/{username}/{year}.png
+/// Refreshes at most every 24h WHILE that calendar year is in progress.
+/// After Dec 31 of `year`, stats are frozen (never mixes later years).
+/// Distinct from WrappedShare (historical share snapshot / slug).
+model ProfileCard {
+  id             String    @id @default(cuid())
+  userId         String
+  /// Display username (preserves GitHub casing).
+  username       String
+  /// Lowercase key used for URL lookups.
+  usernameKey    String
+  /// Wrapped year this card represents (e.g. 2026).
+  year           Int
+  /// Serialized WrappedStats JSON (public metrics only, that year).
+  stats          Json
+  refreshedAt    DateTime  @default(now())
+  /// Soft lock to avoid concurrent GitHub refreshes for the same card.
+  refreshLockUntil DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year])
+  @@unique([usernameKey, year])
+  @@index([refreshedAt])
+  @@index([usernameKey, year])
 }

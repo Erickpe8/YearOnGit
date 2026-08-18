@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  buildReadmeMarkdown,
+  buildShareCardUrl,
   buildShareMetaDescription,
   buildShareMetaTitle,
   buildShareUrl,
@@ -28,6 +30,22 @@ describe("share helpers", () => {
     assert.equal(
       buildShareUrl("8f4b9b2e", "https://yearongit.com"),
       "https://yearongit.com/share/8f4b9b2e",
+    );
+  });
+
+  it("builds README markdown with card image and share link", () => {
+    assert.equal(
+      buildShareCardUrl("8f4b9b2e", "https://yearongit.com"),
+      "https://yearongit.com/share/8f4b9b2e/card",
+    );
+    assert.equal(
+      buildReadmeMarkdown({
+        slug: "8f4b9b2e",
+        username: "erick",
+        year: 2026,
+        baseUrl: "https://yearongit.com",
+      }),
+      "[![@erick's Year on Git 2026](https://yearongit.com/cards/erick/2026.png?lang=en)](https://yearongit.com/share/8f4b9b2e)",
     );
   });
 

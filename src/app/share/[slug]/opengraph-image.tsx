@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
-import { prisma } from "@/lib/db";
-import { isValidShareSlug, isWrappedStats } from "@/lib/wrapped/share";
-import type { WrappedStats } from "@/lib/wrapped/types";
+import { loadActiveShare } from "@/lib/wrapped/load-share";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -13,40 +11,16 @@ type Props = {
 
 export default async function ShareOpenGraphImage({ params }: Props) {
   const { slug } = await params;
+  const share = await loadActiveShare(slug);
 
-  let username = "developer";
-  let year = 2026;
-  let stats: Pick<
-    WrappedStats,
-    | "totalContributions"
-    | "totalCommits"
-    | "longestStreak"
-    | "languageCount"
-  > = {
-    totalContributions: 0,
-    totalCommits: 0,
-    longestStreak: 0,
-    languageCount: 0,
+  const username = share?.username ?? "developer";
+  const year = share?.year ?? 2026;
+  const stats = {
+    totalContributions: share?.stats.totalContributions ?? 0,
+    totalCommits: share?.stats.totalCommits ?? 0,
+    longestStreak: share?.stats.longestStreak ?? 0,
+    languageCount: share?.stats.languageCount ?? 0,
   };
-
-  if (isValidShareSlug(slug)) {
-    const share = await prisma.wrappedShare.findFirst({
-      where: { slug: slug.toLowerCase(), isActive: true },
-      select: { username: true, year: true, stats: true },
-    });
-
-    if (share && isWrappedStats(share.stats)) {
-      username = share.username;
-      year = share.year;
-      const full = share.stats as WrappedStats;
-      stats = {
-        totalContributions: full.totalContributions,
-        totalCommits: full.totalCommits,
-        longestStreak: full.longestStreak,
-        languageCount: full.languageCount,
-      };
-    }
-  }
 
   return new ImageResponse(
     (
