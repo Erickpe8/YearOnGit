@@ -1334,27 +1334,6 @@ body::-webkit-scrollbar {
   max-width: 28rem;
 }
 
-.wrapped-progress-segment {
-  transform: scaleX(0);
-  transform-origin: left center;
-  animation-name: wrapped-progress-segment-fill;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-.wrapped-progress-segment.is-paused {
-  animation-play-state: paused;
-}
-
-@keyframes wrapped-progress-segment-fill {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
 
 .wrapped-slide--race .wrapped-slide-inner {
   position: relative;
@@ -1870,10 +1849,6 @@ body::-webkit-scrollbar {
   .animate-float-left,
   .animate-float-right {
     animation: none;
-  }
-
-  .wrapped-progress-segment {
-    animation-delay: 0ms !important;
   }
 }
 

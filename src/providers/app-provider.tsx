@@ -20,17 +20,6 @@ import {
 import { brandName } from "@/lib/brand/assets";
 import { SfxProvider } from "@/providers/sfx-provider";
 
-type HeaderProgress = {
-  current: number;
-  total: number;
-  cycleKey: string;
-  settleMs: number;
-  dwellMs: number;
-  durationMs: number;
-  fillMode: "animate" | "complete";
-  paused?: boolean;
-} | null;
-
 type TranslationValues = Record<string, string | number>;
 
 type AppContextValue = {
@@ -42,8 +31,6 @@ type AppContextValue = {
   toggleHeader: () => void;
   showHeader: () => void;
   hideHeader: () => void;
-  headerProgress: HeaderProgress;
-  setHeaderProgress: (progress: HeaderProgress) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -54,7 +41,6 @@ const HEADER_KEY = "yearongit-header-visible";
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
   const [headerVisible, setHeaderVisible] = useState(true);
-  const [headerProgress, setHeaderProgress] = useState<HeaderProgress>(null);
 
   const applyDocumentLocale = useCallback((next: Locale) => {
     document.documentElement.lang = next;
@@ -132,8 +118,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toggleHeader,
       showHeader,
       hideHeader,
-      headerProgress,
-      setHeaderProgress,
     }),
     [
       locale,
@@ -143,7 +127,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toggleHeader,
       showHeader,
       hideHeader,
-      headerProgress,
     ],
   );
 

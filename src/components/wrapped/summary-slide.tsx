@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { AnimatedCounter } from "@/components/wrapped/animated-counter";
 import { ShareCopyButton } from "@/components/wrapped/share-copy-button";
+import { ShareMarkdownButton } from "@/components/wrapped/share-markdown-button";
 import { WrappedSlideShell } from "@/components/wrapped/wrapped-slide-shell";
 import {
   IconCircleAlert,
@@ -292,11 +293,20 @@ export function SummarySlide({
         >
           {!isShared && payload ? (
             <>
-              <ShareCopyButton payload={payload} />
+              <div className="flex w-full flex-col gap-2 sm:flex-row">
+                <ShareCopyButton
+                  payload={payload}
+                  className="sm:min-w-0 sm:flex-1"
+                />
+                <ShareMarkdownButton
+                  payload={payload}
+                  className="sm:min-w-0 sm:flex-1"
+                />
+              </div>
               <button
                 type="button"
                 onClick={onRestart}
-                className="text-xs text-on-surface-variant transition-colors hover:text-primary md:text-sm"
+                className="w-full text-center text-xs text-on-surface-variant transition-colors hover:text-primary md:text-sm"
               >
                 {t("viewAgain")}
               </button>
