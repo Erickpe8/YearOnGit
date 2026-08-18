@@ -50,7 +50,7 @@ export function WrappedExperience({
   mode = "owner",
   initialPayload = null,
 }: WrappedExperienceProps = {}) {
-  const { t, locale, setHeaderProgress } = useApp();
+  const { t, locale } = useApp();
   const { setScene } = useSfx();
   useWrappedBeat();
   useViewI18n("wrapped");
@@ -143,16 +143,6 @@ export function WrappedExperience({
   const playbackPausedRef = useRef(false);
   const deadlineRef = useRef<number | null>(null);
   const remainingWhilePausedRef = useRef<number | null>(null);
-  const progressConfigRef = useRef<{
-    current: number;
-    total: number;
-    cycleKey: string;
-    settleMs: number;
-    dwellMs: number;
-    durationMs: number;
-    fillMode: "animate" | "complete";
-    paused: boolean;
-  } | null>(null);
 
   const pausePlayback = useCallback(() => {
     if (playbackPausedRef.current) return;
@@ -164,14 +154,7 @@ export function WrappedExperience({
       );
     }
     setPlaybackPaused(true);
-    if (progressConfigRef.current) {
-      progressConfigRef.current = {
-        ...progressConfigRef.current,
-        paused: true,
-      };
-      setHeaderProgress(progressConfigRef.current);
-    }
-  }, [setHeaderProgress]);
+  }, []);
 
   const resumePlayback = useCallback(() => {
     if (!playbackPausedRef.current) return;
@@ -181,14 +164,7 @@ export function WrappedExperience({
       remainingWhilePausedRef.current = null;
     }
     setPlaybackPaused(false);
-    if (progressConfigRef.current) {
-      progressConfigRef.current = {
-        ...progressConfigRef.current,
-        paused: false,
-      };
-      setHeaderProgress(progressConfigRef.current);
-    }
-  }, [setHeaderProgress]);
+  }, []);
 
   const contributionStoryRef = useRef<ContributionStoryHandle | null>(null);
   const favoriteRepoRaceRef = useRef<FavoriteRepoRaceHandle | null>(null);
@@ -208,8 +184,6 @@ export function WrappedExperience({
 
   useEffect(() => {
     if (totalSlides === 0 || !current) {
-      setHeaderProgress(null);
-      progressConfigRef.current = null;
       deadlineRef.current = null;
       remainingWhilePausedRef.current = null;
       playbackPausedRef.current = false;
@@ -225,18 +199,6 @@ export function WrappedExperience({
       heatmapStory,
       heatmapTeasers,
     });
-    const config = {
-      current: slide + 1,
-      total: totalSlides,
-      cycleKey: `${slide}-${totalSlides}-${current.key}`,
-      settleMs: runtime.settleMs,
-      dwellMs: runtime.dwellMs,
-      durationMs: runtime.durationMs,
-      fillMode: (isLast ? "complete" : "animate") as "animate" | "complete",
-      paused: false,
-    };
-    progressConfigRef.current = config;
-    setHeaderProgress(config);
     playbackPausedRef.current = false;
     setPlaybackPaused(false);
     remainingWhilePausedRef.current = null;
@@ -246,7 +208,6 @@ export function WrappedExperience({
     totalSlides,
     current,
     reducedMotion,
-    setHeaderProgress,
     stats,
     heatmapStory,
     heatmapTeasers,
@@ -267,10 +228,6 @@ export function WrappedExperience({
       window.clearTimeout(advanceTimer);
     };
   }, [slide, totalSlides, current, next, playbackPaused]);
-
-  useEffect(() => {
-    return () => setHeaderProgress(null);
-  }, [setHeaderProgress]);
 
   useEffect(() => {
     setSlide(0);

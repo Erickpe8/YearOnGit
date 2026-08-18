@@ -1,16 +1,21 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useApp } from "@/providers/app-provider";
+import { ensureShareSlug } from "@/lib/wrapped/ensure-share-client";
 import type { WrappedPayload } from "@/lib/wrapped/types";
+import { useApp } from "@/providers/app-provider";
 
 type ShareCopyButtonProps = {
   payload: WrappedPayload;
+  className?: string;
 };
 
 type ShareState = "idle" | "loading" | "copied" | "error";
 
-export function ShareCopyButton({ payload }: ShareCopyButtonProps) {
+export function ShareCopyButton({
+  payload,
+  className = "",
+}: ShareCopyButtonProps) {
   const { t } = useApp();
   const [state, setState] = useState<ShareState>("idle");
 
@@ -19,26 +24,7 @@ export function ShareCopyButton({ payload }: ShareCopyButtonProps) {
     setState("loading");
 
     try {
-      const response = await fetch("/api/share", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          stats: payload.stats,
-          username: payload.username,
-          year: payload.year,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create share link");
-      }
-
-      const data = (await response.json()) as { url?: string };
-      if (!data.url) {
-        throw new Error("Missing share URL");
-      }
-
-      const shareUrl = data.url;
+      const { url: shareUrl } = await ensureShareSlug(payload);
       const title = `@${payload.username}'s Year on Git ${payload.year}`;
       const text = t("shareNativeText", {
         username: payload.username,
@@ -82,14 +68,15 @@ export function ShareCopyButton({ payload }: ShareCopyButtonProps) {
       type="button"
       onClick={() => void handleShare()}
       disabled={state === "loading"}
+      aria-label={t("copyLink")}
       aria-live="polite"
       className={`i18n-cta glass-pill w-full py-2.5 font-display text-sm font-bold transition-colors md:py-3 ${
         state === "copied"
           ? "text-primary"
           : state === "error"
             ? "text-red-400"
-            : "text-on-surface hover:text-primary"
-      } disabled:opacity-70`}
+            : "text-on-surface hover:text-primary active:scale-[0.98]"
+      } disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
     >
       {label}
     </button>

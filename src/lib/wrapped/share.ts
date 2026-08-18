@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { getAppBaseUrl } from "@/lib/app-url";
+import { buildProfileCardMarkdown } from "@/lib/profile-card/urls";
 import type { WrappedPayload, WrappedStats } from "@/lib/wrapped/types";
 import { WRAPPED_YEAR } from "@/lib/wrapped/year";
 
@@ -9,9 +10,28 @@ export function generateShareSlug(): string {
   return randomBytes(SHARE_SLUG_BYTES).toString("hex");
 }
 
-
 export function buildShareUrl(slug: string, baseUrl = getAppBaseUrl()): string {
   return `${baseUrl}/share/${slug}`;
+}
+
+export function buildShareCardUrl(slug: string, baseUrl = getAppBaseUrl()): string {
+  return `${baseUrl}/share/${slug}/card`;
+}
+
+export function buildReadmeMarkdown(input: {
+  username: string;
+  year: number;
+  slug?: string;
+  baseUrl?: string;
+  locale?: string;
+}): string {
+  return buildProfileCardMarkdown({
+    username: input.username,
+    year: input.year,
+    shareSlug: input.slug,
+    baseUrl: input.baseUrl,
+    locale: input.locale,
+  });
 }
 
 export function isValidShareSlug(slug: string): boolean {

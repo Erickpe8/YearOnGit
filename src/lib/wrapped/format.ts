@@ -53,26 +53,42 @@ export function formatMonthAbbrev(
   }).format(new Date(Date.UTC(2026, month - 1, 1)));
 }
 
+const WEEKDAY_INDEX: Record<WeekdayKey, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+function weekdayDate(weekday: WeekdayKey): Date {
+  return new Date(Date.UTC(2026, 0, 4 + WEEKDAY_INDEX[weekday]));
+}
+
 export function formatWeekdayName(
   weekday: WeekdayKey | null,
   locale: string,
 ): string | null {
   if (!weekday) return null;
 
-  const weekdayIndex = {
-    sunday: 0,
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-  }[weekday];
-
   return new Intl.DateTimeFormat(getIntlLocale(locale), {
     weekday: "long",
     timeZone: "UTC",
-  }).format(new Date(Date.UTC(2026, 0, 4 + weekdayIndex)));
+  }).format(weekdayDate(weekday));
+}
+
+export function formatWeekdayNarrow(
+  weekday: WeekdayKey | null,
+  locale: string,
+): string | null {
+  if (!weekday) return null;
+
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
+    weekday: "narrow",
+    timeZone: "UTC",
+  }).format(weekdayDate(weekday));
 }
 
 export function formatNumber(
