@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import { isAdminLogin } from "@/lib/admin/access";
+import { loadWrappedConfig } from "@/lib/admin/settings";
+import { auth } from "@/auth";
 import {
   buildShareMetaDescription,
   buildShareMetaTitle,
@@ -94,5 +97,16 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound();
   }
 
-  return <SharedWrappedExperience payload={payload} />;
+  const [config, session] = await Promise.all([
+    loadWrappedConfig(),
+    auth(),
+  ]);
+  if (
+    !config.features.publicLinks &&
+    !isAdminLogin(session?.user?.login)
+  ) {
+    notFound();
+  }
+
+  return <SharedWrappedExperience payload={payload} wrappedConfig={config} />;
 }

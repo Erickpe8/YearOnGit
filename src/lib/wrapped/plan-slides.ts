@@ -1,3 +1,10 @@
+import {
+  DEFAULT_WRAPPED_CONFIG,
+  slideAllowedByStats,
+  type SlideId,
+  type SlideToggle,
+  type WrappedAdminConfig,
+} from "@/lib/admin/wrapped-config";
 import type { Achievement, Highlight } from "@/lib/wrapped/modules/types";
 import type { WrappedStats } from "@/lib/wrapped/types";
 
@@ -14,17 +21,13 @@ export type PlannedSlide =
   | { key: string; kind: "achievements"; achievements: Achievement[] }
   | { key: string; kind: "summary" };
 
-export function planWrappedSlides(stats: WrappedStats): PlannedSlide[] {
-  const slides: PlannedSlide[] = [{ key: "overview", kind: "overview" }];
+export type PlanWrappedSlidesOptions = {
+  config?: Pick<WrappedAdminConfig, "slides" | "stats">;
+  includeDisabled?: boolean;
+  onlySlideId?: SlideId;
+};
 
-  const typedTotal = stats.contributionTypes.reduce(
-    (sum, entry) => sum + entry.count,
-    0,
-  );
-  if (typedTotal > 0) {
-    slides.push({ key: "contribution-types", kind: "contribution-types" });
-  }
-
+function highlightsForStats(stats: WrappedStats) {
   const highlightsRaw = (stats.generatedHighlights ?? []).slice(0, 8);
   const favoriteHighlight = highlightsRaw.find(
     (highlight) => highlight.id === "favorite_repo",
@@ -32,41 +35,15 @@ export function planWrappedSlides(stats: WrappedStats): PlannedSlide[] {
   const otherHighlights = highlightsRaw.filter(
     (highlight) => highlight.id !== "favorite_repo",
   );
-  const highlights = (
-    favoriteHighlight
-      ? [favoriteHighlight, ...otherHighlights]
-      : otherHighlights
-  ).slice(0, MAX_HIGHLIGHT_SLIDES);
+  return { favoriteHighlight, otherHighlights };
+}
 
-  if (highlights[0]) {
-    slides.push({
-      key: `highlight-${highlights[0].id}`,
-      kind: "highlight",
-      highlight: highlights[0],
-    });
-  }
-
-  slides.push({ key: "heatmap", kind: "heatmap" });
-
-  if (highlights[1]) {
-    slides.push({
-      key: `highlight-${highlights[1].id}`,
-      kind: "highlight",
-      highlight: highlights[1],
-    });
-  }
-
-  if (stats.languageCount > 0) {
-    slides.push({ key: "languages", kind: "languages" });
-  }
-
-  if (highlights[2]) {
-    slides.push({
-      key: `highlight-${highlights[2].id}`,
-      kind: "highlight",
-      highlight: highlights[2],
-    });
-  }
+function buildSlidePool(stats: WrappedStats): Record<SlideId, PlannedSlide[]> {
+  const { favoriteHighlight, otherHighlights } = highlightsForStats(stats);
+  const typedTotal = stats.contributionTypes.reduce(
+    (sum, entry) => sum + entry.count,
+    0,
+  );
 
   const showCommunity =
     stats.social.followers > 0 ||
@@ -75,21 +52,68 @@ export function planWrappedSlides(stats: WrappedStats): PlannedSlide[] {
     stats.profile.organizationsCount > 0 ||
     stats.social.friends > 0;
 
-  if (showCommunity) {
-    slides.push({ key: "community", kind: "community" });
-  }
-
   const achievements = stats.achievements ?? [];
-  if (achievements.length > 0) {
-    slides.push({
-      key: "achievements",
-      kind: "achievements",
-      achievements,
-    });
+  const extraHighlightLimit = favoriteHighlight
+    ? MAX_HIGHLIGHT_SLIDES - 1
+    : MAX_HIGHLIGHT_SLIDES;
+
+  return {
+    overview: [{ key: "overview", kind: "overview" }],
+    "contribution-types":
+      typedTotal > 0
+        ? [{ key: "contribution-types", kind: "contribution-types" }]
+        : [],
+    "favorite-repo": favoriteHighlight
+      ? [
+          {
+            key: `highlight-${favoriteHighlight.id}`,
+            kind: "highlight",
+            highlight: favoriteHighlight,
+          },
+        ]
+      : [],
+    heatmap: [{ key: "heatmap", kind: "heatmap" }],
+    highlight: otherHighlights.slice(0, extraHighlightLimit).map((highlight) => ({
+      key: `highlight-${highlight.id}`,
+      kind: "highlight" as const,
+      highlight,
+    })),
+    languages:
+      stats.languageCount > 0
+        ? [{ key: "languages", kind: "languages" }]
+        : [],
+    community: showCommunity
+      ? [{ key: "community", kind: "community" }]
+      : [],
+    achievements:
+      achievements.length > 0
+        ? [{ key: "achievements", kind: "achievements", achievements }]
+        : [],
+    streak: [{ key: "streak", kind: "streak" }],
+    summary: [{ key: "summary", kind: "summary" }],
+  };
+}
+
+export function planWrappedSlides(
+  stats: WrappedStats,
+  options: PlanWrappedSlidesOptions = {},
+): PlannedSlide[] {
+  const slides: SlideToggle[] =
+    options.config?.slides ?? DEFAULT_WRAPPED_CONFIG.slides;
+  const statToggles = options.config?.stats ?? DEFAULT_WRAPPED_CONFIG.stats;
+  const includeDisabled = options.includeDisabled === true;
+  const onlySlideId = options.onlySlideId;
+  const pool = buildSlidePool(stats);
+  const planned: PlannedSlide[] = [];
+
+  for (const item of slides) {
+    if (onlySlideId && item.id !== onlySlideId) continue;
+    if (!onlySlideId && !item.enabled && !includeDisabled) continue;
+    if (!onlySlideId && !slideAllowedByStats(item.id, statToggles)) continue;
+    planned.push(...(pool[item.id] ?? []));
   }
 
-  slides.push({ key: "streak", kind: "streak" });
-  slides.push({ key: "summary", kind: "summary" });
+  if (onlySlideId) return planned.slice(0, 1);
 
-  return slides;
+  return planned;
 }

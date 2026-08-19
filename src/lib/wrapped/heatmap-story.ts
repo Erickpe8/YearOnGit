@@ -67,9 +67,11 @@ export function buildWeekdayInsights(
 export function buildPerfectWeeks(
   levels: number[],
   dates?: string[],
+  year: number = WRAPPED_YEAR,
 ): PerfectWeeksInsight {
   if (levels.length === 0) return { weekIndexes: [], count: 0 };
 
+  const prefix = String(year);
   const weekCount = Math.ceil(levels.length / DAYS_PER_WEEK);
   const weekIndexes: number[] = [];
 
@@ -82,7 +84,7 @@ export function buildPerfectWeeks(
         break;
       }
       const date = dates?.[index];
-      if (date && !date.startsWith(String(WRAPPED_YEAR))) {
+      if (date && !date.startsWith(prefix)) {
         perfect = false;
         break;
       }
@@ -119,12 +121,13 @@ export function buildHeatmapStoryInsights(
     dates?: string[];
     totalContributions: number;
     activeDays: number;
+    year?: number;
   },
   locale: Locale = "en",
 ): HeatmapStoryInsights {
   return {
     weekday: buildWeekdayInsights(input.weekdayContributions, locale),
-    perfectWeeks: buildPerfectWeeks(input.levels, input.dates),
+    perfectWeeks: buildPerfectWeeks(input.levels, input.dates, input.year),
     averages: buildContributionAverages({
       totalContributions: input.totalContributions,
       activeDays: input.activeDays,
@@ -137,25 +140,25 @@ export const PEAK_MONTH_YELLOW = "#f5c518";
 export const WEEKDAY_HIGHLIGHT_BLUE = "#5ba8f5";
 export const PERFECT_WEEK_MAGENTA = "#c45b9f";
 
-export const TYPE_MS_PER_CHAR = 20;
-export const TYPE_LINE_PAUSE_MS = 240;
-export const DAY_TEASER_BUDGET_MS = 2_800;
-export const MONTH_TEASER_BUDGET_MS = 2_500;
-export const WEEKDAY_TEASER_BUDGET_MS = 2_300;
-export const WEEKS_TEASER_BUDGET_MS = 2_300;
-export const PEAK_DAY_HOLD_MS = 1_400;
-export const PEAK_MONTH_HOLD_MS = 1_400;
+export const TYPE_MS_PER_CHAR = 28;
+export const TYPE_LINE_PAUSE_MS = 360;
+export const DAY_TEASER_BUDGET_MS = 3_600;
+export const MONTH_TEASER_BUDGET_MS = 3_200;
+export const WEEKDAY_TEASER_BUDGET_MS = 3_000;
+export const WEEKS_TEASER_BUDGET_MS = 3_000;
+export const PEAK_DAY_HOLD_MS = 2_200;
+export const PEAK_MONTH_HOLD_MS = 2_200;
 export const WEEKDAY_WAVE_STAGGER_MS = 22;
 export const WEEKDAY_CELL_PULSE_MS = 360;
-export const WEEKDAY_REVEAL_HOLD_MS = 1_400;
+export const WEEKDAY_REVEAL_HOLD_MS = 2_200;
 export const PERFECT_WEEK_STAGGER_MS = 80;
-export const PERFECT_WEEK_HOLD_MS = 1_400;
-export const MOSAIC_HOLD_MS = 1_400;
+export const PERFECT_WEEK_HOLD_MS = 2_200;
+export const MOSAIC_HOLD_MS = 2_000;
 export const RESTORE_MS = 800;
-export const SUMMARY_HOLD_MS = 1_800;
-export const FINALE_HOLD_MS = 500;
-export const STORY_INTRO_PAUSE_MS = 600;
-export const POST_QUESTION_PAUSE_MS = 1_100;
+export const SUMMARY_HOLD_MS = 2_600;
+export const FINALE_HOLD_MS = 1_200;
+export const STORY_INTRO_PAUSE_MS = 800;
+export const POST_QUESTION_PAUSE_MS = 1_500;
 
 /** @deprecated */
 export const AVERAGE_HOLD_MS = SUMMARY_HOLD_MS;

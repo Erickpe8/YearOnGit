@@ -58,8 +58,8 @@ type AchievementsSlideProps = {
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-export const ACHIEVEMENT_INTRO_MS = 400;
-export const ACHIEVEMENT_CARD_MS = 1_400;
+export const ACHIEVEMENT_INTRO_MS = 600;
+export const ACHIEVEMENT_CARD_MS = 2_200;
 
 export function achievementsCarouselSettleMs(
   count: number,

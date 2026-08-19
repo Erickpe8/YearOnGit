@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import { isAdminLogin } from "@/lib/admin/access";
 import { prisma } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -57,6 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           (user as { login?: string | null }).login ??
           session.user.name ??
           null;
+        session.user.isAdmin = isAdminLogin(session.user.login);
       }
       return session;
     },

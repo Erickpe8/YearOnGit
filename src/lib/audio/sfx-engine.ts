@@ -250,7 +250,16 @@ export function createSfxEngine() {
     for (const id of queued) playNow(id);
   }
 
+  function unlockSync() {
+    const nodes = ensureContext();
+    if (!nodes) return;
+    if (nodes.ctx.state === "suspended") {
+      void nodes.ctx.resume();
+    }
+  }
+
   async function unlock() {
+    unlockSync();
     await resume();
     flushPending();
     if (musicWanted) startMusicNow();
@@ -871,9 +880,7 @@ export function createSfxEngine() {
     padSource = null;
     try {
       source.stop();
-    } catch {
-      /* already stopped */
-    }
+    } catch {}
     source.disconnect();
   }
 
@@ -1748,6 +1755,7 @@ export function createSfxEngine() {
 
   return {
     unlock,
+    unlockSync,
     setMuted,
     setReducedMotion,
     play,

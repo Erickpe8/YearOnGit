@@ -120,9 +120,9 @@ export function buildFavoriteRepoRace(
   };
 }
 
-export const QUIZ_ANSWER_WAIT_MS = 5_500;
-export const QUIZ_WRONG_FEEDBACK_MS = 900;
-export const QUIZ_SHOW_ANSWER_MS = 850;
+export const QUIZ_ANSWER_WAIT_MS = 6_500;
+export const QUIZ_WRONG_FEEDBACK_MS = 1_200;
+export const QUIZ_SHOW_ANSWER_MS = 1_400;
 
 export function favoriteRepoRaceSettleMs(
   race: FavoriteRepoRace | null,
@@ -130,13 +130,13 @@ export function favoriteRepoRaceSettleMs(
 ): number {
   if (reducedMotion || !race) return 800;
   if (race.mode === "direct") {
-    return 4_200;
+    return 5_600;
   }
   return (
     QUIZ_ANSWER_WAIT_MS +
     QUIZ_WRONG_FEEDBACK_MS +
     QUIZ_SHOW_ANSWER_MS +
-    2_000
+    2_800
   );
 }
 

@@ -263,6 +263,7 @@ export function createEmptyWrappedStats(): WrappedStats {
 export function buildWrappedStats(
   data: GitHubWrappedResponse,
   social?: SocialStats,
+  options?: { year?: number; daysInYear?: number },
 ): WrappedStats {
   if (!data.viewer) {
     return createEmptyWrappedStats();
@@ -275,5 +276,7 @@ export function buildWrappedStats(
     friendsIsComplete: false,
   };
 
-  return modulesToWrappedStats(composeWrappedModules(data, socialStats));
+  return modulesToWrappedStats(
+    composeWrappedModules(data, socialStats, options),
+  );
 }

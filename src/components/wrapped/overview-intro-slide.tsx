@@ -15,6 +15,8 @@ import { formatNumber } from "@/lib/wrapped/format";
 import type { WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
 import { useSfx } from "@/providers/sfx-provider";
+import { burstConfettiFromElement } from "@/lib/wrapped/burst-confetti";
+import { useWrappedUi } from "@/lib/wrapped/wrapped-ui";
 
 type TranslationValues = Record<string, string | number>;
 
@@ -36,17 +38,17 @@ const CONFETTI_COLORS = [
 
 const STEP = {
   eyebrow: 0,
-  username: 320,
-  hero: 700,
-  heroNote: 1_650,
-  commits: 2_200,
-  commitsNote: 2_900,
-  collab: 3_450,
-  collabNote: 4_000,
-  repos: 4_550,
-  reposNote: 5_050,
-  languages: 5_500,
-  languagesNote: 5_950,
+  username: 400,
+  hero: 900,
+  heroNote: 2_100,
+  commits: 2_800,
+  commitsNote: 3_700,
+  collab: 4_400,
+  collabNote: 5_200,
+  repos: 5_900,
+  reposNote: 6_600,
+  languages: 7_200,
+  languagesNote: 7_900,
 } as const;
 
 function Reveal({
@@ -103,48 +105,42 @@ function useRevealStep(reducedMotion: boolean): number {
   return step;
 }
 
-function burstConfettiFromElement(element: HTMLElement | null) {
-  const rect = element?.getBoundingClientRect();
-  const x = rect
-    ? (rect.left + rect.width / 2) / window.innerWidth
-    : 0.5;
-  const y = rect
-    ? (rect.top + rect.height / 2) / window.innerHeight
-    : 0.32;
+function burstIntroConfetti(element: HTMLElement | null) {
+  burstConfettiFromElement(
+    element,
+    (fire, origin) => {
+      const shared = {
+        colors: CONFETTI_COLORS,
+        disableForReducedMotion: true,
+      };
 
-  void import("canvas-confetti").then((mod) => {
-    const confetti = mod.default;
-    const shared = {
-      colors: CONFETTI_COLORS,
-      disableForReducedMotion: true,
-      zIndex: 80,
-    };
-
-    confetti({
-      ...shared,
-      particleCount: 55,
-      angle: 60,
-      spread: 58,
-      startVelocity: 38,
-      origin: { x: Math.max(0.12, x - 0.04), y },
-    });
-    confetti({
-      ...shared,
-      particleCount: 55,
-      angle: 120,
-      spread: 58,
-      startVelocity: 38,
-      origin: { x: Math.min(0.88, x + 0.04), y },
-    });
-    confetti({
-      ...shared,
-      particleCount: 40,
-      spread: 100,
-      startVelocity: 28,
-      origin: { x, y },
-      scalar: 0.9,
-    });
-  });
+      fire({
+        ...shared,
+        particleCount: 55,
+        angle: 60,
+        spread: 58,
+        startVelocity: 38,
+        origin: { x: Math.max(0.12, origin.x - 0.04), y: origin.y },
+      });
+      fire({
+        ...shared,
+        particleCount: 55,
+        angle: 120,
+        spread: 58,
+        startVelocity: 38,
+        origin: { x: Math.min(0.88, origin.x + 0.04), y: origin.y },
+      });
+      fire({
+        ...shared,
+        particleCount: 40,
+        spread: 100,
+        startVelocity: 28,
+        origin,
+        scalar: 0.9,
+      });
+    },
+    0.32,
+  );
 }
 
 export function OverviewIntroSlide({
@@ -155,6 +151,7 @@ export function OverviewIntroSlide({
 }: OverviewIntroSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
   const { cue } = useSfx();
+  const { features } = useWrappedUi();
   const step = useRevealStep(reducedMotion);
   const shown = (at: number) => reducedMotion || step >= at;
   const heroValueRef = useRef<HTMLParagraphElement>(null);
@@ -170,11 +167,11 @@ export function OverviewIntroSlide({
   }, [cue, reducedMotion, step]);
 
   const handleHeroCountComplete = useCallback(() => {
-    if (reducedMotion || confettiFiredRef.current) return;
+    if (reducedMotion || !features.confetti || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
     cue("celebrate");
-    burstConfettiFromElement(heroValueRef.current);
-  }, [reducedMotion, cue]);
+    burstIntroConfetti(heroValueRef.current);
+  }, [features.confetti, reducedMotion, cue]);
 
   const commitsLeadCode =
     stats.totalContributions > 0 &&

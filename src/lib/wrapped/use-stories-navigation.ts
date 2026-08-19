@@ -90,9 +90,7 @@ export function useStoriesNavigation({
 
       try {
         target.setPointerCapture(event.pointerId);
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     },
     [enabled, onHoldStart, clearHoldTimer],
   );
@@ -122,9 +120,7 @@ export function useStoriesNavigation({
 
       try {
         (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
-      } catch {
-        /* ignore */
-      }
+      } catch {}
 
       if (cancelled) return;
 

@@ -2,6 +2,8 @@
 
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { IconArrowRight, IconLock } from "@/components/ui/icons";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
@@ -13,6 +15,8 @@ import {
   LanguagesCard,
   ReposDecorCard,
 } from "./landing-card-cluster";
+import type { PublicSiteConfig } from "@/lib/admin/settings";
+import { useLiveWrappedConfig } from "@/lib/admin/use-live-config";
 
 function GitHubIcon() {
   return (
@@ -22,22 +26,101 @@ function GitHubIcon() {
   );
 }
 
-export function LandingHero() {
+function openGitHubPopup(): Window | null {
+  const width = 520;
+  const height = 720;
+  const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+  const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+  return window.open(
+    "about:blank",
+    "yearongit-github",
+    `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
+  );
+}
+
+export function LandingHero({ siteConfig }: { siteConfig: PublicSiteConfig }) {
   const { t } = useApp();
   const { unlock } = useSfx();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
   useViewI18n("landing");
+  const [liveConfig, setLiveConfig] = useState(siteConfig);
+
+  useEffect(() => {
+    setLiveConfig(siteConfig);
+  }, [siteConfig]);
+
+  useLiveWrappedConfig((payload) => {
+    if (!payload.updatedAt) return;
+    setLiveConfig({
+      wrappedEnabled: payload.config.wrappedEnabled,
+      wrappedYear: payload.config.wrappedYear,
+    });
+  });
 
   const displayName =
     session?.user?.login ?? session?.user?.name ?? null;
   const isAuthenticated = status === "authenticated" && Boolean(session?.user);
+  const wrappedLive = liveConfig.wrappedEnabled;
+  const waitingForLaunch = !wrappedLive && isAuthenticated;
+
+  const goAfterAuth = useCallback(
+    (nextIsAdmin = false) => {
+      unlock();
+      if (nextIsAdmin) {
+        router.push("/admin");
+        return;
+      }
+      if (liveConfig.wrappedEnabled) {
+        router.push("/loading");
+      }
+    },
+    [liveConfig.wrappedEnabled, router, unlock],
+  );
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "yearongit:oauth") return;
+      void update().then((next) => {
+        goAfterAuth(Boolean(next?.user?.isAdmin));
+      });
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [goAfterAuth, update]);
+
+  const handleGitHub = useCallback(() => {
+    unlock();
+
+    const popup = openGitHubPopup();
+    if (!popup) {
+      void signIn("github", { callbackUrl: "/loading" });
+      return;
+    }
+
+    const done = `${window.location.origin}/auth/popup-done`;
+    void signIn("github", { redirect: false, callbackUrl: done }).then(
+      (result) => {
+        const url = result?.url;
+        if (!url) {
+          popup.close();
+          void signIn("github", { callbackUrl: "/loading" });
+          return;
+        }
+        popup.location.href = url.startsWith("http")
+          ? url
+          : new URL(url, window.location.origin).href;
+      },
+    );
+  }, [unlock]);
 
   return (
     <LandingCardCluster>
       <div className="relative z-40 mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-[#39d353]/20 bg-[#39d353]/5 px-4 py-1.5 max-[390px]:mb-4">
         <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#39d353]" />
         <span className="i18n-badge font-display text-[10px] font-bold uppercase text-[#39d353] max-[390px]:text-[9px]">
-          {t("editionLive")}
+          {wrappedLive ? t("editionLive") : t("wrappedSoonBadge")}
         </span>
       </div>
 
@@ -45,27 +128,37 @@ export function LandingHero() {
         <CommitsDecorCard />
         <ReposDecorCard />
         <h1 className="hero-headline i18n-text relative z-40 font-display text-[32px] font-extrabold text-on-surface max-[390px]:text-[26px] md:text-[48px]">
-          {isAuthenticated && displayName ? (
-            t("welcomeBack", { name: displayName })
+          {waitingForLaunch ? (
+            t("wrappedSoonNotifyTitle")
+          ) : wrappedLive ? (
+            isAuthenticated && displayName ? (
+              t("welcomeBack", { name: displayName })
+            ) : (
+              <>
+                {t("taglinePrefix")}
+                <span className="text-[#39d353] italic"> GitHub</span>
+                {t("taglineSuffix")}
+              </>
+            )
           ) : (
-            <>
-              {t("taglinePrefix")}
-              <span className="text-[#39d353] italic"> GitHub</span>
-              {t("taglineSuffix")}
-            </>
+            t("wrappedSoonTitle")
           )}
         </h1>
       </div>
 
       <p className="hero-headline i18n-text relative z-40 mb-6 text-base leading-relaxed text-on-surface-variant max-[390px]:mb-5 max-[390px]:text-sm">
-        {t("landingDescription")}
+        {waitingForLaunch
+          ? t("wrappedSoonNotifyBody")
+          : wrappedLive
+            ? t("landingDescription")
+            : t("wrappedSoonBody")}
       </p>
 
       <div className="relative z-40 mx-auto flex w-full max-w-sm flex-col items-center gap-3 max-[390px]:max-w-[300px]">
         <div className="relative w-full">
           <HeatmapCard />
           <LanguagesCard />
-          {isAuthenticated ? (
+          {wrappedLive && isAuthenticated ? (
             <Link
               href="/loading"
               onClick={() => {
@@ -76,17 +169,20 @@ export function LandingHero() {
               <span className="i18n-cta text-center">{t("viewMyWrapped")}</span>
               <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
             </Link>
+          ) : waitingForLaunch ? (
+            <p className="relative z-40 text-center font-display text-sm font-semibold text-primary/80">
+              {t("comingSoon")}
+            </p>
           ) : (
             <button
               type="button"
-              onClick={() => {
-                unlock();
-                void signIn("github", { callbackUrl: "/loading" });
-              }}
+              onClick={handleGitHub}
               className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
             >
               <GitHubIcon />
-              <span className="i18n-cta text-center">{t("continueWithGitHub")}</span>
+              <span className="i18n-cta text-center">
+                {t("continueWithGitHub")}
+              </span>
               <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
             </button>
           )}
