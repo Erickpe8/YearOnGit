@@ -2,6 +2,8 @@
 
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect } from "react";
 import { IconArrowRight, IconLock } from "@/components/ui/icons";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { useApp } from "@/providers/app-provider";
@@ -22,15 +24,70 @@ function GitHubIcon() {
   );
 }
 
+function openGitHubPopup(): Window | null {
+  const width = 520;
+  const height = 720;
+  const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+  const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+  return window.open(
+    "about:blank",
+    "yearongit-github",
+    `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
+  );
+}
+
 export function LandingHero() {
   const { t } = useApp();
   const { unlock } = useSfx();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
   useViewI18n("landing");
 
   const displayName =
     session?.user?.login ?? session?.user?.name ?? null;
   const isAuthenticated = status === "authenticated" && Boolean(session?.user);
+
+  const goToWrapped = useCallback(() => {
+    unlock();
+    router.push("/loading");
+  }, [unlock, router]);
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "yearongit:oauth") return;
+      void update().then(() => {
+        goToWrapped();
+      });
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [goToWrapped, update]);
+
+  const handleGitHub = useCallback(() => {
+    unlock();
+
+    const popup = openGitHubPopup();
+    if (!popup) {
+      void signIn("github", { callbackUrl: "/loading" });
+      return;
+    }
+
+    const done = `${window.location.origin}/auth/popup-done`;
+    void signIn("github", { redirect: false, callbackUrl: done }).then(
+      (result) => {
+        const url = result?.url;
+        if (!url) {
+          popup.close();
+          void signIn("github", { callbackUrl: "/loading" });
+          return;
+        }
+        popup.location.href = url.startsWith("http")
+          ? url
+          : new URL(url, window.location.origin).href;
+      },
+    );
+  }, [unlock]);
 
   return (
     <LandingCardCluster>
@@ -79,10 +136,7 @@ export function LandingHero() {
           ) : (
             <button
               type="button"
-              onClick={() => {
-                unlock();
-                void signIn("github", { callbackUrl: "/loading" });
-              }}
+              onClick={handleGitHub}
               className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
             >
               <GitHubIcon />

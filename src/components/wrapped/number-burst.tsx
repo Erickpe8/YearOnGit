@@ -148,4 +148,4 @@ export function NumberBurst({
   );
 }
 
-export const HIGHLIGHT_BURST_SETTLE_MS = 4_200;
+export const HIGHLIGHT_BURST_SETTLE_MS = 5_400;

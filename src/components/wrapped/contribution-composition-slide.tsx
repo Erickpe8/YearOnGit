@@ -92,26 +92,26 @@ function buildStages(insights: ContributionInsights): Stage[] {
   };
 
   push("title", 0);
-  push("intro", 800);
-  push("hero", 1_400);
-  push("bar", 1_400);
-  push("legend", 900);
-  push("codeFocus", 1_700);
+  push("intro", 1_100);
+  push("hero", 1_900);
+  push("bar", 1_900);
+  push("legend", 1_300);
+  push("codeFocus", 2_300);
 
   if (insights.collaborativeActions > 0) {
-    push("but", 1_500);
-    push("collab", 1_300);
-    push("collabPr", 1_400);
-    push("collabIssues", 700);
-    push("collabReviews", 700);
+    push("but", 2_000);
+    push("collab", 1_800);
+    push("collabPr", 1_900);
+    push("collabIssues", 1_000);
+    push("collabReviews", 1_000);
   }
 
   if (insights.commitsPerPullRequest != null) {
-    push("ratioHint", 1_400);
-    push("ratio", 1_100);
+    push("ratioHint", 1_900);
+    push("ratio", 1_600);
   }
 
-  push("conclusion", 1_400);
+  push("conclusion", 2_000);
   return stages;
 }
 
@@ -556,5 +556,5 @@ export function contributionStorySettleMs(
   if (reducedMotion) return 0;
   const stages = buildStages(buildContributionInsights(stats));
   const lastAt = stages[stages.length - 1]?.at ?? 0;
-  return lastAt + 1_400;
+  return lastAt + 2_400;
 }

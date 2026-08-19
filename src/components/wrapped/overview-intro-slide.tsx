@@ -36,17 +36,17 @@ const CONFETTI_COLORS = [
 
 const STEP = {
   eyebrow: 0,
-  username: 320,
-  hero: 700,
-  heroNote: 1_650,
-  commits: 2_200,
-  commitsNote: 2_900,
-  collab: 3_450,
-  collabNote: 4_000,
-  repos: 4_550,
-  reposNote: 5_050,
-  languages: 5_500,
-  languagesNote: 5_950,
+  username: 400,
+  hero: 900,
+  heroNote: 2_100,
+  commits: 2_800,
+  commitsNote: 3_700,
+  collab: 4_400,
+  collabNote: 5_200,
+  repos: 5_900,
+  reposNote: 6_600,
+  languages: 7_200,
+  languagesNote: 7_900,
 } as const;
 
 function Reveal({

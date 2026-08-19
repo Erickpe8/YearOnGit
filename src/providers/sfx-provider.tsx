@@ -68,6 +68,7 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
   }, [reducedMotion]);
 
   const unlock = useCallback(() => {
+    engineRef.current?.unlockSync();
     void engineRef.current?.unlock();
   }, []);
 
@@ -78,10 +79,16 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("pointerdown", onGesture);
     window.addEventListener("keydown", onGesture);
     window.addEventListener("touchstart", onGesture, { passive: true });
+    window.addEventListener("pageshow", onGesture);
+    window.addEventListener("focus", onGesture);
+    document.addEventListener("visibilitychange", onGesture);
     return () => {
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
       window.removeEventListener("touchstart", onGesture);
+      window.removeEventListener("pageshow", onGesture);
+      window.removeEventListener("focus", onGesture);
+      document.removeEventListener("visibilitychange", onGesture);
     };
   }, [unlock]);
 
@@ -110,6 +117,7 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
       const next = !prev;
       localStorage.setItem(MUTE_KEY, String(next));
       engineRef.current?.setMuted(next);
+      engineRef.current?.unlockSync();
       void engineRef.current?.unlock();
       return next;
     });

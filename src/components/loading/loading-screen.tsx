@@ -11,7 +11,7 @@ import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { saveWrappedPayload } from "@/lib/wrapped/storage";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useApp } from "@/providers/app-provider";
-import { useSfx, useWrappedBeat } from "@/providers/sfx-provider";
+import { useWrappedBeat } from "@/providers/sfx-provider";
 
 type LoadState = "loading" | "error";
 

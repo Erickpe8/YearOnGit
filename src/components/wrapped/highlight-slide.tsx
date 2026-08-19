@@ -22,8 +22,8 @@ type HighlightSlideProps = {
 };
 
 const TEXT_REVEAL_MS = 450;
-const POST_REVEAL_PAUSE_MS = 550;
-const BURST_HOLD_MS = 2_800;
+const POST_REVEAL_PAUSE_MS = 800;
+const BURST_HOLD_MS = 3_800;
 
 const CONFETTI_COLORS = [
   "#39d353",

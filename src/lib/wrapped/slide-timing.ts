@@ -15,9 +15,9 @@ import type { PlannedSlide } from "@/lib/wrapped/plan-slides";
 import type { WrappedStats } from "@/lib/wrapped/types";
 
 /** Fallback reading pause after animations on simple slides. */
-export const WRAPPED_DWELL_MS = 2_600;
+export const WRAPPED_DWELL_MS = 4_200;
 
-const STORY_CODA_MS = 900;
+const STORY_CODA_MS = 2_400;
 
 export type SlideRuntime = {
   settleMs: number;
@@ -33,13 +33,13 @@ export function slideSettleMs(
 
   switch (kind) {
     case "overview":
-      return 6_400;
+      return 8_400;
     case "contribution-types":
       return 14_000;
     case "languages":
-      return 2_000;
+      return 2_800;
     case "streak":
-      return 2_000;
+      return 2_800;
     case "highlight":
       return HIGHLIGHT_BURST_SETTLE_MS;
     case "achievements":
@@ -47,9 +47,9 @@ export function slideSettleMs(
     case "heatmap":
       return 1_400;
     case "community":
-      return 1_800;
-    case "summary":
       return 2_600;
+    case "summary":
+      return 3_200;
     default:
       return 900;
   }
@@ -62,14 +62,14 @@ function dwellForKind(kind: PlannedSlide["kind"]): number {
     case "achievements":
       return STORY_CODA_MS;
     case "overview":
-      return 1_600;
+      return 2_800;
     case "languages":
     case "community":
-      return 1_800;
+      return 3_200;
     case "streak":
-      return 2_000;
+      return 3_200;
     case "highlight":
-      return 1_500;
+      return 2_800;
     case "summary":
       return 0;
     default:
