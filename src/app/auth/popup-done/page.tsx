@@ -8,9 +8,7 @@ export default function AuthPopupDonePage() {
   useEffect(() => {
     try {
       window.opener?.postMessage(MESSAGE, window.location.origin);
-    } catch {
-      /* empty */
-    }
+    } catch {}
     window.close();
     window.setTimeout(() => {
       window.location.replace("/loading");

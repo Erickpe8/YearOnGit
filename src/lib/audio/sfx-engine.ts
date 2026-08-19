@@ -880,9 +880,7 @@ export function createSfxEngine() {
     padSource = null;
     try {
       source.stop();
-    } catch {
-      /* already stopped */
-    }
+    } catch {}
     source.disconnect();
   }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
+import { loadWrappedConfig } from "@/lib/admin/settings";
 import {
   buildShareUrl,
   generateShareSlug,
@@ -20,6 +21,14 @@ export async function POST(request: Request) {
   const session = await requireAuth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const config = await loadWrappedConfig();
+  if (!config.features.publicLinks || !config.features.shareWrapped) {
+    return NextResponse.json(
+      { error: "Public sharing is disabled" },
+      { status: 403 },
+    );
   }
 
   let body: ShareRequestBody;

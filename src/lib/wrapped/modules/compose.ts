@@ -45,6 +45,7 @@ export function countRepositoriesCreatedThisYear(
     NonNullable<GitHubWrappedResponse["viewer"]>["contributionsCollection"]
   >,
   ownedNodes: GitHubOwnedRepoNode[] = [],
+  year: number = WRAPPED_YEAR,
 ): number {
   const contributionNodes = collection.repositoryContributions?.nodes;
   if (contributionNodes) {
@@ -58,10 +59,11 @@ export function countRepositoriesCreatedThisYear(
     return unique.size;
   }
 
+  const prefix = String(year);
   const fromOwned = ownedNodes.filter((node) => {
     if (node.isFork) return false;
     const created = node.createdAt ?? "";
-    return created.startsWith(String(WRAPPED_YEAR));
+    return created.startsWith(prefix);
   }).length;
   if (fromOwned > 0) return fromOwned;
 
@@ -606,17 +608,20 @@ export function emptySocialStats(): SocialStats {
 export function composeWrappedModules(
   data: GitHubWrappedResponse,
   social: SocialStats,
+  options?: { year?: number; daysInYear?: number },
 ): WrappedModules {
   const viewer = data.viewer;
   if (!viewer) {
     throw new Error("Missing viewer");
   }
 
+  const year = options?.year ?? WRAPPED_YEAR;
+  const daysInYear = options?.daysInYear ?? WRAPPED_DAYS_IN_YEAR;
   const collection = viewer.contributionsCollection;
   const repos = collection.commitContributionsByRepository ?? [];
   const calendarWeeks = collection.contributionCalendar.weeks;
   const allDays = flattenContributionDays(calendarWeeks);
-  const yearDays = filterYearDays(allDays);
+  const yearDays = filterYearDays(allDays, year);
 
   const totalCommits =
     collection.totalCommitContributions || sumCommits(repos);
@@ -629,7 +634,7 @@ export function composeWrappedModules(
     repos.filter((entry) => (entry.contributions?.totalCount ?? 0) > 0).length;
 
   const activeDays = calculateActiveDays(yearDays);
-  const calendar = buildCalendarModule(yearDays, allDays);
+  const calendar = buildCalendarModule(yearDays, allDays, year);
   const habits = buildHabitsModule(yearDays);
   const languages = buildLanguagesModule(repos);
   const profile = buildProfileModule(viewer);
@@ -649,6 +654,7 @@ export function composeWrappedModules(
   const repositoriesCreatedThisYear = countRepositoriesCreatedThisYear(
     collection,
     sample.nodes ?? [],
+    year,
   );
 
   const activity = {
@@ -667,8 +673,8 @@ export function composeWrappedModules(
       codeReviews: totalCodeReviews,
     }),
     activeDays,
-    inactiveDays: WRAPPED_DAYS_IN_YEAR - activeDays,
-    activityRate: calculateActivityRate(activeDays),
+    inactiveDays: daysInYear - activeDays,
+    activityRate: calculateActivityRate(activeDays, daysInYear),
     averageDailyContributions: calculateAverageDailyContributions(
       totalContributions,
       activeDays,

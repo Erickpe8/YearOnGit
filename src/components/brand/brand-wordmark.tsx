@@ -14,7 +14,7 @@ type BrandWordmarkProps = {
 export function BrandWordmark({ size = "md", className = "" }: BrandWordmarkProps) {
   return (
     <span
-      className={`font-display font-extrabold tracking-tighter text-on-surface ${sizeClasses[size]} ${className}`}
+      className={`inline-block whitespace-nowrap font-display font-extrabold leading-none tracking-tighter text-on-surface ${sizeClasses[size]} ${className}`}
     >
       Year<span className="text-primary">On</span>Git
     </span>

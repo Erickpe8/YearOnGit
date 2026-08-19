@@ -20,16 +20,24 @@ export function flattenContributionDays(
   return weeks.flatMap((week) => week.contributionDays);
 }
 
-export function filterYearDays(days: GitHubContributionDay[]): GitHubContributionDay[] {
-  return days.filter((day) => day.date.startsWith(String(WRAPPED_YEAR)));
+export function filterYearDays(
+  days: GitHubContributionDay[],
+  year: number = WRAPPED_YEAR,
+): GitHubContributionDay[] {
+  const prefix = String(year);
+  return days.filter((day) => day.date.startsWith(prefix));
 }
 
 export function calculateActiveDays(days: GitHubContributionDay[]): number {
   return days.filter((day) => day.contributionCount > 0).length;
 }
 
-export function calculateActivityRate(activeDays: number): number {
-  return Math.round((activeDays / WRAPPED_DAYS_IN_YEAR) * 1000) / 10;
+export function calculateActivityRate(
+  activeDays: number,
+  daysInYear: number = WRAPPED_DAYS_IN_YEAR,
+): number {
+  if (daysInYear <= 0) return 0;
+  return Math.round((activeDays / daysInYear) * 1000) / 10;
 }
 
 export function calculateAverageDailyContributions(
@@ -272,14 +280,18 @@ export function contributionCountToHeatmapLevel(
   return 3;
 }
 
-export function buildHeatmap(days: GitHubContributionDay[]): number[] {
-  const yearDays = filterYearDays(days);
+export function buildHeatmap(
+  days: GitHubContributionDay[],
+  year: number = WRAPPED_YEAR,
+): number[] {
+  const yearDays = filterYearDays(days, year);
+  const prefix = String(year);
   const max = yearDays.reduce(
     (peak, day) => Math.max(peak, day.contributionCount),
     0,
   );
   return days.map((day) => {
-    if (!day.date.startsWith(String(WRAPPED_YEAR))) return 0;
+    if (!day.date.startsWith(prefix)) return 0;
     return contributionCountToHeatmapLevel(day.contributionCount, max);
   });
 }
@@ -296,6 +308,7 @@ export function findHeatmapPeakIndex(
 export function buildCalendarModule(
   yearDays: GitHubContributionDay[],
   allDaysForHeatmap: GitHubContributionDay[],
+  year: number = WRAPPED_YEAR,
 ): CalendarModule {
   const streaks = calculateStreaks(yearDays);
   const mostActiveDay = findMostActiveDay(yearDays);
@@ -306,7 +319,7 @@ export function buildCalendarModule(
   const brk = findLongestBreak(yearDays);
   const { firstActiveDay, lastActiveDay } = findFirstAndLastActiveDays(yearDays);
   const weekdayContributions = buildWeekdayContributions(yearDays);
-  const heatmap = buildHeatmap(allDaysForHeatmap);
+  const heatmap = buildHeatmap(allDaysForHeatmap, year);
   const heatmapDates = allDaysForHeatmap.map((day) => day.date);
 
   return {

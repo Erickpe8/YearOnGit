@@ -97,7 +97,7 @@ export function NumberBurst({
     <AnimatePresence>
       {active ? (
         <div
-          className={`number-burst pointer-events-none fixed inset-0 overflow-hidden ${className}`}
+          className={`number-burst pointer-events-none absolute inset-0 overflow-hidden ${className}`}
           aria-hidden
         >
           {particles.map((particle) => (

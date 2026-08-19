@@ -85,4 +85,13 @@ describe("planWrappedSlides", () => {
       true,
     );
   });
+
+  it("locks preview to a single requested slide", () => {
+    const stats = createEmptyWrappedStats();
+    const slides = planWrappedSlides(stats, { onlySlideId: "overview" });
+    assert.deepEqual(
+      slides.map((slide) => slide.kind),
+      ["overview"],
+    );
+  });
 });

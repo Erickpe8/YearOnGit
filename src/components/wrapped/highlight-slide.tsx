@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { burstConfettiFromElement } from "@/lib/wrapped/burst-confetti";
 import { NumberBurst } from "@/components/wrapped/number-burst";
 import { WrappedSlideShell } from "@/components/wrapped/wrapped-slide-shell";
 import type { TranslationKey } from "@/lib/i18n/translations";
@@ -14,6 +15,7 @@ import type { Highlight } from "@/lib/wrapped/modules/types";
 import { MUSIC_BUILD_LEAD_MS } from "@/lib/audio/score";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
 import { useSfx } from "@/providers/sfx-provider";
+import { useWrappedUi } from "@/lib/wrapped/wrapped-ui";
 
 type HighlightSlideProps = {
   highlight: Highlight;
@@ -44,45 +46,35 @@ export function getHighlightBurstValue(highlight: Highlight): number | null {
 }
 
 function burstConfetti(element: HTMLElement | null) {
-  const rect = element?.getBoundingClientRect();
-  const x = rect
-    ? (rect.left + rect.width / 2) / window.innerWidth
-    : 0.5;
-  const y = rect
-    ? (rect.top + rect.height / 2) / window.innerHeight
-    : 0.42;
-
-  void import("canvas-confetti").then((mod) => {
-    const confetti = mod.default;
+  burstConfettiFromElement(element, (fire, origin) => {
     const shared = {
       colors: CONFETTI_COLORS,
       disableForReducedMotion: true,
-      zIndex: 40,
     };
-    confetti({
+    fire({
       ...shared,
       particleCount: 36,
       spread: 58,
       startVelocity: 26,
-      origin: { x, y },
+      origin,
       scalar: 0.85,
     });
-    confetti({
+    fire({
       ...shared,
       particleCount: 18,
       angle: 60,
       spread: 42,
       startVelocity: 22,
-      origin: { x: Math.max(0.12, x - 0.12), y },
+      origin: { x: Math.max(0.12, origin.x - 0.12), y: origin.y },
       scalar: 0.7,
     });
-    confetti({
+    fire({
       ...shared,
       particleCount: 18,
       angle: 120,
       spread: 42,
       startVelocity: 22,
-      origin: { x: Math.min(0.88, x + 0.12), y },
+      origin: { x: Math.min(0.88, origin.x + 0.12), y: origin.y },
       scalar: 0.7,
     });
   });
@@ -90,6 +82,7 @@ function burstConfetti(element: HTMLElement | null) {
 
 export function HighlightSlide({ highlight, locale, t }: HighlightSlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { features } = useWrappedUi();
   const { cue } = useSfx();
   const values = resolveHighlightValues(highlight, locale);
   const templateKey = isHighlightTemplateKey(highlight.templateKey)
@@ -105,15 +98,15 @@ export function HighlightSlide({ highlight, locale, t }: HighlightSlideProps) {
   const [burstActive, setBurstActive] = useState(false);
 
   const fireConfetti = useCallback(() => {
-    if (reducedMotion || confettiFiredRef.current) return;
+    if (reducedMotion || !features.confetti || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
     burstConfetti(titleRef.current);
-  }, [reducedMotion]);
+  }, [features.confetti, reducedMotion]);
 
   useEffect(() => {
     confettiFiredRef.current = false;
     setBurstActive(false);
-    if (reducedMotion || burstValue == null) return;
+    if (reducedMotion || !features.confetti || burstValue == null) return;
 
     const dropAt = TEXT_REVEAL_MS + POST_REVEAL_PAUSE_MS;
     const buildTimer = window.setTimeout(() => {
@@ -135,7 +128,7 @@ export function HighlightSlide({ highlight, locale, t }: HighlightSlideProps) {
       window.clearTimeout(confettiTimer);
       window.clearTimeout(clearBurst);
     };
-  }, [burstValue, cue, fireConfetti, highlight.id, reducedMotion]);
+  }, [burstValue, cue, features.confetti, fireConfetti, highlight.id, reducedMotion]);
 
   return (
     <>

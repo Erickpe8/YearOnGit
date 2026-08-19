@@ -107,3 +107,22 @@ model ProfileCard {
   @@index([refreshedAt])
   @@index([usernameKey, year])
 }
+
+model AppSettings {
+  id              String   @id
+  maintenanceMode Boolean  @default(false)
+  signInsEnabled  Boolean  @default(true)
+  config          Json     @default("{}")
+  updatedAt       DateTime @updatedAt
+  updatedByLogin  String?
+}
+
+model AdminAuditLog {
+  id         String   @id
+  action     String
+  summary    String
+  actorLogin String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
