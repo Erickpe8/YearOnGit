@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AchievementsSlide } from "@/components/wrapped/achievements-slide";
 import { AnimatedCounter } from "@/components/wrapped/animated-counter";
 import { CommunitySlide } from "@/components/wrapped/community-slide";
@@ -36,38 +36,106 @@ import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motio
 import { useStoriesNavigation } from "@/lib/wrapped/use-stories-navigation";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useWrappedStats } from "@/lib/wrapped/use-wrapped-stats";
+import { WrappedUiProvider } from "@/lib/wrapped/wrapped-ui";
+import { DEFAULT_WRAPPED_CONFIG, type SlideId, type WrappedAdminConfig } from "@/lib/admin/wrapped-config";
+import { useLiveWrappedConfig } from "@/lib/admin/use-live-config";
 import { buildHeatmapStoryInsights } from "@/lib/wrapped/heatmap-story";
 import { sceneFromSlide } from "@/lib/audio/score";
 import { useApp } from "@/providers/app-provider";
 import { useSfx, useWrappedBeat } from "@/providers/sfx-provider";
 
 export type WrappedExperienceProps = {
-  mode?: "owner" | "shared";
+  mode?: "owner" | "shared" | "preview";
   initialPayload?: WrappedPayload | null;
+  wrappedConfig?: WrappedAdminConfig;
+  includeDisabledSlides?: boolean;
+  initialSlideKey?: string;
+  onlySlideKey?: string;
+  embedded?: boolean;
 };
 
 export function WrappedExperience({
   mode = "owner",
   initialPayload = null,
+  wrappedConfig = DEFAULT_WRAPPED_CONFIG,
+  includeDisabledSlides = false,
+  initialSlideKey,
+  onlySlideKey,
+  embedded = false,
 }: WrappedExperienceProps = {}) {
+  const [liveConfig, setLiveConfig] = useState(wrappedConfig);
+
+  useEffect(() => {
+    setLiveConfig(wrappedConfig);
+  }, [wrappedConfig]);
+
+  useLiveWrappedConfig((payload) => {
+    if (embedded) return;
+    if (!payload.updatedAt) return;
+    setLiveConfig(payload.config);
+  });
+
+  return (
+    <WrappedUiProvider
+      config={liveConfig}
+      preview={mode === "preview"}
+      includeDisabledSlides={includeDisabledSlides}
+    >
+      <WrappedExperienceInner
+        mode={mode}
+        initialPayload={initialPayload}
+        wrappedConfig={liveConfig}
+        includeDisabledSlides={includeDisabledSlides}
+        initialSlideKey={initialSlideKey}
+        onlySlideKey={onlySlideKey}
+        embedded={embedded}
+      />
+    </WrappedUiProvider>
+  );
+}
+
+function WrappedExperienceInner({
+  mode = "owner",
+  initialPayload = null,
+  wrappedConfig = DEFAULT_WRAPPED_CONFIG,
+  includeDisabledSlides = false,
+  initialSlideKey,
+  onlySlideKey,
+  embedded = false,
+}: WrappedExperienceProps) {
   const { t, locale } = useApp();
   const { setScene } = useSfx();
-  useWrappedBeat();
+  const features = wrappedConfig.features;
+  useWrappedBeat(features.music);
   useViewI18n("wrapped");
   const router = useRouter();
   const [slide, setSlide] = useState(0);
   const isShared = mode === "shared";
+  const isPreview = mode === "preview";
+
+  useEffect(() => {
+    if (mode !== "owner" || wrappedConfig.wrappedEnabled) return;
+    router.replace("/");
+  }, [mode, router, wrappedConfig.wrappedEnabled]);
   const { stats, username, payload, ready } = useWrappedStats({
     initialPayload,
-    shared: isShared,
+    shared: isShared || isPreview,
   });
   const reducedMotion = usePrefersReducedMotion();
 
   const displayName = username ?? "developer";
 
+  const lockedToOneSlide = Boolean(onlySlideKey);
   const slides = useMemo(
-    () => (stats ? planWrappedSlides(stats) : []),
-    [stats],
+    () =>
+      stats
+        ? planWrappedSlides(stats, {
+            config: wrappedConfig,
+            includeDisabled: includeDisabledSlides,
+            onlySlideId: onlySlideKey as SlideId | undefined,
+          })
+        : [],
+    [stats, wrappedConfig, includeDisabledSlides, onlySlideKey],
   );
   const totalSlides = slides.length;
   const current = slides[slide] ?? null;
@@ -89,10 +157,11 @@ export function WrappedExperience({
         dates: stats.heatmapDates ?? stats.calendar?.heatmapDates,
         totalContributions: stats.totalContributions,
         activeDays: stats.activeDays,
+        year: payload?.year ?? wrappedConfig.wrappedYear,
       },
       locale,
     );
-  }, [stats, locale]);
+  }, [stats, locale, payload?.year, wrappedConfig.wrappedYear]);
 
   const heatmapTeasers = useMemo(() => {
     if (!stats) return undefined;
@@ -124,10 +193,10 @@ export function WrappedExperience({
 
   const restart = useCallback(() => {
     setSlide(0);
-    if (!isShared) {
+    if (!isShared && !isPreview) {
       router.push("/loading");
     }
-  }, [isShared, router]);
+  }, [isPreview, isShared, router]);
 
   const next = useCallback(() => {
     setSlide((currentIndex) =>
@@ -180,6 +249,7 @@ export function WrappedExperience({
     },
     onHoldStart: pausePlayback,
     onHoldEnd: resumePlayback,
+    enabled: features.swipeNav && !lockedToOneSlide,
   });
 
   useEffect(() => {
@@ -202,7 +272,7 @@ export function WrappedExperience({
     playbackPausedRef.current = false;
     setPlaybackPaused(false);
     remainingWhilePausedRef.current = null;
-    deadlineRef.current = isLast ? null : Date.now() + runtime.durationMs;
+    deadlineRef.current = isLast || !features.autoplay ? null : Date.now() + runtime.durationMs;
   }, [
     slide,
     totalSlides,
@@ -211,6 +281,7 @@ export function WrappedExperience({
     stats,
     heatmapStory,
     heatmapTeasers,
+    features.autoplay,
   ]);
 
   useEffect(() => {
@@ -234,27 +305,45 @@ export function WrappedExperience({
   }, [stats]);
 
   useEffect(() => {
+    if (!initialSlideKey || slides.length === 0) return;
+    const index = slides.findIndex((item) => {
+      if (item.key === initialSlideKey || item.kind === initialSlideKey) {
+        return true;
+      }
+      if (item.kind !== "highlight") return false;
+      if (initialSlideKey === "favorite-repo") {
+        return item.highlight.id === "favorite_repo";
+      }
+      return initialSlideKey === "highlight" && item.highlight.id !== "favorite_repo";
+    });
+    if (index >= 0) setSlide(index);
+  }, [initialSlideKey, slides]);
+
+  useEffect(() => {
     if (!current) return;
     const scene = sceneFromSlide(current);
     setScene(scene);
   }, [current, setScene]);
 
   useEffect(() => {
+    if (embedded) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (lockedToOneSlide) return;
       if (event.key === "Enter") {
         if (favoriteRepoRaceRef.current?.trySelectWithEnter()) {
           event.preventDefault();
           return;
         }
       }
+      if (!features.arrowNav) return;
       if (event.key === "ArrowRight") tryAdvanceStoryOrNext();
       if (event.key === "ArrowLeft") prev();
       if (event.key === " " || event.key === "Spacebar") {
@@ -264,20 +353,21 @@ export function WrappedExperience({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [tryAdvanceStoryOrNext, prev]);
+  }, [features.arrowNav, lockedToOneSlide, tryAdvanceStoryOrNext, prev]);
 
   if (!ready || !stats || !current) {
     return (
-      <PageShell wrapped>
-        <main className="wrapped-stage" aria-busy="true" />
-      </PageShell>
+      <ExperienceFrame embedded={embedded}>
+        <main className="wrapped-stage" aria-busy="true" data-confetti-root />
+      </ExperienceFrame>
     );
   }
 
   return (
-    <PageShell wrapped>
+    <ExperienceFrame embedded={embedded}>
       <main
         className="wrapped-stage touch-manipulation select-none"
+        data-confetti-root
         role="presentation"
         {...storiesHandlers}
       >
@@ -340,32 +430,56 @@ export function WrappedExperience({
                 <WrappedHeatmap
                   levels={stats.heatmap}
                   dates={stats.heatmapDates ?? stats.calendar?.heatmapDates}
-                  peakDate={stats.mostActiveDay}
+                  peakDate={
+                    wrappedConfig.stats.favoriteDay ? stats.mostActiveDay : null
+                  }
                   peakIndex={
-                    stats.heatmapPeakIndex ?? stats.calendar?.heatmapPeakIndex
+                    wrappedConfig.stats.favoriteDay
+                      ? (stats.heatmapPeakIndex ?? stats.calendar?.heatmapPeakIndex)
+                      : null
                   }
                   peakDateLabel={
-                    stats.mostActiveDay
+                    wrappedConfig.stats.favoriteDay && stats.mostActiveDay
                       ? formatWrappedDate(stats.mostActiveDay, locale)
                       : null
                   }
                   peakCaption={t("heatmapPeakCaption")}
-                  peakCount={stats.mostActiveDayCount}
+                  peakCount={
+                    wrappedConfig.stats.favoriteDay ? stats.mostActiveDayCount : 0
+                  }
                   peakCountLabel={t("heatmapPeakCountLabel")}
                   teaserLines={heatmapTeasers?.day ?? []}
-                  peakMonth={stats.mostActiveMonth}
+                  peakMonth={
+                    wrappedConfig.stats.favoriteMonth ? stats.mostActiveMonth : null
+                  }
                   peakMonthLabel={
-                    stats.mostActiveMonth
+                    wrappedConfig.stats.favoriteMonth && stats.mostActiveMonth
                       ? formatMonthName(stats.mostActiveMonth, locale)
                       : null
                   }
                   peakMonthCaption={t("heatmapMonthCaption")}
-                  peakMonthCount={stats.mostActiveMonthCount}
+                  peakMonthCount={
+                    wrappedConfig.stats.favoriteMonth
+                      ? stats.mostActiveMonthCount
+                      : 0
+                  }
                   peakMonthCountLabel={t("heatmapMonthCountLabel")}
                   monthTeaserLines={heatmapTeasers?.month ?? []}
-                  weekdayInsight={heatmapStory?.weekday ?? null}
-                  perfectWeeks={heatmapStory?.perfectWeeks ?? null}
-                  averages={heatmapStory?.averages ?? null}
+                  weekdayInsight={
+                    wrappedConfig.stats.favoriteDay
+                      ? (heatmapStory?.weekday ?? null)
+                      : null
+                  }
+                  perfectWeeks={
+                    wrappedConfig.stats.perfectWeeks
+                      ? (heatmapStory?.perfectWeeks ?? null)
+                      : null
+                  }
+                  averages={
+                    wrappedConfig.stats.averageContributions
+                      ? (heatmapStory?.averages ?? null)
+                      : null
+                  }
                   weekdayTeaserLines={heatmapTeasers?.weekday ?? []}
                   weeksTeaserLines={heatmapTeasers?.weeks ?? []}
                   weekdayTitle={t("heatmapWeekdayFavorite")}
@@ -448,6 +562,24 @@ export function WrappedExperience({
           )}
         </AnimatePresence>
       </main>
-    </PageShell>
+    </ExperienceFrame>
   );
+}
+
+function ExperienceFrame({
+  embedded,
+  children,
+}: {
+  embedded: boolean;
+  children: ReactNode;
+}) {
+  if (embedded) {
+    return (
+      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
+        {children}
+      </div>
+    );
+  }
+
+  return <PageShell wrapped>{children}</PageShell>;
 }

@@ -15,7 +15,7 @@ import { useWrappedBeat } from "@/providers/sfx-provider";
 
 type LoadState = "loading" | "error";
 
-export function LoadingScreen() {
+export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean }) {
   const { t } = useApp();
   const { data: session } = useSession();
   useViewI18n("loading");
@@ -24,7 +24,7 @@ export function LoadingScreen() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fetchedRef = useRef(false);
-  useWrappedBeat(loadState === "loading");
+  useWrappedBeat(musicEnabled && loadState === "loading");
 
   const displayName =
     session?.user?.login ?? session?.user?.name ?? null;
@@ -36,6 +36,11 @@ export function LoadingScreen() {
 
     try {
       const response = await fetch("/api/wrapped");
+
+      if (response.status === 403) {
+        router.replace("/");
+        return;
+      }
 
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as {

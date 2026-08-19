@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { upsertProfileCard } from "@/lib/profile-card/store";
 import { parseProfileCardLocale } from "@/lib/profile-card/locale";
+import { loadWrappedConfig } from "@/lib/admin/settings";
 import {
   buildProfileCardMarkdown,
   buildProfileCardUrl,
@@ -23,6 +24,14 @@ export async function POST(request: Request) {
     const session = await requireAuth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const wrappedConfig = await loadWrappedConfig();
+    if (!wrappedConfig.features.publicCard && !wrappedConfig.features.copyMarkdown) {
+      return NextResponse.json(
+        { error: "Public cards are disabled" },
+        { status: 403 },
+      );
     }
 
     let body: Body;

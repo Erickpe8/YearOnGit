@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useWrappedUi } from "@/lib/wrapped/wrapped-ui";
 
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
+  const { features } = useWrappedUi();
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -13,5 +15,5 @@ export function usePrefersReducedMotion(): boolean {
     return () => media.removeEventListener("change", update);
   }, []);
 
-  return reduced;
+  return reduced || !features.animations;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { LocaleFlag } from "@/components/i18n/locale-flag";
+import { GlassTooltip } from "@/components/ui/glass-tooltip";
 import { IconCheck, IconSearch } from "@/components/ui/icons";
 import {
   filterLanguages,
@@ -60,22 +61,24 @@ export function LanguageToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-controls={listboxId}
-        aria-label={t("selectLanguage")}
-        className={`glass-pill flex h-9 items-center gap-1.5 px-2.5 transition-colors max-[390px]:h-8 max-[390px]:px-2 ${
-          open ? "text-primary" : "text-on-surface-variant hover:text-primary"
-        }`}
-      >
-        <LocaleFlag locale={locale} />
-        <span className="i18n-label font-display text-[10px] font-bold uppercase">
-          {locale}
-        </span>
-      </button>
+      <GlassTooltip label={t("selectLanguage")} align="end" disabled={open}>
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-label={t("selectLanguage")}
+          className={`glass-pill flex h-9 items-center gap-1.5 px-2.5 transition-colors max-[390px]:h-8 max-[390px]:px-2 ${
+            open ? "text-primary" : "text-on-surface-variant hover:text-primary"
+          }`}
+        >
+          <LocaleFlag locale={locale} />
+          <span className="i18n-label font-display text-[10px] font-bold uppercase">
+            {locale}
+          </span>
+        </button>
+      </GlassTooltip>
 
       {open ? (
         <div className="glass-panel absolute right-0 top-[calc(100%+8px)] z-[60] w-64 overflow-hidden rounded-2xl border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.45)] max-[390px]:w-[min(16rem,calc(100vw-2rem))]">

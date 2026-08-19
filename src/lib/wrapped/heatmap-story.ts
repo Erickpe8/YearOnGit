@@ -67,9 +67,11 @@ export function buildWeekdayInsights(
 export function buildPerfectWeeks(
   levels: number[],
   dates?: string[],
+  year: number = WRAPPED_YEAR,
 ): PerfectWeeksInsight {
   if (levels.length === 0) return { weekIndexes: [], count: 0 };
 
+  const prefix = String(year);
   const weekCount = Math.ceil(levels.length / DAYS_PER_WEEK);
   const weekIndexes: number[] = [];
 
@@ -82,7 +84,7 @@ export function buildPerfectWeeks(
         break;
       }
       const date = dates?.[index];
-      if (date && !date.startsWith(String(WRAPPED_YEAR))) {
+      if (date && !date.startsWith(prefix)) {
         perfect = false;
         break;
       }
@@ -119,12 +121,13 @@ export function buildHeatmapStoryInsights(
     dates?: string[];
     totalContributions: number;
     activeDays: number;
+    year?: number;
   },
   locale: Locale = "en",
 ): HeatmapStoryInsights {
   return {
     weekday: buildWeekdayInsights(input.weekdayContributions, locale),
-    perfectWeeks: buildPerfectWeeks(input.levels, input.dates),
+    perfectWeeks: buildPerfectWeeks(input.levels, input.dates, input.year),
     averages: buildContributionAverages({
       totalContributions: input.totalContributions,
       activeDays: input.activeDays,

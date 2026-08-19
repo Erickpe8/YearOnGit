@@ -21,6 +21,7 @@ import type { TranslationKey } from "@/lib/i18n/translations";
 import type { WrappedPayload, WrappedStats } from "@/lib/wrapped/types";
 import { usePrefersReducedMotion } from "@/lib/wrapped/use-prefers-reduced-motion";
 import { useSfx } from "@/providers/sfx-provider";
+import { useWrappedUi } from "@/lib/wrapped/wrapped-ui";
 
 type SummarySlideProps = {
   stats: WrappedStats;
@@ -89,6 +90,7 @@ export function SummarySlide({
   t,
 }: SummarySlideProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const { features, stats: enabledStats, preview } = useWrappedUi();
   const { cue } = useSfx();
   const avatarUrl = stats.profile.avatarUrl;
   const login = stats.profile.login || displayName;
@@ -133,14 +135,15 @@ export function SummarySlide({
       icon: <IconFolder className="h-3.5 w-3.5" />,
       delay: 0.72,
     },
-    {
-      key: "langs",
-      label: t("languagesLabel"),
-      value: stats.languageCount,
-      icon: <IconLanguage className="h-3.5 w-3.5" />,
-      delay: 0.78,
-    },
-  ];
+  ].filter((item) => {
+    if (item.key === "commits") return enabledStats.commits;
+    if (item.key === "prs") return enabledStats.pullRequests;
+    if (item.key === "issues") return enabledStats.issues;
+    if (item.key === "reviews") return enabledStats.codeReviews;
+    if (item.key === "repos") return enabledStats.repositories;
+    if (item.key === "langs") return enabledStats.languages;
+    return true;
+  });
 
   return (
     <WrappedSlideShell
@@ -238,6 +241,7 @@ export function SummarySlide({
             />
           </motion.div>
 
+          {enabledStats.streak ? (
           <motion.div
             className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1"
             initial={reducedMotion ? false : { opacity: 0, y: 8 }}
@@ -265,6 +269,7 @@ export function SummarySlide({
               </span>
             </span>
           </motion.div>
+          ) : null}
         </div>
 
         <div className="relative z-[1] grid w-full shrink-0 grid-cols-2 gap-2 sm:grid-cols-3">
@@ -291,18 +296,31 @@ export function SummarySlide({
               : { duration: 0.35, delay: 0.88, ease: EASE }
           }
         >
-          {!isShared && payload ? (
+          {preview ? (
+            <a
+              href="/admin"
+              className="i18n-cta btn-primary w-full rounded-full py-2.5 text-center text-sm font-bold text-white transition-transform hover:scale-[1.02] active:scale-95 md:py-3"
+            >
+              Volver al panel
+            </a>
+          ) : !isShared && payload ? (
             <>
+              {features.shareWrapped || features.copyMarkdown ? (
               <div className="flex w-full flex-col gap-2 sm:flex-row">
+                {features.shareWrapped && features.publicLinks ? (
                 <ShareCopyButton
                   payload={payload}
                   className="sm:min-w-0 sm:flex-1"
                 />
+                ) : null}
+                {features.copyMarkdown ? (
                 <ShareMarkdownButton
                   payload={payload}
                   className="sm:min-w-0 sm:flex-1"
                 />
+                ) : null}
               </div>
+              ) : null}
               <button
                 type="button"
                 onClick={onRestart}
