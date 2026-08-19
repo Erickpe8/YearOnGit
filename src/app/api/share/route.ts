@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { AuthenticationError, AuthorizationError, ValidationError } from "@/lib/errors/app-error";
+import { jsonError, jsonOk, getApiRequestId } from "@/lib/http/api-response";
 import type { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
@@ -18,16 +19,30 @@ type ShareRequestBody = {
 };
 
 export async function POST(request: Request) {
+  const requestId = getApiRequestId(request);
   const session = await requireAuth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return jsonError(
+      new AuthenticationError({
+        message: "Unauthorized",
+        userMessage: "Your GitHub connection needs attention.",
+        statusCode: 401,
+        requestId,
+      }),
+      { requestId, endpoint: "/api/share" },
+    );
   }
 
   const config = await loadWrappedConfig();
   if (!config.features.publicLinks || !config.features.shareWrapped) {
-    return NextResponse.json(
-      { error: "Public sharing is disabled" },
-      { status: 403 },
+    return jsonError(
+      new AuthorizationError({
+        message: "Public sharing is disabled",
+        userMessage: "Sharing isn't available right now.",
+        statusCode: 403,
+        requestId,
+      }),
+      { requestId, endpoint: "/api/share" },
     );
   }
 
@@ -35,13 +50,24 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as ShareRequestBody;
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return jsonError(
+      new ValidationError({
+        message: "Invalid JSON body",
+        userMessage: "That request didn't look valid.",
+        requestId,
+      }),
+      { requestId, endpoint: "/api/share" },
+    );
   }
 
   if (!isWrappedStats(body.stats)) {
-    return NextResponse.json(
-      { error: "Invalid wrapped stats payload" },
-      { status: 400 },
+    return jsonError(
+      new ValidationError({
+        message: "Invalid wrapped stats payload",
+        userMessage: "That request didn't look valid.",
+        requestId,
+      }),
+      { requestId, endpoint: "/api/share" },
     );
   }
 
@@ -55,38 +81,77 @@ export async function POST(request: Request) {
       ? body.year
       : WRAPPED_YEAR;
 
-  const payload = toPublicSharePayload({
-    stats: body.stats,
-    username,
-    year,
-  });
+  try {
+    const payload = toPublicSharePayload({
+      stats: body.stats,
+      username,
+      year,
+    });
 
-  const existing = await prisma.wrappedShare.findUnique({
-    where: {
-      userId_year: {
-        userId: session.user.id,
-        year: payload.year,
-      },
-    },
-    select: {
-      slug: true,
-      isActive: true,
-    },
-  });
-
-  if (existing) {
-    const share = await prisma.wrappedShare.update({
+    const existing = await prisma.wrappedShare.findUnique({
       where: {
         userId_year: {
           userId: session.user.id,
           year: payload.year,
         },
       },
+      select: {
+        slug: true,
+        isActive: true,
+      },
+    });
+
+    if (existing) {
+      const share = await prisma.wrappedShare.update({
+        where: {
+          userId_year: {
+            userId: session.user.id,
+            year: payload.year,
+          },
+        },
+        data: {
+          username: payload.username,
+          stats: payload.stats as Prisma.InputJsonValue,
+          isActive: true,
+          revokedAt: null,
+        },
+        select: {
+          slug: true,
+          username: true,
+          year: true,
+        },
+      });
+
+      return jsonOk(
+        {
+          slug: share.slug,
+          url: buildShareUrl(share.slug),
+          username: share.username,
+          year: share.year,
+          created: false,
+        },
+        { requestId },
+      );
+    }
+
+    let slug = generateShareSlug();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const collision = await prisma.wrappedShare.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+      if (!collision) break;
+      slug = generateShareSlug();
+    }
+
+    const share = await prisma.wrappedShare.create({
       data: {
+        slug,
+        userId: session.user.id,
         username: payload.username,
+        year: payload.year,
         stats: payload.stats as Prisma.InputJsonValue,
         isActive: true,
-        revokedAt: null,
       },
       select: {
         slug: true,
@@ -95,46 +160,17 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({
-      slug: share.slug,
-      url: buildShareUrl(share.slug),
-      username: share.username,
-      year: share.year,
-      created: false,
-    });
+    return jsonOk(
+      {
+        slug: share.slug,
+        url: buildShareUrl(share.slug),
+        username: share.username,
+        year: share.year,
+        created: true,
+      },
+      { requestId },
+    );
+  } catch (error) {
+    return jsonError(error, { requestId, endpoint: "/api/share" });
   }
-
-  let slug = generateShareSlug();
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const collision = await prisma.wrappedShare.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-    if (!collision) break;
-    slug = generateShareSlug();
-  }
-
-  const share = await prisma.wrappedShare.create({
-    data: {
-      slug,
-      userId: session.user.id,
-      username: payload.username,
-      year: payload.year,
-      stats: payload.stats as Prisma.InputJsonValue,
-      isActive: true,
-    },
-    select: {
-      slug: true,
-      username: true,
-      year: true,
-    },
-  });
-
-  return NextResponse.json({
-    slug: share.slug,
-    url: buildShareUrl(share.slug),
-    username: share.username,
-    year: share.year,
-    created: true,
-  });
 }

@@ -94,4 +94,20 @@ describe("planWrappedSlides", () => {
       ["overview"],
     );
   });
+
+  it("does not add languages when the count is a real zero", () => {
+    const stats = createEmptyWrappedStats();
+    stats.languageCount = 0;
+    stats.languages.available = true;
+    const kinds = planWrappedSlides(stats).map((slide) => slide.kind);
+    assert.equal(kinds.includes("languages"), false);
+  });
+
+  it("keeps a languages fallback slide when language data is unavailable", () => {
+    const stats = createEmptyWrappedStats();
+    stats.languageCount = 0;
+    stats.languages.available = false;
+    const kinds = planWrappedSlides(stats).map((slide) => slide.kind);
+    assert.equal(kinds.includes("languages"), true);
+  });
 });

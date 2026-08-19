@@ -308,16 +308,22 @@ export function buildCommunityModule(social: SocialStats): CommunityModule {
 
 export function buildLanguagesModule(repos: GitHubCommitRepoEntry[]): LanguagesModule {
   const languages = aggregateLanguages(repos);
+  const hadRepos = repos.length > 0;
+  const anyLanguagePayload = repos.some(
+    (entry) => entry.repository.languages != null,
+  );
+  const available = !hadRepos || anyLanguagePayload;
   return {
-    topLanguage: languages[0]?.name ?? null,
-    topLanguagePercentage: languages[0]?.pct ?? 0,
-    secondLanguage: languages[1]?.name ?? null,
-    secondLanguagePercentage: languages[1]?.pct ?? 0,
-    thirdLanguage: languages[2]?.name ?? null,
-    thirdLanguagePercentage: languages[2]?.pct ?? 0,
-    languageCount: languages.length,
-    languages,
-    top10: languages.slice(0, 10),
+    topLanguage: available ? languages[0]?.name ?? null : null,
+    topLanguagePercentage: available ? languages[0]?.pct ?? 0 : 0,
+    secondLanguage: available ? languages[1]?.name ?? null : null,
+    secondLanguagePercentage: available ? languages[1]?.pct ?? 0 : 0,
+    thirdLanguage: available ? languages[2]?.name ?? null : null,
+    thirdLanguagePercentage: available ? languages[2]?.pct ?? 0 : 0,
+    languageCount: available ? languages.length : 0,
+    languages: available ? languages : [],
+    top10: available ? languages.slice(0, 10) : [],
+    available,
   };
 }
 

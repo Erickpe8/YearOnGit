@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/wrapped/build-stats.test.ts src/lib/i18n/interpolate.test.ts src/lib/wrapped/share.test.ts src/lib/profile-card/urls.test.ts src/lib/profile-card/copy.test.ts src/lib/wrapped/profile-stats.test.ts src/lib/wrapped/modules/achievements.test.ts src/lib/wrapped/plan-slides.test.ts src/lib/wrapped/contribution-insights.test.ts src/lib/wrapped/favorite-repo-race.test.ts src/lib/wrapped/weekday-insights.test.ts src/lib/wrapped/heatmap-story.test.ts src/lib/wrapped/language-icons.test.ts src/lib/admin/access.test.ts src/lib/admin/wrapped-config.test.ts src/lib/admin/list-query.test.ts src/lib/admin/config-changelog.test.ts",
+    "test": "tsx --test src/lib/wrapped/build-stats.test.ts src/lib/i18n/interpolate.test.ts src/lib/wrapped/share.test.ts src/lib/profile-card/urls.test.ts src/lib/profile-card/copy.test.ts src/lib/wrapped/profile-stats.test.ts src/lib/wrapped/modules/achievements.test.ts src/lib/wrapped/plan-slides.test.ts src/lib/wrapped/contribution-insights.test.ts src/lib/wrapped/favorite-repo-race.test.ts src/lib/wrapped/weekday-insights.test.ts src/lib/wrapped/heatmap-story.test.ts src/lib/wrapped/language-icons.test.ts src/lib/admin/access.test.ts src/lib/admin/wrapped-config.test.ts src/lib/admin/list-query.test.ts src/lib/admin/config-changelog.test.ts src/lib/errors/catalog.test.ts src/lib/errors/resilience.test.ts src/lib/wrapped/languages-available.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
