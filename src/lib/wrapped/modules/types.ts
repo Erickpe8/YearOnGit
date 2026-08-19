@@ -127,6 +127,7 @@ export type LanguagesModule = {
   languageCount: number;
   languages: WrappedLanguageStat[];
   top10: WrappedLanguageStat[];
+  available: boolean;
 };
 
 export type RepositoryBreakdown = {

@@ -1,14 +1,23 @@
-import { NextResponse } from "next/server";
-import { GitHubGraphQLError } from "@/lib/github/client";
+import { AuthenticationError, AuthorizationError } from "@/lib/errors/app-error";
+import { jsonError, jsonOk, getApiRequestId } from "@/lib/http/api-response";
 import { isAdminLogin } from "@/lib/admin/access";
 import { loadWrappedConfig } from "@/lib/admin/settings";
 import { getGitHubAccessToken, requireAuth } from "@/lib/auth/session";
 import { fetchViewerWrapped } from "@/lib/wrapped/fetch-viewer-wrapped";
 
 export async function GET(request: Request) {
+  const requestId = getApiRequestId(request);
   const session = await requireAuth();
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return jsonError(
+      new AuthenticationError({
+        message: "Unauthorized",
+        userMessage: "Your GitHub connection needs attention.",
+        statusCode: 401,
+        requestId,
+      }),
+      { requestId, endpoint: "/api/wrapped" },
+    );
   }
 
   const config = await loadWrappedConfig();
@@ -16,29 +25,34 @@ export async function GET(request: Request) {
     new URL(request.url).searchParams.get("preview") === "1" &&
     isAdminLogin(session.user.login);
   if (!config.wrappedEnabled && !preview) {
-    return NextResponse.json({ error: "Wrapped is disabled" }, { status: 403 });
+    return jsonError(
+      new AuthorizationError({
+        message: "Wrapped is disabled",
+        userMessage: "This Wrapped isn't available right now.",
+        statusCode: 403,
+        requestId,
+      }),
+      { requestId, endpoint: "/api/wrapped" },
+    );
   }
 
   const token = await getGitHubAccessToken();
   if (!token) {
-    return NextResponse.json(
-      { error: "GitHub account not connected" },
-      { status: 401 },
+    return jsonError(
+      new AuthenticationError({
+        message: "GitHub account not connected",
+        userMessage: "Your GitHub connection needs attention.",
+        statusCode: 401,
+        requestId,
+      }),
+      { requestId, endpoint: "/api/wrapped" },
     );
   }
 
   try {
     const payload = await fetchViewerWrapped(token, config);
-    return NextResponse.json(payload);
+    return jsonOk(payload, { requestId });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to load wrapped stats";
-    console.error("[api/wrapped]", message);
-
-    if (error instanceof GitHubGraphQLError) {
-      return NextResponse.json({ error: message }, { status: error.status });
-    }
-
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonError(error, { requestId, endpoint: "/api/wrapped" });
   }
 }

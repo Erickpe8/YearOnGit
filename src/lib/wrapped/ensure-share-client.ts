@@ -1,10 +1,11 @@
+import { fetchJson } from "@/lib/http/fetch-json";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 
 export async function ensureShareSlug(payload: WrappedPayload): Promise<{
   url: string;
   slug: string;
 }> {
-  const response = await fetch("/api/share", {
+  const data = await fetchJson<{ url?: string; slug?: string }>("/api/share", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -12,13 +13,9 @@ export async function ensureShareSlug(payload: WrappedPayload): Promise<{
       username: payload.username,
       year: payload.year,
     }),
+    retries: 2,
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to create share link");
-  }
-
-  const data = (await response.json()) as { url?: string; slug?: string };
   if (!data.url || !data.slug) {
     throw new Error("Missing share URL");
   }

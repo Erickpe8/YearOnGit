@@ -6,6 +6,7 @@ import { ensureProfileCardMarkdown } from "@/lib/profile-card/ensure-client";
 import { ensureShareSlug } from "@/lib/wrapped/ensure-share-client";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useApp } from "@/providers/app-provider";
+import { useToast } from "@/providers/toast-provider";
 
 type ShareMarkdownButtonProps = {
   payload: WrappedPayload;
@@ -19,6 +20,7 @@ export function ShareMarkdownButton({
   className = "",
 }: ShareMarkdownButtonProps) {
   const { t, locale } = useApp();
+  const { notify } = useToast();
   const [state, setState] = useState<CopyState>("idle");
 
   const handleCopy = useCallback(async () => {
@@ -42,9 +44,17 @@ export function ShareMarkdownButton({
       window.setTimeout(() => setState("idle"), 2200);
     } catch {
       setState("error");
+      notify({
+        kind: "error",
+        title: t("toastMarkdownError"),
+        actionLabel: t("errorTryAgain"),
+        onAction: () => {
+          setState("idle");
+        },
+      });
       window.setTimeout(() => setState("idle"), 2500);
     }
-  }, [locale, payload, state]);
+  }, [locale, notify, payload, state, t]);
 
   const label =
     state === "copied"

@@ -18,7 +18,9 @@ import {
   type Locale,
 } from "@/lib/i18n/supported-locales";
 import { brandName } from "@/lib/brand/assets";
+import { OfflineNotice } from "@/components/ui/offline-notice";
 import { SfxProvider } from "@/providers/sfx-provider";
+import { ToastProvider } from "@/providers/toast-provider";
 
 type TranslationValues = Record<string, string | number>;
 
@@ -132,7 +134,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      <SfxProvider>{children}</SfxProvider>
+      <SfxProvider>
+        <ToastProvider>
+          <OfflineNotice />
+          {children}
+        </ToastProvider>
+      </SfxProvider>
     </AppContext.Provider>
   );
 }
