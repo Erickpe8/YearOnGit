@@ -2,11 +2,16 @@
 
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrandWordmark } from "@/components/brand/brand-wordmark";
+import { ErrorScreen } from "@/components/error/error-screen";
 import { PageShell } from "@/components/layout/page-shell";
+import { isAppError } from "@/lib/errors/app-error";
+import { isErrorStatusCode } from "@/lib/errors/catalog";
+import { ERROR_CODES } from "@/lib/errors/codes";
+import { normalizeError } from "@/lib/errors/normalize";
+import { fetchJson } from "@/lib/http/fetch-json";
 import { useViewI18n } from "@/lib/i18n/use-view-i18n";
 import { saveWrappedPayload } from "@/lib/wrapped/storage";
 import type { WrappedPayload } from "@/lib/wrapped/types";
@@ -22,7 +27,9 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
   const router = useRouter();
   const [progress, setProgress] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>("loading");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<ReturnType<typeof normalizeError> | null>(
+    null,
+  );
   const fetchedRef = useRef(false);
   useWrappedBeat(musicEnabled && loadState === "loading");
 
@@ -31,36 +38,30 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
 
   const fetchWrapped = useCallback(async () => {
     setLoadState("loading");
-    setErrorMessage(null);
+    setLoadError(null);
     setProgress(0);
 
     try {
-      const response = await fetch("/api/wrapped");
-
-      if (response.status === 403) {
-        router.replace("/");
-        return;
-      }
-
-      if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(body?.error ?? t("wrappedLoadError"));
-      }
-
-      const payload = (await response.json()) as WrappedPayload;
+      const payload = await fetchJson<WrappedPayload>("/api/wrapped", {
+        retries: 2,
+      });
       saveWrappedPayload(payload);
       setProgress(100);
 
       setTimeout(() => router.push("/wrapped"), 400);
     } catch (error) {
+      const appError = isAppError(error) ? error : normalizeError(error);
+      if (
+        appError.statusCode === 403 ||
+        appError.code === ERROR_CODES.AUTHORIZATION
+      ) {
+        router.replace("/");
+        return;
+      }
       setLoadState("error");
-      setErrorMessage(
-        error instanceof Error ? error.message : t("wrappedLoadError"),
-      );
+      setLoadError(appError);
     }
-  }, [router, t]);
+  }, [router]);
 
   useEffect(() => {
     if (fetchedRef.current) return;
@@ -81,41 +82,47 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
     return () => clearInterval(interval);
   }, [loadState]);
 
-  if (loadState === "error") {
+  if (loadState === "error" && loadError) {
+    const isAuth = loadError.code === ERROR_CODES.AUTHENTICATION;
+    const isRate = loadError.code === ERROR_CODES.RATE_LIMIT;
+    const isNetwork =
+      loadError.code === ERROR_CODES.NETWORK ||
+      loadError.code === ERROR_CODES.TIMEOUT;
+    const status = loadError.statusCode ?? (isNetwork ? 504 : 500);
+    const code = isAuth
+      ? 401
+      : isRate
+        ? 429
+        : isErrorStatusCode(status)
+          ? status
+          : 500;
+
     return (
-      <PageShell immersive className="items-center justify-center">
-        <main className="relative z-10 flex min-h-[calc(100dvh-7rem)] w-full max-w-lg flex-col items-center justify-center px-4 text-center max-[390px]:min-h-[calc(100dvh-6.5rem)] max-[390px]:px-3">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-card w-full rounded-2xl p-8"
-          >
-            <h1 className="i18n-text mb-3 font-display text-2xl font-bold text-on-surface">
-              {t("wrappedLoadError")}
-            </h1>
-            {errorMessage ? (
-              <p className="mb-8 text-sm leading-relaxed text-on-surface-variant">
-                {errorMessage}
-              </p>
-            ) : null}
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={() => void fetchWrapped()}
-                className="i18n-cta btn-primary w-full rounded-full py-3 font-bold text-white transition-transform hover:scale-[1.02] active:scale-95"
-              >
-                {t("retry")}
-              </button>
-              <Link
-                href="/"
-                className="i18n-cta glass-pill w-full py-3 text-center font-display text-sm font-bold text-on-surface transition-colors hover:text-primary"
-              >
-                {t("goHome")}
-              </Link>
-            </div>
-          </motion.div>
-        </main>
-      </PageShell>
+      <ErrorScreen
+        code={code}
+        titleKey={
+          isAuth
+            ? "githubReconnectTitle"
+            : isRate
+              ? "rateLimitTitle"
+              : undefined
+        }
+        descriptionKey={
+          isAuth
+            ? "githubReconnectDescription"
+            : isRate
+              ? "rateLimitDescription"
+              : isNetwork
+                ? "networkRetryMessage"
+                : undefined
+        }
+        onRetry={() => void fetchWrapped()}
+        requestId={loadError.requestId}
+        signInCallbackUrl="/loading"
+        actionLabels={
+          isAuth ? { signin: t("errorReconnectGitHub") } : undefined
+        }
+      />
     );
   }
 

@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { ensureShareSlug } from "@/lib/wrapped/ensure-share-client";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 import { useApp } from "@/providers/app-provider";
+import { useToast } from "@/providers/toast-provider";
 
 type ShareCopyButtonProps = {
   payload: WrappedPayload;
@@ -17,6 +18,7 @@ export function ShareCopyButton({
   className = "",
 }: ShareCopyButtonProps) {
   const { t } = useApp();
+  const { notify } = useToast();
   const [state, setState] = useState<ShareState>("idle");
 
   const handleShare = useCallback(async () => {
@@ -50,9 +52,17 @@ export function ShareCopyButton({
       window.setTimeout(() => setState("idle"), 2200);
     } catch {
       setState("error");
+      notify({
+        kind: "error",
+        title: t("toastShareLinkError"),
+        actionLabel: t("errorTryAgain"),
+        onAction: () => {
+          setState("idle");
+        },
+      });
       window.setTimeout(() => setState("idle"), 2500);
     }
-  }, [payload, state, t]);
+  }, [notify, payload, state, t]);
 
   const label =
     state === "copied"

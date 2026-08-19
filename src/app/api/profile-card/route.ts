@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { AuthenticationError, AuthorizationError, ValidationError } from "@/lib/errors/app-error";
+import { jsonError, jsonOk, getApiRequestId } from "@/lib/http/api-response";
 import { requireAuth } from "@/lib/auth/session";
 import { upsertProfileCard } from "@/lib/profile-card/store";
 import { parseProfileCardLocale } from "@/lib/profile-card/locale";
@@ -20,17 +21,31 @@ type Body = {
 };
 
 export async function POST(request: Request) {
+  const requestId = getApiRequestId(request);
   try {
     const session = await requireAuth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return jsonError(
+        new AuthenticationError({
+          message: "Unauthorized",
+          userMessage: "Your GitHub connection needs attention.",
+          statusCode: 401,
+          requestId,
+        }),
+        { requestId, endpoint: "/api/profile-card" },
+      );
     }
 
     const wrappedConfig = await loadWrappedConfig();
     if (!wrappedConfig.features.publicCard && !wrappedConfig.features.copyMarkdown) {
-      return NextResponse.json(
-        { error: "Public cards are disabled" },
-        { status: 403 },
+      return jsonError(
+        new AuthorizationError({
+          message: "Public cards are disabled",
+          userMessage: "Sharing isn't available right now.",
+          statusCode: 403,
+          requestId,
+        }),
+        { requestId, endpoint: "/api/profile-card" },
       );
     }
 
@@ -38,13 +53,24 @@ export async function POST(request: Request) {
     try {
       body = (await request.json()) as Body;
     } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+      return jsonError(
+        new ValidationError({
+          message: "Invalid JSON body",
+          userMessage: "That request didn't look valid.",
+          requestId,
+        }),
+        { requestId, endpoint: "/api/profile-card" },
+      );
     }
 
     if (!isWrappedStats(body.stats)) {
-      return NextResponse.json(
-        { error: "Invalid wrapped stats payload" },
-        { status: 400 },
+      return jsonError(
+        new ValidationError({
+          message: "Invalid wrapped stats payload",
+          userMessage: "That request didn't look valid.",
+          requestId,
+        }),
+        { requestId, endpoint: "/api/profile-card" },
       );
     }
 
@@ -90,17 +116,17 @@ export async function POST(request: Request) {
       locale,
     });
 
-    return NextResponse.json({
-      username: card.username,
-      year: card.year,
-      cardUrl,
-      markdown,
-      refreshedAt: card.refreshedAt.toISOString(),
-    });
+    return jsonOk(
+      {
+        username: card.username,
+        year: card.year,
+        cardUrl,
+        markdown,
+        refreshedAt: card.refreshedAt.toISOString(),
+      },
+      { requestId },
+    );
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to save profile card";
-    console.error("[api/profile-card]", message, error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonError(error, { requestId, endpoint: "/api/profile-card" });
   }
 }

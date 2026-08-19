@@ -1,3 +1,4 @@
+import { fetchJson } from "@/lib/http/fetch-json";
 import type { WrappedPayload } from "@/lib/wrapped/types";
 
 export async function ensureProfileCardMarkdown(
@@ -9,7 +10,11 @@ export async function ensureProfileCardMarkdown(
   cardUrl: string;
   username: string;
 }> {
-  const response = await fetch("/api/profile-card", {
+  const data = await fetchJson<{
+    markdown?: string;
+    cardUrl?: string;
+    username?: string;
+  }>("/api/profile-card", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -19,22 +24,8 @@ export async function ensureProfileCardMarkdown(
       shareSlug,
       locale,
     }),
+    retries: 2,
   });
-
-  if (!response.ok) {
-    let detail = "Failed to create profile card";
-    try {
-      const err = (await response.json()) as { error?: string };
-      if (err.error) detail = err.error;
-    } catch {}
-    throw new Error(detail);
-  }
-
-  const data = (await response.json()) as {
-    markdown?: string;
-    cardUrl?: string;
-    username?: string;
-  };
 
   if (!data.markdown || !data.cardUrl || !data.username) {
     throw new Error("Missing profile card response");

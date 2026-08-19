@@ -18,6 +18,8 @@ import { HighlightSlide } from "@/components/wrapped/highlight-slide";
 import { LanguagesPodium } from "@/components/wrapped/languages-podium";
 import { OverviewIntroSlide } from "@/components/wrapped/overview-intro-slide";
 import { PageShell } from "@/components/layout/page-shell";
+import { DataUnavailableFallback } from "@/components/wrapped/data-unavailable-fallback";
+import { SlideErrorBoundary } from "@/components/wrapped/slide-error-boundary";
 import { StreakSlide } from "@/components/wrapped/streak-slide";
 import { SummarySlide } from "@/components/wrapped/summary-slide";
 import { WrappedHeatmap } from "@/components/wrapped/wrapped-heatmap";
@@ -372,6 +374,7 @@ function WrappedExperienceInner({
         {...storiesHandlers}
       >
         <AnimatePresence mode="wait">
+          <SlideErrorBoundary key={current.key} onContinue={tryAdvanceStoryOrNext}>
           {current.kind === "overview" && (
             <WrappedSlideShell slideKey="year-overview">
               <OverviewIntroSlide
@@ -507,24 +510,30 @@ function WrappedExperienceInner({
               <h2 className="i18n-text wrapped-slide-title shrink-0 font-display font-bold">
                 {t("yourStack")}
               </h2>
-              {stats.topLanguage ? (
-                <p className="i18n-text shrink-0 text-center text-xs text-on-surface-variant md:text-sm">
-                  {t("topLanguage", {
-                    language: stats.topLanguage,
-                    percent: stats.topLanguagePercentage,
-                  })}
-                </p>
-              ) : null}
-              <LanguagesPodium
-                languages={stats.languages.languages}
-                t={t}
-              />
-              <p className="i18n-text shrink-0 text-xs text-on-surface-variant md:text-sm">
-                {t("languagePodiumFootnote", {
-                  shown: Math.min(5, stats.languageCount),
-                  total: stats.languageCount,
-                })}
-              </p>
+              {stats.languages.available === false ? (
+                <DataUnavailableFallback />
+              ) : (
+                <>
+                  {stats.topLanguage ? (
+                    <p className="i18n-text shrink-0 text-center text-xs text-on-surface-variant md:text-sm">
+                      {t("topLanguage", {
+                        language: stats.topLanguage,
+                        percent: stats.topLanguagePercentage,
+                      })}
+                    </p>
+                  ) : null}
+                  <LanguagesPodium
+                    languages={stats.languages.languages}
+                    t={t}
+                  />
+                  <p className="i18n-text shrink-0 text-xs text-on-surface-variant md:text-sm">
+                    {t("languagePodiumFootnote", {
+                      shown: Math.min(5, stats.languageCount),
+                      total: stats.languageCount,
+                    })}
+                  </p>
+                </>
+              )}
             </WrappedSlideShell>
           )}
 
@@ -560,6 +569,7 @@ function WrappedExperienceInner({
               t={t}
             />
           )}
+          </SlideErrorBoundary>
         </AnimatePresence>
       </main>
     </ExperienceFrame>

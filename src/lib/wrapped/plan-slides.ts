@@ -79,7 +79,7 @@ function buildSlidePool(stats: WrappedStats): Record<SlideId, PlannedSlide[]> {
       highlight,
     })),
     languages:
-      stats.languageCount > 0
+      stats.languageCount > 0 || stats.languages.available === false
         ? [{ key: "languages", kind: "languages" }]
         : [],
     community: showCommunity
