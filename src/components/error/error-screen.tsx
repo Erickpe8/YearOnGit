@@ -59,7 +59,7 @@ export function ErrorScreen({
     <>
       <GlassHeader />
       <HeaderRestorePill />
-      <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden pt-14 md:pt-16">
+      <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
         <ErrorBackground />
         <ErrorPage
           statusCode={page.statusCode}
