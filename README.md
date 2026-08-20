@@ -14,21 +14,25 @@ Tu año en GitHub, contado como un Wrapped: commits, lenguajes, rachas, highligh
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)
 
 > [!NOTE]
-> YearOnGit es un **monolito** Next.js (App Router): la interfaz y las API routes viven en el mismo proyecto. El *access token* de GitHub (la credencial que emite OAuth) **nunca se envía al navegador**; solo se usa en el servidor.
+> YearOnGit es un **monolito** Next.js (App Router): la interfaz y los *Route Handlers* (endpoints de servidor en `src/app/api`) viven en el mismo proyecto. El *access token* de GitHub (credencial que emite OAuth) **permanece en el servidor** y no se envía al navegador.
 
 ---
 
 ## Tabla de contenidos
 
 - [Visión general](#visión-general)
+- [¿Cómo funciona?](#cómo-funciona)
+- [Características](#características)
 - [Quick Start](#quick-start-60-segundos)
 - [Stack tecnológico](#stack-tecnológico)
+- [Decisiones técnicas](#decisiones-técnicas)
 - [Requisitos](#requisitos)
 - [Puesta en marcha](#puesta-en-marcha)
 - [Rutas](#rutas)
 - [Arquitectura](#arquitectura)
 - [Flujo de autenticación](#flujo-de-autenticación)
 - [Flujo de generación del Wrapped](#flujo-de-generación-del-wrapped)
+- [Datos utilizados](#datos-utilizados)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Schema de datos](#schema-de-datos)
 - [SEO, sitemap y robots](#seo-sitemap-y-robots)
@@ -37,7 +41,7 @@ Tu año en GitHub, contado como un Wrapped: commits, lenguajes, rachas, highligh
 - [Reglas para agentes](#reglas-para-agentes)
 - [Comandos útiles](#comandos-útiles)
 - [Seguridad](#seguridad)
-- [FAQ de onboarding](#faq-de-onboarding)
+- [FAQ](#faq)
 - [Contribución y GitFlow](#contribución-y-gitflow)
 - [CI/CD y despliegue (Vercel)](#cicd-y-despliegue-vercel)
 - [Variables de entorno](#variables-de-entorno)
@@ -47,23 +51,66 @@ Tu año en GitHub, contado como un Wrapped: commits, lenguajes, rachas, highligh
 
 ## Visión general
 
-YearOnGit existe para que un desarrollador vea **su propio año en GitHub** de forma narrativa, no como un dashboard de tablas. La idea es: conectas la cuenta una vez, el servidor lee actividad vía GraphQL, calcula stats del año y las presenta en slides; si quieres, generas un enlace público o Markdown para el perfil.
+YearOnGit existe para que un desarrollador vea **su propio año en GitHub** de forma narrativa, no como un panel de tablas. En lugar de exportar CSV o mirar el contribution graph a secas, la app construye una secuencia de slides a partir de actividad real leída vía GraphQL.
 
-En la práctica el producto cubre:
-
-1. **Login con GitHub** — OAuth (el usuario autoriza en GitHub; YearOnGit no pide ni guarda contraseñas).
-2. **Wrapped del año** — slides con commits, lenguajes, rachas, highlights, etc.
-3. **Compartir** — slug público (`/share/[slug]`) y/o **profile card** (imagen + Markdown para el README).
-4. **Admin** — ediciones, slides, features, mantenimiento y auditoría, restringido a logins allowlisted.
+El recorrido típico es: conectar GitHub una vez, dejar que el servidor calcule estadísticas del año, recorrer el Wrapped y, si quieres, publicar un enlace (`/share/[slug]`) o copiar Markdown para una *profile card* en el README del perfil.
 
 > [!TIP]
 > Punto de entrada al código: `src/app/page.tsx` → `src/app/api/wrapped/route.ts` → `src/lib/wrapped/`.
 
 ---
 
+## ¿Cómo funciona?
+
+YearOnGit no inventa métricas: autentica al usuario, lee su actividad en GitHub desde el servidor y transforma esa respuesta en un objeto de estadísticas (`WrappedStats`) que alimenta las slides. Compartir es un paso opcional que materializa un snapshot público sin exponer credenciales.
+
+En prosa, el flujo completo es:
+
+1. El usuario pulsa **Continuar con GitHub** en la landing.
+2. GitHub OAuth autoriza la app; Auth.js crea la sesión en Postgres.
+3. En `/loading`, el cliente pide `GET /api/wrapped`.
+4. El servidor usa el access token guardado en cuenta OAuth para consultar GitHub GraphQL.
+5. `src/lib/wrapped` normaliza y calcula stats (commits, lenguajes, rachas, highlights…).
+6. El usuario entra a `/wrapped` y recorre las slides.
+7. Desde el resumen puede crear un share público y/o generar Markdown de profile card.
+
+```mermaid
+flowchart LR
+    U[Usuario] --> O[GitHub OAuth]
+    O --> S[Sesion Auth.js]
+    S --> F[Fetch GraphQL]
+    F --> P[Procesamiento]
+    P --> W[Wrapped slides]
+    W --> C[Share o Profile Card]
+```
+
+---
+
+## Características
+
+Estas capacidades están implementadas en el producto (UI + APIs + librerías de dominio). No son un wishlist: corresponden a slides planificadas en `plan-slides`, endpoints y modelos Prisma existentes.
+
+| Característica | Qué ofrece |
+|----------------|------------|
+| **GitHub OAuth** | Login sin contraseña propia; scopes en `src/auth.ts`: `read:user repo read:org` |
+| **Wrapped anual** | Experiencia de slides en `/wrapped` a partir de stats del año |
+| **Tipos de contribución** | Commits, PRs, issues y code reviews agregados desde `contributionsCollection` |
+| **Heatmap / calendario** | Días activos derivados del contribution calendar de GitHub |
+| **Lenguajes** | Distribución a partir de lenguajes de repos con actividad |
+| **Rachas** | `longestStreak` / `currentStreak` y fechas asociadas en `WrappedStats` |
+| **Highlights y logros** | Slides de highlight y achievements generados desde los stats |
+| **Comunidad** | Seguidores, following, estrellas/orgs cuando hay datos suficientes |
+| **Shares públicos** | Snapshot en `WrappedShare` y URL `/share/[slug]` vía `POST /api/share` |
+| **Profile Card** | Imagen year-scoped + Markdown README (`POST /api/profile-card`, ruta `/cards/...`) |
+| **i18n** | Locales en `src/lib/i18n/locales` (en, es, fr, de, pt, it, ja, ko, zh, ar) |
+| **Motion** | Animaciones con Framer Motion en landing y slides |
+| **Cookies / GA4 opcional** | Banner de consentimiento; GA4 solo si se acepta analítica |
+
+---
+
 ## Quick Start (60 segundos)
 
-Con las variables mínimas ya en `.env` (ver [Puesta en marcha](#puesta-en-marcha)):
+Si ya tienes Neon y una OAuth App, este bloque deja el entorno listo para probar landing → login → Wrapped.
 
 ```bash
 cp .env.example .env
@@ -72,60 +119,75 @@ npx prisma migrate deploy
 npm run dev
 ```
 
-Luego abre `http://localhost:3000`.
+Abre `http://localhost:3000`. Detalle de variables: [Variables de entorno](#variables-de-entorno).
 
 > [!TIP]
-> Sin OAuth App ni base de datos Neon configuradas, la landing carga, pero el login y el Wrapped no funcionarán.
+> Sin OAuth ni base de datos, la landing puede cargar, pero el login y `/api/wrapped` no completarán el flujo.
 
 ---
 
 ## Stack tecnológico
 
-El stack está pensado para un producto web público con auth social y datos vivos de GitHub, desplegado en Vercel y respaldado por Postgres serverless.
+El stack concentra UI, auth y APIs en Next.js, con GitHub como fuente de actividad y Neon como memoria de sesiones y snapshots compartibles.
 
 ### App (UI y runtime)
 
 | Tecnología | Rol en el proyecto |
 |------------|--------------------|
-| **Next.js 16** (App Router) | Páginas, layouts y API routes en un solo repo |
+| **Next.js 16** (App Router) | Páginas, layouts y Route Handlers en un solo repo |
 | **React 19** + **TypeScript 5** | UI tipada |
 | **Tailwind CSS v4** | Estilos (tema dark) |
-| **Framer Motion** | Animaciones de landing y slides del Wrapped |
+| **Framer Motion** | Animaciones de landing y slides |
 
 ### Auth y datos
 
 | Tecnología | Rol en el proyecto |
 |------------|--------------------|
 | **Auth.js** (`next-auth` v5) | Sesiones y proveedor GitHub |
-| **Prisma** + **Neon Postgres** | Persistencia (usuarios, shares, cards, settings) |
-| **GitHub GraphQL API** | Fuente de verdad de actividad del año (`contributionsCollection`, repos, lenguajes…) |
+| **Prisma** + **Neon Postgres** | Persistencia (usuarios, shares, cards, configuración de producto) |
+| **GitHub GraphQL API** | Actividad del año (`contributionsCollection`, repos, lenguajes, orgs…) |
 
-Scopes OAuth configurados en `src/auth.ts`: `read:user repo read:org`.  
-(*Scope* = permiso que GitHub otorga a la app. La app usa esos permisos para **leer** actividad, incluidos repos privados cuando GitHub los expone al token; no hay flujos de escritura sobre repos en el producto.)
+*Scope* = permiso que GitHub otorga a la app. La configuración actual pide `read:user repo read:org`. El producto consulta datos con GraphQL; **no implementa flujos de escritura** sobre repositorios (crear issues, push, borrar, etc.).
 
 ### Producto e infraestructura
 
-- Shares (`WrappedShare`), profile cards (`ProfileCard`) y cron diario en Vercel.
-- Panel `/admin` (editions, slides, features, maintenance, logs).
+- Shares (`WrappedShare`) y profile cards (`ProfileCard`), con cron diario en Vercel.
 - Cookies + GA4 opcional; i18n multi-idioma.
-- Hosting: **Vercel** (no hay Docker Compose ni orquestador propio en este repo).
+- Hosting: **Vercel** (este repo no incluye Docker Compose ni orquestador propio).
+
+---
+
+## Decisiones técnicas
+
+Estas decisiones se deducen de cómo está organizado el código, no de un documento de arquitectura externo.
+
+| Decisión | Por qué encaja en este repo |
+|----------|------------------------------|
+| **Next.js App Router** | Une páginas (`src/app/**/page.tsx`) y APIs (`src/app/api/**/route.ts`) sin un backend separado |
+| **GitHub como identidad** | Auth.js + proveedor GitHub evita cuentas/contraseñas propias |
+| **GraphQL como fuente de actividad** | Una query de año (`WRAPPED_YEAR_QUERY` y relacionadas) concentra contribuciones y repos |
+| **Prisma + Postgres (Neon)** | Persiste sesión OAuth, shares y cards; no sustituye a GitHub como origen de métricas en vivo |
+| **`lib/wrapped` separado de la UI** | Calcula `WrappedStats` y plan de slides independiente de React; la UI solo renderiza |
+| **Token solo en servidor** | El access token vive en `Account` (Prisma); las llamadas a GitHub salen de Route Handlers |
 
 ---
 
 ## Requisitos
 
+Para desarrollar o desplegar necesitas herramientas alineadas con el stack real:
+
 - **Node.js 20+** y **npm**
-- Cuenta en **Neon** (u otro Postgres compatible con Prisma; el código usa el adapter de Neon)
-- Una **GitHub OAuth App** en [GitHub Developer Settings](https://github.com/settings/developers)
+- Cuenta en **Neon** (u otro Postgres compatible; el cliente usa el adapter de Neon)
+- Una **GitHub OAuth App** en GitHub Developer Settings
 
 > [!WARNING]
-> Los puertos por defecto son los de Next (`3000`). No hay servicios locales adicionales (Redis, MinIO, etc.) en este proyecto.
+> El puerto local por defecto es el de Next (`3000`). No hay Redis, colas ni MinIO en este proyecto.
 
 ---
 
 ## Puesta en marcha
 
-El objetivo de este setup es dejar la app lista para probar el flujo completo: landing → OAuth → loading → Wrapped.
+El objetivo es poder recorrer el flujo completo en local: landing → OAuth → loading → Wrapped → share/card opcional.
 
 ### 1) Clonar
 
@@ -140,7 +202,7 @@ cd YearOnGit
 cp .env.example .env
 ```
 
-Rellena al menos las variables marcadas como requeridas en [Variables de entorno](#variables-de-entorno).
+Completa las variables marcadas como requeridas más abajo.
 
 **OAuth App (local)**
 
@@ -157,18 +219,17 @@ npx prisma migrate deploy
 npm run dev
 ```
 
-### 4) Accesos
+### 4) Acceso
 
-| URL | Quién |
-|-----|--------|
-| `http://localhost:3000` | Cualquiera |
-| `http://localhost:3000/admin` | Solo logins en allowlist (`Erickpe8` por defecto + `ADMIN_GITHUB_LOGINS`) |
+| URL | Uso |
+|-----|-----|
+| `http://localhost:3000` | Landing y flujo de usuario |
 
 ---
 
 ## Rutas
 
-Las **páginas** son rutas del App Router. Las **API** son *route handlers* en `src/app/api/**` (código de servidor que responde JSON u otros formatos).
+Las **páginas** son rutas del App Router. Las **API** son Route Handlers en `src/app/api/**` que responden JSON (u otros formatos) y pueden usar el token de GitHub o Prisma con seguridad.
 
 ### Páginas
 
@@ -176,37 +237,35 @@ Las **páginas** son rutas del App Router. Las **API** son *route handlers* en `
 |--------|------|-------------|------|
 | GET | `/` | Landing / welcome | No |
 | GET | `/how-it-works` | Cómo funciona YearOnGit | No |
-| GET | `/faq` | Preguntas frecuentes + enlace a Discussions | No |
+| GET | `/faq` | Preguntas frecuentes | No |
 | GET | `/privacy` | Política de privacidad | No |
 | GET | `/terms` | Términos de uso | No |
 | GET | `/share/[slug]` | Wrapped público compartido | No |
 | GET | `/cards/[username]/[year]` | Imagen de profile card | No |
-| GET | `/loading` | Pantalla de armado del Wrapped | Sí (sesión) |
+| GET | `/loading` | Armado del Wrapped | Sí (sesión) |
 | GET | `/wrapped` | Player de slides | Sí (sesión) |
-| GET | `/admin` | Panel operativo | Sí + admin |
 | GET | `/auth/popup-done` | Cierre del popup OAuth | Flujo auth |
 
-Redirects permanentes: `/privacidad` → `/privacy`, `/terminos` → `/terms`.
+Redirects: `/privacidad` → `/privacy`, `/terminos` → `/terms`.
 
 ### API principales
 
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
 | * | `/api/auth/[...nextauth]` | Auth.js (login, callback, sesión) | Flujo OAuth |
-| GET | `/api/wrapped` | Stats del año para el usuario autenticado | Sí |
-| POST | `/api/share` | Crea / actualiza un share público | Sí |
+| GET | `/api/wrapped` | Stats del año del usuario autenticado | Sí |
+| POST | `/api/share` | Crea / actualiza share público | Sí |
 | POST | `/api/profile-card` | Genera / actualiza profile card | Sí |
-| GET | `/api/live` | Estado “live” del producto (features / edición) | No |
-| GET | `/api/cron/refresh-profile-cards` | Refresh programado de cards | Bearer `CRON_SECRET` |
-| GET/PATCH | `/api/admin/*` | Settings, slides, editions, users, health… | Sí + admin |
+| GET | `/api/live` | Estado público del producto | No |
+| GET | `/api/cron/refresh-profile-cards` | Refresh de cards obsoletas | Bearer `CRON_SECRET` |
 
 ---
 
 ## Arquitectura
 
-YearOnGit no separa frontend y backend en servicios distintos: el navegador habla con Next.js; Next.js habla con GitHub y con Neon. Eso reduce latencia de integración y mantiene el token fuera del cliente.
+YearOnGit no separa frontend y backend en servicios distintos: el navegador habla con Next.js; Next.js habla con GitHub y con Neon. Así el access token nunca necesita residir en el cliente.
 
-**Flujo de datos (en prosa):** el usuario autoriza en GitHub → Auth.js guarda sesión y cuenta en Postgres → al pedir el Wrapped, el servidor usa el token para consultar GraphQL → `src/lib/wrapped` calcula slides/stats → la UI renderiza `/wrapped` → si comparte, se persiste un snapshot (`WrappedShare`) y/o una card (`ProfileCard`).
+**Flujo de datos:** OAuth → sesión en Postgres → `GET /api/wrapped` → GraphQL → `lib/wrapped` → slides → opcionalmente `WrappedShare` / `ProfileCard`.
 
 ### Diagrama de arquitectura (alto nivel)
 
@@ -254,11 +313,59 @@ flowchart TB
     CARD --> NEON
 ```
 
+### De GitHub a WrappedStats
+
+Este diagrama detalla la transformación de datos crudos en el objeto que consumen las slides.
+
+```mermaid
+flowchart LR
+    GH[GitHub GraphQL] --> RAW[Datos de actividad]
+    RAW --> NORM[Normalizacion]
+    NORM --> CALC[Calculo de stats]
+    CALC --> WS[WrappedStats]
+    WS --> SL[Slides]
+```
+
+### Seguridad del access token
+
+```mermaid
+flowchart LR
+    U[Usuario] --> GH[GitHub OAuth]
+    GH --> SV[Servidor Next.js]
+    SV --> API[GitHub GraphQL]
+    SV -.->|no se envia| BR[Navegador]
+```
+
+El token queda asociado a la cuenta OAuth en base de datos y solo lo usan Route Handlers / jobs de servidor.
+
+### Actualización de Profile Cards (cron)
+
+Confirmado en `vercel.json`: cron diario `0 6 * * *` hacia `/api/cron/refresh-profile-cards`. El handler exige `Authorization: Bearer ${CRON_SECRET}`, lista cards “stale” y llama a `refreshProfileCard`.
+
+```mermaid
+flowchart LR
+    C[Vercel Cron] --> E[api cron refresh-profile-cards]
+    E --> GH[GitHub GraphQL]
+    E --> PC[(ProfileCard)]
+```
+
+### Flujo para desarrolladores (código)
+
+```mermaid
+flowchart LR
+    APP[src/app] --> RH[Route Handler]
+    RH --> GHLIB[lib/github]
+    GHLIB --> GAPI[GitHub API]
+    RH --> WRAP[lib/wrapped]
+    WRAP --> WS[WrappedStats]
+    WS --> UI[components/wrapped]
+```
+
 ---
 
 ## Flujo de autenticación
 
-El login no inventa usuarios a mano: GitHub es el identity provider. Tras el consent del usuario, Auth.js crea o actualiza `User` / `Account` / `Session` en la base.
+GitHub actúa como proveedor de identidad: YearOnGit no gestiona contraseñas. Tras el consentimiento, Auth.js persiste `User`, `Account` y `Session` en Postgres.
 
 ### Diagrama de flujo de autenticación
 
@@ -283,17 +390,15 @@ sequenceDiagram
     L-->>U: Listo para Loading o Wrapped
 ```
 
-Detalles útiles:
-
-- Scopes reales: `read:user repo read:org` (definidos en `src/auth.ts`).
-- La contraseña de GitHub **no** pasa por YearOnGit.
-- El logout invalida la sesión de Auth.js en el servidor.
+- Scopes: `read:user repo read:org` (`src/auth.ts`).
+- La contraseña de GitHub no pasa por YearOnGit.
+- Logout invalida la sesión Auth.js en el servidor.
 
 ---
 
 ## Flujo de generación del Wrapped
 
-Una vez autenticado, el Wrapped no se “adivina”: se **construye** en el servidor a partir de la API de GitHub y luego se proyecta en slides. Compartir es opcional y crea un snapshot público (sin token).
+El Wrapped se **construye** en el servidor a partir de GraphQL y se proyecta en slides. Compartir y la profile card son pasos opcionales con diagramas propios más abajo.
 
 ### Diagrama de flujo del Wrapped
 
@@ -306,30 +411,71 @@ sequenceDiagram
     participant GH as GitHub GraphQL
     participant LIB as lib wrapped
     participant W as Wrapped
-    participant SH as api share o card
     participant DB as Neon
 
     U->>LD: Entra autenticado
     LD->>API: Pide stats del anio
     API->>GH: Query contribuciones y repos
     GH-->>API: Datos crudos
-    API->>LIB: Calcula stats y slides
+    API->>LIB: Calcula WrappedStats
     API-->>LD: Payload JSON
     LD->>W: Navega al player
     W-->>U: Recorre slides
-    opt Compartir
-        U->>W: Copiar Markdown o crear enlace
-        W->>SH: Persiste share o profile card
-        SH->>DB: WrappedShare o ProfileCard
-        SH-->>U: URL publica o snippet README
-    end
 ```
+
+### Flujo de share público
+
+```mermaid
+flowchart LR
+    W[Wrapped] --> P[POST api share]
+    P --> DB[(WrappedShare)]
+    DB --> URL[/share/slug]
+```
+
+### Flujo de Profile Card
+
+```mermaid
+flowchart LR
+    W[Wrapped] --> P[POST api profile-card]
+    P --> DB[(ProfileCard)]
+    DB --> IMG[/cards/user/year]
+    P --> MD[Markdown README]
+```
+
+---
+
+## Datos utilizados
+
+La query principal (`WRAPPED_YEAR_QUERY` y consultas relacionadas en `src/lib/github/queries.ts`) pide a GitHub, entre otros, perfil, calendario de contribuciones, repos con actividad, lenguajes, gists, stars y organizaciones. Esos campos se agregan en `WrappedStats` para las slides.
+
+### Qué se lee de GitHub (resumen)
+
+| Dato (origen GraphQL) | Uso en el Wrapped |
+|-----------------------|-------------------|
+| Perfil (`login`, `name`, `avatarUrl`, bio, company, location…) | Identidad en slides / payload |
+| Followers / following | Módulo comunidad / social |
+| Contribution calendar (días y counts) | Heatmap, rachas, días activos |
+| Commits / PRs / issues / reviews (totales y por repo) | Tipos de contribución y repos top |
+| Restricted contributions | Flags de actividad restringida |
+| Lenguajes por repositorio | Slide de lenguajes |
+| Repos owned (públicos/privados, forks, archived, starred) | Breakdown de repositorios y popularidad |
+| Organizations | Conteo / contexto de comunidad |
+| Pinned repositories | Contexto de perfil |
+
+### Qué se persiste vs qué se vuelve a pedir
+
+| En Neon (Prisma) | Directo de GitHub en el momento del fetch |
+|------------------|-------------------------------------------|
+| Usuario, cuenta OAuth (incluye access token en servidor), sesión | Contribuciones y métricas “en vivo” al llamar `/api/wrapped` o al refrescar una card |
+| `WrappedShare.stats` (snapshot JSON público) | — |
+| `ProfileCard.stats` + `refreshedAt` | Refresh periódico vía cron vuelve a consultar GitHub |
+| `AppSettings` (configuración de producto) | — |
 
 ---
 
 ## Estructura del proyecto
 
-La organización sigue el App Router de Next: rutas en `app/`, UI en `components/`, dominio en `lib/`. No hay carpeta `Modules/` tipo Laravel; el “módulo” Wrapped está en `src/lib/wrapped` + componentes `src/components/wrapped`.
+Next App Router organiza rutas en `app/`, UI en `components/` y dominio en `lib/`. El “motor” del Wrapped no vive en componentes: vive en `src/lib/wrapped` y se alimenta de `src/lib/github`.
 
 ### Diagrama de carpetas
 
@@ -354,7 +500,7 @@ flowchart TB
 ```text
 src/
   app/            # Rutas UI + API + sitemap/robots
-  components/     # Landing, wrapped, legal, admin, seo…
+  components/     # Landing, wrapped, legal, seo…
   lib/            # GitHub client, wrapped, auth helpers, errors…
   providers/      # App, consent, toasts, sfx…
 prisma/           # Schema y migraciones
@@ -365,7 +511,7 @@ public/           # Assets estáticos + llms.txt
 
 ## Schema de datos
 
-Postgres es la memoria de largo plazo: sesiones, snapshots compartibles y configuración admin. Las métricas “en vivo” del Wrapped salen de GitHub en el momento del fetch (salvo shares/cards ya materializados).
+Postgres guarda identidad/sesión y materializaciones públicas (shares y cards). No reemplaza a GitHub como origen de la actividad del año en el momento de generar un Wrapped fresco.
 
 | Modelo | Para qué sirve |
 |--------|----------------|
@@ -373,8 +519,7 @@ Postgres es la memoria de largo plazo: sesiones, snapshots compartibles y config
 | `VerificationToken` | Flujo estándar Auth.js |
 | `WrappedShare` | Snapshot público por usuario/año (`slug` + `stats` JSON) |
 | `ProfileCard` | Stats year-scoped para imagen README; refresh acotado mientras el año corre |
-| `AppSettings` | Mantenimiento, sign-ins, config JSON (slides/features/editions) |
-| `AdminAuditLog` | Quién cambió qué en admin |
+| `AppSettings` | Configuración de producto persistida |
 
 ```mermaid
 erDiagram
@@ -385,62 +530,55 @@ erDiagram
 ```
 
 > [!WARNING]
-> En shares y cards solo van métricas públicas serializadas. El `access_token` vive en `Account` en el servidor y no se expone al cliente.
+> Shares y cards almacenan métricas públicas serializadas. El `access_token` de GitHub está en `Account` en el servidor y no se expone al cliente.
 
 ---
 
 ## SEO, sitemap y robots
 
-El SEO del producto no depende de un CMS: cada superficie pública tiene metadata propia (`src/lib/seo/pages.ts`), y Next genera `/sitemap.xml` y `/robots.txt` en build/runtime.
+Cada superficie pública tiene metadata propia (`src/lib/seo/pages.ts`). Next genera `/sitemap.xml` y `/robots.txt` desde `src/app/sitemap.ts` y `src/app/robots.ts`.
 
 **En código**
 
-- Titles/descriptions + Open Graph / Twitter por página
+- Titles/descriptions + Open Graph / Twitter
 - JSON-LD `WebApplication` en `/` y `FAQPage` en `/faq`
-- GA4 solo si el usuario aceptó analítica en cookies
+- GA4 solo tras consentimiento de analítica
 
-**Sitemap incluye:** `/`, `/how-it-works`, `/faq`, `/privacy`, `/terms`
+**Sitemap:** `/`, `/how-it-works`, `/faq`, `/privacy`, `/terms`  
 
 **Robots allow:** esas rutas + `/share/`  
-**Robots disallow:** `/admin`, `/api/`, `/wrapped`, `/loading`, `/auth/`, `/errors/`
+**Robots disallow:** `/api/`, `/wrapped`, `/loading`, `/auth/`, `/errors/`
 
-**Manual en producción**
-
-1. Propiedad en Google Search Console  
-2. Enviar `https://<dominio>/sitemap.xml`  
-3. Verificar con `NEXT_PUBLIC_GSC_VERIFICATION` o DNS  
-4. Measurement ID de GA4 en `NEXT_PUBLIC_GA_MEASUREMENT_ID`
+**Manual en producción:** Search Console + envío de sitemap; opcionalmente `NEXT_PUBLIC_GSC_VERIFICATION` y GA4.
 
 ---
 
 ## Privacidad, términos y cookies
 
-La capa legal y de consentimiento existe para ser explícitos: qué se lee de GitHub, qué se guarda, y qué analítica es opcional.
+Las páginas legales y el banner de cookies existen para dejar claro qué se lee de GitHub, qué se guarda y qué analítica es opcional.
 
-- Páginas: `/privacy` y `/terms` (contenido EN/ES en `src/lib/legal/content.ts`)
-- Banner de cookies: esenciales siempre; analítica (GA4) y preferencias opcionales
-- Persistencia de elección: `localStorage` → clave `yearongit-cookie-consent` (versionada, ~12 meses)
-- Reabrir preferencias: footer → **Ajustes de cookies**
+- `/privacy` y `/terms` (textos EN/ES en `src/lib/legal/content.ts`)
+- Banner: esenciales siempre; analítica (GA4) y preferencias opcionales
+- Elección en `localStorage` (`yearongit-cookie-consent`, ~12 meses)
+- Reabrir: footer → **Ajustes de cookies**
 
 ---
 
 ## Catálogo para LLMs
 
-Resumen estable para agentes/LLMs que indexan el producto:
-
-YearOnGit es un producto web gratuito que convierte el año de un desarrollador en GitHub en un Wrapped cinematográfico (contribuciones, lenguajes, rachas, highlights, tarjetas). Auth: GitHub OAuth de solo uso de lectura en la app. Páginas primarias: `/`, `/how-it-works`, `/faq`, `/privacy`, `/terms`, `/share/{slug}`. Privadas: `/wrapped`, `/loading`, `/admin`, `/api/*`. Sitemap `/sitemap.xml`, robots `/robots.txt`.
+YearOnGit es un producto web gratuito que convierte el año de un desarrollador en GitHub en un Wrapped cinematográfico (contribuciones, lenguajes, rachas, highlights, tarjetas). Auth: GitHub OAuth. Páginas primarias: `/`, `/how-it-works`, `/faq`, `/privacy`, `/terms`, `/share/{slug}`. Privadas: `/wrapped`, `/loading`, `/api/*`. Sitemap `/sitemap.xml`, robots `/robots.txt`.
 
 ---
 
 ## Reglas para agentes
 
-Si un asistente de código trabaja en este repo, debe respetar estas convenciones (además del estilo del código existente):
+Convenciones al modificar este repo:
 
-1. **Tokens OAuth solo en servidor** — no loguearlos ni mandarlos al cliente.  
-2. **Preferir GraphQL agrupado** (`contributionsCollection`) frente a muchas llamadas REST.  
-3. **UI dark / slides cinematográficas** — no rediseñar a un look genérico de dashboard.  
-4. **Idioma:** responder en español cuando el usuario escriba en español.  
-5. Endpoints centrales: `/api/auth/*`, `/api/wrapped`.
+1. Tokens OAuth **solo en servidor**.  
+2. Preferir GraphQL agrupado (`contributionsCollection`) frente a muchas llamadas REST.  
+3. UI dark / slides cinematográficas.  
+4. Responder en español si el usuario escribe en español.  
+5. Endpoints centrales de producto: `/api/auth/*`, `/api/wrapped`.
 
 ---
 
@@ -473,23 +611,51 @@ npm run start
 
 ## Seguridad
 
-La superficie sensible es el token de GitHub y los datos de sesión. El diseño asume: “el navegador ve UI y JSON público; el servidor habla con GitHub”.
+La superficie sensible es el access token de GitHub y la sesión. El diseño del monolito asume: el navegador recibe UI y JSON de producto; el servidor es quien habla con GitHub.
 
-- OAuth con scopes de lectura de actividad; sin contraseñas propias.
-- Tokens y secretos solo en entorno servidor / Vercel.
-- Cron de profile cards exige `Authorization: Bearer ${CRON_SECRET}`.
-- Admin por allowlist de `login` de GitHub (`ADMIN_GITHUB_LOGINS`).
-- GA4 no carga hasta consentimiento de analítica.
+- **Autenticación:** GitHub OAuth vía Auth.js; no hay contraseñas de YearOnGit.
+- **Access token:** se obtiene en el callback OAuth, se asocia a `Account` y se usa en servidor para GraphQL.
+- **Cliente:** no recibe el token; recibe stats / payloads de producto.
+- **Shares y cards:** contienen métricas públicas serializadas (`stats` JSON), no tokens ni secretos.
+- **Cron de cards:** requiere `Authorization: Bearer ${CRON_SECRET}`.
+- **GA4:** solo si el usuario aceptó la categoría de analítica.
 
 ---
 
-## FAQ de onboarding
+## FAQ
 
-### ¿Por dónde empiezo a leer código?
-Landing → `src/lib/github` → `src/lib/wrapped` → `src/app/api/wrapped`.
+### ¿Por qué necesito iniciar sesión con GitHub?
+Porque las estadísticas salen de tu actividad en GitHub. OAuth identifica al usuario y permite al servidor leer esos datos con un token propio de la app.
+
+### ¿YearOnGit puede modificar mis repositorios?
+El código de producto **no implementa** operaciones de escritura sobre repos (push, borrar, abrir PRs, etc.). Consulta actividad con la API GraphQL para armar el Wrapped.
+
+### ¿Qué datos utiliza?
+Perfil, calendario de contribuciones, commits/PRs/issues/reviews, lenguajes, repos y organizaciones, entre otros campos pedidos en `src/lib/github/queries.ts`. Ver [Datos utilizados](#datos-utilizados).
+
+### ¿Dónde se utiliza el access token?
+Solo en el servidor (Route Handlers / refresh de cards), nunca en el navegador.
+
+### ¿Qué información se guarda?
+Sesión e identidad Auth.js; opcionalmente snapshots de share y profile card; configuración de producto. Las métricas “en vivo” se vuelven a pedir a GitHub al generar un Wrapped nuevo.
+
+### ¿Cómo funciona el Wrapped?
+`GET /api/wrapped` → GraphQL → `lib/wrapped` → `WrappedStats` → slides en `/wrapped`.
+
+### ¿Cómo funcionan los shares?
+`POST /api/share` guarda un `WrappedShare` y expone `/share/[slug]` sin exigir login al visitante.
+
+### ¿Cómo funciona la Profile Card?
+`POST /api/profile-card` genera/actualiza stats year-scoped, sirve imagen en `/cards/[username]/[year]` y Markdown para el README. Un cron en Vercel puede refrescar cards antiguas.
+
+### ¿Cómo ejecuto el proyecto localmente?
+Ver [Puesta en marcha](#puesta-en-marcha) y [Quick Start](#quick-start-60-segundos).
+
+### ¿Qué requisitos necesito?
+Node 20+, npm, Postgres (Neon) y una GitHub OAuth App.
 
 ### ¿Por qué falla el login en local?
-Callback URL distinto al de la OAuth App, `AUTH_URL` incorrecto, o falta `AUTH_SECRET`.
+Callback URL distinto, `AUTH_URL` incorrecto o falta `AUTH_SECRET`.
 
 ### ¿Qué corro antes de un PR?
 ```bash
@@ -537,11 +703,11 @@ sequenceDiagram
 
 ## CI/CD y despliegue (Vercel)
 
-Este repositorio está orientado a **Vercel** (hay `vercel.json` con un cron diario). No hay workflow de GitHub Actions ni CapRover en el árbol actual del proyecto: el deploy típico es el de la integración Git → Vercel.
+El despliegue previsto es **Vercel** (`vercel.json` define un cron diario). En el árbol actual no hay workflows de GitHub Actions documentados aquí.
 
 1. Push / merge a la rama conectada en Vercel.  
-2. Build con Prisma + Next.  
-3. Env vars solo en el dashboard de Vercel.  
+2. Build: Prisma generate + migrate + Next build.  
+3. Secretos solo en el dashboard de Vercel.  
 4. Cron `0 6 * * *` → `GET /api/cron/refresh-profile-cards`.
 
 ```mermaid
@@ -561,27 +727,26 @@ sequenceDiagram
 ```
 
 > [!WARNING]
-> No hay badge de “build passing” de Actions porque este repo no define workflows CI en `.github/workflows` en el estado actual. Los badges dinámicos del encabezado usan shields.io sobre GitHub (último commit, versión de `package.json`, stars).
+> No hay badge de CI de Actions porque este repo no define workflows en `.github/workflows` en el estado actual. Los badges del encabezado usan shields.io sobre GitHub (último commit, versión de `package.json`, stars).
 
 ---
 
 ## Variables de entorno
 
-Copia desde `.env.example`. Los valores de ejemplo son orientativos; en producción usa secretos reales solo en Vercel/Neon.
+Copia desde `.env.example`. Los ejemplos son orientativos; en producción usa secretos reales solo en Vercel/Neon.
 
 | Variable | Descripción | Ejemplo | Requerida |
 |----------|-------------|---------|-----------|
 | `DATABASE_URL` | Postgres pooled (Neon) | `postgresql://…` | Sí |
 | `DIRECT_URL` | Postgres directo (migraciones) | `postgresql://…` | Sí |
-| `AUTH_SECRET` | Secreto de sesión Auth.js | `npx auth secret` | Sí |
+| `AUTH_SECRET` | Secreto de sesión Auth.js | salida de `npx auth secret` | Sí |
 | `AUTH_GITHUB_ID` | Client ID OAuth App | `Ov23…` | Sí |
 | `AUTH_GITHUB_SECRET` | Client Secret OAuth App | `…` | Sí |
-| `AUTH_URL` | URL canónica de la app para Auth.js | `http://localhost:3000` | Sí |
+| `AUTH_URL` | URL canónica para Auth.js | `http://localhost:3000` | Sí |
 | `NEXT_PUBLIC_APP_URL` | URL pública (share, sitemap, robots) | `https://yearongit.com` | Recomendada en prod |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | ID de GA4 | `G-XXXXXXXX` | No |
-| `NEXT_PUBLIC_GSC_VERIFICATION` | Token meta de Search Console | `google…` | No |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | ID de medición GA4 | `G-XXXXXXXX` | No |
+| `NEXT_PUBLIC_GSC_VERIFICATION` | Token meta Search Console | `google…` | No |
 | `CRON_SECRET` | Bearer del cron de profile cards | string largo | Sí en prod con cron |
-| `ADMIN_GITHUB_LOGINS` | Logins admin extra (CSV) | `alice,bob` | No |
 
 ```env
 DATABASE_URL=
@@ -594,7 +759,6 @@ AUTH_URL=http://localhost:3000
 # NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 # NEXT_PUBLIC_GSC_VERIFICATION=
 # CRON_SECRET=
-# ADMIN_GITHUB_LOGINS=
 ```
 
 > [!WARNING]
@@ -604,9 +768,9 @@ AUTH_URL=http://localhost:3000
 
 ## Estado del proyecto
 
-Producto en evolución activa alrededor del Wrapped 2026: experiencia de slides, shares, profile cards, admin de ediciones, SEO y consentimiento de cookies.
+Producto en evolución activa alrededor del Wrapped 2026: slides, shares, profile cards, SEO y consentimiento de cookies.
 
-Versión declarada en `package.json`: **0.1.0** (también reflejada por el badge dinámico del encabezado).
+Versión en `package.json`: **0.1.0** (también en el badge dinámico del encabezado).
 
 > [!IMPORTANT]
-> Regla de oro: el token de GitHub no sale del servidor; GraphQL agrupado antes que ráfagas REST; UI dark y narrativo, no dashboard genérico.
+> El token de GitHub no sale del servidor. GraphQL agrupado antes que ráfagas REST. UI dark y narrativa.
