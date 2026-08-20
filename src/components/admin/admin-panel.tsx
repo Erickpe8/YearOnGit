@@ -257,8 +257,8 @@ export function AdminPanel({ settings, overview, runtime }: AdminPanelProps) {
   const currentLabel = MODULES.find((item) => item.id === module)?.label;
 
   return (
-    <PageShell footerCompact>
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-6 max-[390px]:px-3 md:px-8 md:py-10">
+    <PageShell footerCompact fitContent>
+      <main className="relative z-10 mx-auto w-full max-w-6xl px-4 py-5 max-[390px]:px-3 md:px-8 md:py-7">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"

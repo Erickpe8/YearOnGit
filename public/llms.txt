@@ -1,0 +1,35 @@
+# YearOnGit
+
+> YearOnGit turns a developer's GitHub year into a cinematic Wrapped-style
+> recap: contributions, languages, streaks, highlights, and shareable cards.
+
+YearOnGit is a free web product. Users sign in with GitHub (read-only OAuth),
+generate a year-in-review experience, and optionally share a public link or
+README Markdown card.
+
+## Primary pages
+
+- [Home](/): Generate your GitHub Wrapped — product landing
+- [How it works](/how-it-works): Three steps from GitHub sign-in to a shareable card
+- [FAQ](/faq): Pricing, permissions, README cards, sharing, and data
+- [Privacy](/privacy): Data handling and OAuth scopes
+- [Terms](/terms): Terms of use
+- [Shared Wrapped](/share/{slug}): Public share links for a finished Wrapped
+
+## Private / non-indexable
+
+- /wrapped — authenticated Wrapped player
+- /loading — auth loading state
+- /admin — operators only
+- /api/* — application APIs
+
+## Product facts
+
+- Brand: YearOnGit
+- Category: developer tools / GitHub year-in-review
+- Auth: GitHub OAuth (read-only)
+
+## Optional
+
+- Sitemap: /sitemap.xml
+- Robots: /robots.txt

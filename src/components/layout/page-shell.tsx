@@ -40,11 +40,17 @@ export function PageShell({
   }
 
   return (
-    <div className={`relative flex min-h-screen flex-col ${className}`}>
+    <div className={`relative flex min-h-dvh flex-col ${className}`}>
       <GlassHeader />
       <HeaderRestorePill />
       <AmbientBackground />
-      <div className={fitContent ? "relative z-10 flex flex-col" : "relative z-10 flex flex-1 flex-col"}>
+      <div
+        className={
+          fitContent
+            ? "relative z-10 flex flex-col"
+            : "relative z-10 flex min-h-0 flex-1 flex-col"
+        }
+      >
         {children}
       </div>
       <SiteFooter

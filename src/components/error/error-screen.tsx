@@ -56,30 +56,28 @@ export function ErrorScreen({
     : null;
 
   return (
-    <>
+    <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
       <GlassHeader />
       <HeaderRestorePill />
-      <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
-        <ErrorBackground />
-        <ErrorPage
-          statusCode={page.statusCode}
-          title={t(titleKey ?? page.titleKey)}
-          description={t(descriptionKey ?? page.descriptionKey)}
-          mood={page.mood}
-          primaryAction={page.primaryAction}
-          secondaryAction={page.secondaryAction}
-          actionLabels={actionLabels}
-          availability={availabilityText}
-          footerLabel={t("copyright")}
-          onRetry={onRetry}
-          requestId={requestId}
-          referenceLabel={
-            requestId ? t("errorReference", { id: requestId }) : undefined
-          }
-          signInCallbackUrl={signInCallbackUrl}
-        />
-        <NoiseOverlay />
-      </div>
-    </>
+      <ErrorBackground />
+      <ErrorPage
+        statusCode={page.statusCode}
+        title={t(titleKey ?? page.titleKey)}
+        description={t(descriptionKey ?? page.descriptionKey)}
+        mood={page.mood}
+        primaryAction={page.primaryAction}
+        secondaryAction={page.secondaryAction}
+        actionLabels={actionLabels}
+        availability={availabilityText}
+        footerLabel={t("copyright")}
+        onRetry={onRetry}
+        requestId={requestId}
+        referenceLabel={
+          requestId ? t("errorReference", { id: requestId }) : undefined
+        }
+        signInCallbackUrl={signInCallbackUrl}
+      />
+      <NoiseOverlay />
+    </div>
   );
 }

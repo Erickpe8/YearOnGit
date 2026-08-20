@@ -23,8 +23,8 @@ export function AdminPreviewClient({
 }: AdminPreviewClientProps) {
   if (error || !payload || !config) {
     return (
-      <PageShell footerCompact>
-        <main className="relative z-10 mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-16 text-center">
+      <PageShell footerCompact fitContent>
+        <main className="relative z-10 mx-auto flex w-full max-w-xl flex-col justify-center px-4 py-8 text-center">
           <p className="font-display text-lg font-bold text-on-surface">
             No se pudo abrir el preview
           </p>
