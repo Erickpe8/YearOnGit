@@ -33,7 +33,7 @@ export function ErrorIllustration({
     <motion.div
       role="img"
       aria-label={LABELS[mood]}
-      className="relative mx-auto grid h-28 w-28 place-items-center max-[390px]:h-24 max-[390px]:w-24"
+      className="relative mx-auto grid h-24 w-24 place-items-center max-[390px]:h-20 max-[390px]:w-20"
       animate={float}
       transition={
         reducedMotion

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { brandAssets, brandName } from "@/lib/brand/assets";
+import { SEO_PAGES } from "@/lib/seo/pages";
 import { AppProvider } from "@/providers/app-provider";
 import { AuthSessionProviderServer } from "@/providers/auth-session-provider-server";
 import "./globals.css";
@@ -16,27 +17,37 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const gscVerification = process.env.NEXT_PUBLIC_GSC_VERIFICATION?.trim();
+
 export const metadata: Metadata = {
   metadataBase: new URL(getAppBaseUrl()),
-  title: brandName,
-  description:
-    "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+  title: {
+    default: `${SEO_PAGES.landing.title} | ${brandName}`,
+    template: `%s | ${brandName}`,
+  },
+  description: SEO_PAGES.landing.description,
   applicationName: brandName,
   openGraph: {
-    title: "YearOnGit | Your GitHub Wrapped",
-    description:
-      "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+    title: `${SEO_PAGES.landing.title} | ${brandName}`,
+    description: SEO_PAGES.landing.description,
     siteName: brandName,
     type: "website",
-    images: [{ url: brandAssets.og, alt: brandName }],
+    images: [
+      {
+        url: brandAssets.og,
+        alt: "YearOnGit Open Graph — GitHub Wrapped preview card",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "YearOnGit | Your GitHub Wrapped",
-    description:
-      "Discover your commits, top repos, languages and more. Your year on GitHub, wrapped.",
+    title: `${SEO_PAGES.landing.title} | ${brandName}`,
+    description: SEO_PAGES.landing.description,
     images: [brandAssets.og],
   },
+  verification: gscVerification
+    ? { google: gscVerification }
+    : undefined,
 };
 
 export default function RootLayout({

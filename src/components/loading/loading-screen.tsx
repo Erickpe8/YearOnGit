@@ -127,12 +127,12 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
   }
 
   return (
-    <PageShell immersive className="items-center justify-center">
-      <main className="relative z-10 flex min-h-[calc(100dvh-7rem)] w-full max-w-lg flex-col items-center justify-center px-4 text-center max-[390px]:min-h-[calc(100dvh-6.5rem)] max-[390px]:px-3">
+    <PageShell immersive>
+      <main className="relative z-10 flex min-h-0 w-full max-w-lg flex-1 flex-col items-center justify-center self-center px-4 py-6 text-center max-[390px]:px-3">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-card brand-wordmark-glow mb-10 rounded-2xl px-8 py-6"
+          className="glass-card brand-wordmark-glow mb-6 rounded-2xl px-7 py-5"
         >
           <BrandWordmark size="lg" />
         </motion.div>
@@ -141,7 +141,7 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="i18n-text mb-2 font-display text-sm font-semibold text-primary"
+            className="i18n-text mb-1.5 font-display text-sm font-semibold text-primary"
           >
             {t("welcomeBack", { name: displayName })}
           </motion.p>
@@ -151,7 +151,7 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="i18n-text mb-3 font-display text-2xl font-bold leading-snug text-on-surface md:text-3xl"
+          className="i18n-text mb-2.5 font-display text-xl font-bold leading-snug text-on-surface md:text-2xl"
         >
           {t("buildingRecap")}
         </motion.h1>
@@ -160,7 +160,7 @@ export function LoadingScreen({ musicEnabled = true }: { musicEnabled?: boolean 
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="i18n-text mb-10 max-w-md leading-relaxed text-on-surface-variant"
+          className="i18n-text mb-6 max-w-md text-sm leading-relaxed text-on-surface-variant md:text-base"
         >
           {t("gatheringCommits")}
         </motion.p>
