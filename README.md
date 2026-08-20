@@ -353,12 +353,12 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    APP[src/app] --> RH[Route Handler]
-    RH --> GHLIB[lib/github]
+    APP["src/app"] --> RH[Route Handler]
+    RH --> GHLIB["lib/github"]
     GHLIB --> GAPI[GitHub API]
-    RH --> WRAP[lib/wrapped]
+    RH --> WRAP["lib/wrapped"]
     WRAP --> WS[WrappedStats]
-    WS --> UI[components/wrapped]
+    WS --> UI["components/wrapped"]
 ```
 
 ---
@@ -429,7 +429,7 @@ sequenceDiagram
 flowchart LR
     W[Wrapped] --> P[POST api share]
     P --> DB[(WrappedShare)]
-    DB --> URL[/share/slug]
+    DB --> URL["/share/slug"]
 ```
 
 ### Flujo de Profile Card
@@ -438,7 +438,7 @@ flowchart LR
 flowchart LR
     W[Wrapped] --> P[POST api profile-card]
     P --> DB[(ProfileCard)]
-    DB --> IMG[/cards/user/year]
+    DB --> IMG["/cards/user/year"]
     P --> MD[Markdown README]
 ```
 
