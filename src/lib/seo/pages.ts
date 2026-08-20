@@ -13,14 +13,8 @@ export type SeoPageId =
   | "shareFallback"
   | "errors";
 
-/**
- * Search intent + unique title/description per public surface.
- * Titles ≠ on-page H1 copy (H1 stays the landing tagline / legal document title).
- */
 export const SEO_PAGES = {
   landing: {
-    intent: "informational+transactional",
-    intentNote: "Generate your GitHub year-in-review / Wrapped",
     title: "Generate Your GitHub Wrapped 2026",
     description:
       "Sign in with GitHub and get a cinematic year-in-review: commits, languages, streaks, and a shareable card. Free, read-only access.",
@@ -28,8 +22,6 @@ export const SEO_PAGES = {
     index: true,
   },
   howItWorks: {
-    intent: "informational",
-    intentNote: "Three steps from GitHub sign-in to a shareable Wrapped",
     title: "How YearOnGit Works",
     description:
       "Sign in with GitHub, generate your cinematic year-in-review, and share a link or README card. Free and read-only.",
@@ -37,8 +29,6 @@ export const SEO_PAGES = {
     index: true,
   },
   faq: {
-    intent: "informational",
-    intentNote: "Common questions about YearOnGit pricing, scopes, and sharing",
     title: "YearOnGit FAQ",
     description:
       "Answers about YearOnGit: free access, GitHub permissions, README cards, public share links, and data storage.",
@@ -46,8 +36,6 @@ export const SEO_PAGES = {
     index: true,
   },
   privacy: {
-    intent: "informational",
-    intentNote: "How YearOnGit handles GitHub data and privacy",
     title: "Privacy Policy",
     description:
       "How YearOnGit uses GitHub OAuth, what data we store, and how sharing and profile cards work. Read-only scopes only.",
@@ -55,8 +43,6 @@ export const SEO_PAGES = {
     index: true,
   },
   terms: {
-    intent: "informational",
-    intentNote: "Terms of use for YearOnGit",
     title: "Terms of Use",
     description:
       "Terms for using YearOnGit: GitHub Wrapped generation, sharing links, and acceptable use of the product.",
@@ -64,32 +50,24 @@ export const SEO_PAGES = {
     index: true,
   },
   wrapped: {
-    intent: "private",
-    intentNote: "Authenticated Wrapped experience — not for search",
     title: "Your Wrapped",
     description: "Your private GitHub year-in-review on YearOnGit.",
     path: "/wrapped",
     index: false,
   },
   loading: {
-    intent: "private",
-    intentNote: "Auth loading state — not for search",
     title: "Building your Wrapped",
     description: "Loading your GitHub Wrapped on YearOnGit.",
     path: "/loading",
     index: false,
   },
   shareFallback: {
-    intent: "social",
-    intentNote: "Public shared Wrapped when slug metadata fails",
     title: "Shared GitHub Wrapped",
     description: "A shared Year on Git recap from YearOnGit.",
     path: "/share",
     index: true,
   },
   errors: {
-    intent: "utility",
-    intentNote: "Error screens — keep out of the index",
     title: "Something went wrong",
     description: "An error page on YearOnGit.",
     path: "/errors",
@@ -98,8 +76,6 @@ export const SEO_PAGES = {
 } as const satisfies Record<
   SeoPageId,
   {
-    intent: string;
-    intentNote: string;
     title: string;
     description: string;
     path: string;

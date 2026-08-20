@@ -1,15 +1,11 @@
 export const CONSENT_STORAGE_KEY = "yearongit-cookie-consent";
 export const CONSENT_VERSION = 1;
-/** How long we honor a stored choice before asking again (12 months). */
 export const CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 
 export type ConsentPreferences = {
   version: number;
-  /** Always true — session, security, consent record. */
   essential: true;
-  /** GA4 and similar. Off until explicit accept. */
   analytics: boolean;
-  /** Non-essential preference cookies beyond essential local prefs. */
   preferences: boolean;
   updatedAt: number;
 };

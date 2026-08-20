@@ -2,10 +2,6 @@ import type { MetadataRoute } from "next";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { SEO_PAGES } from "@/lib/seo/pages";
 
-/**
- * Public indexable routes only.
- * No /page/2-style pagination exists; authenticated and admin routes stay out.
- */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getAppBaseUrl();
   const now = new Date();

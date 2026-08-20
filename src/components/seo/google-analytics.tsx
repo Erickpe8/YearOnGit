@@ -5,9 +5,6 @@ import { useConsent } from "@/providers/consent-provider";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
-/**
- * GA4 loads only after explicit analytics consent (GDPR-style).
- */
 export function GoogleAnalytics() {
   const { ready, consent } = useConsent();
 

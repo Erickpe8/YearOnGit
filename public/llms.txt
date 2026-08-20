@@ -28,7 +28,6 @@ README Markdown card.
 - Brand: YearOnGit
 - Category: developer tools / GitHub year-in-review
 - Auth: GitHub OAuth (read-only)
-- LocalBusiness schema: not applicable (global digital product, no storefront)
 
 ## Optional
 
