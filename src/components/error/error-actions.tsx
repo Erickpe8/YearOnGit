@@ -74,7 +74,7 @@ export function ErrorActions({
   if (!primary && !secondary) return null;
 
   return (
-    <div className="mt-7 flex w-full max-w-sm flex-col items-center gap-3 sm:flex-row sm:justify-center">
+    <div className="mt-5 flex w-full max-w-sm flex-col items-center gap-2.5 sm:flex-row sm:justify-center">
       {primary ? (
         <ActionButton
           action={primary}

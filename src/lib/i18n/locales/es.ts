@@ -5,7 +5,7 @@ export const es = {
   continueWithGitHub: "Continuar con GitHub",
   viewMyWrapped: "Ver mi Wrapped",
   welcomeBack: "Bienvenido de nuevo, @{name}",
-  privacyNote: "Incluye repos públicos y privados. Solo lectura — no guardamos contraseñas.",
+  privacyNote: "Tu actividad pública y privada se ve en solo lectura. Nunca pedimos ni guardamos tu contraseña.",
   editionLive: "RECAP 2026 YA DISPONIBLE",
   privacy: "Privacidad",
   terms: "Términos",
@@ -300,4 +300,62 @@ export const es = {
   rateLimitDescription: "Hubo demasiadas peticiones. Inténtalo en unos segundos.",
   errorReference: "Referencia: {id}",
   wrappedUpdated: "Wrapped actualizado",
+  landingTldrLabel: "En resumen",
+  landingTldrBody:
+    "Conecta GitHub una vez, obtén tu año en commits, lenguajes y rachas, y comparte un enlace o tarjeta README — gratis y solo lectura.",
+  landingHowTitle: "Cómo funciona",
+  landingHowIntro:
+    "Tres pasos sencillos: entra con GitHub, ve tu año en slides y, si quieres, compártelo.",
+  landingHowStepLabel: "Paso {step}",
+  landingHowStep1Title: "Entra con GitHub",
+  landingHowStep1Body:
+    "Te pedimos permiso solo para leer tu actividad. No guardamos tu contraseña ni podemos escribir en tus repos.",
+  landingHowStep2Title: "Armamos tu año",
+  landingHowStep2Body:
+    "Reunimos commits, lenguajes, rachas y momentos destacados y los mostramos en slides.",
+  landingHowStep3Title: "Comparte tu tarjeta",
+  landingHowStep3Body:
+    "Copia un enlace para compartir o una tarjeta para tu perfil de GitHub.",
+  landingFaqTitle: "Preguntas frecuentes",
+  landingFaq1Q: "¿YearOnGit es gratis?",
+  landingFaq1A:
+    "Sí. Entrar con GitHub y ver tu Wrapped es gratis. No cobramos por generar ni por ver tu recap.",
+  landingFaq2Q: "¿Necesito dar acceso a repos privados?",
+  landingFaq2A:
+    "Pedimos permiso de solo lectura para que tu actividad pública y privada pueda aparecer en el Wrapped. Nunca pedimos permiso para modificar nada.",
+  landingFaq3Q: "¿Cómo se genera la tarjeta del perfil?",
+  landingFaq3A:
+    "Cuando terminas tu Wrapped, puedes crear un enlace y copiar un código corto. Ese código muestra una imagen con tus stats del año en el README de tu perfil de GitHub.",
+  landingFaq4Q: "¿Puedo compartir mi Wrapped en público?",
+  landingFaq4A:
+    "Sí. Desde el resumen puedes crear un enlace. Quien lo abra ve ese recap del año sin necesidad de iniciar sesión.",
+  landingFaq5Q: "¿Qué datos guardan?",
+  landingFaq5A:
+    "Guardamos lo necesario para que puedas iniciar sesión y volver a tu Wrapped. Si creas un enlace público o una tarjeta para tu perfil, también guardamos eso. Tu contraseña de GitHub no se almacena: el acceso queda en el servidor. Más detalles en Privacidad.",
+  landingFaqMoreTitle: "¿Tienes otra pregunta?",
+  landingFaqMoreBody:
+    "Si no encontraste lo que buscabas, pregunta en las Discussions de GitHub (Q&A / Preguntas).",
+  landingFaqMoreCta: "Abrir Q&A en GitHub",
+  landingRelatedTitle: "Explora YearOnGit",
+  landingShareSite: "Compartir YearOnGit",
+  landingShareTitle: "YearOnGit — Tu GitHub Wrapped",
+  landingShareText: "Genera tu year-in-review de GitHub con YearOnGit.",
+  landingShareDone: "Enlace listo",
+  landingShareError: "No se pudo compartir",
+  landingStickyCta: "Generar mi Wrapped",
+  cookieBannerTitle: "Cookies y privacidad",
+  cookieBannerBody:
+    "Usamos cookies necesarias para mantener tu sesión y recordar esta elección. La analítica solo se activa si la aceptas. Nunca guardamos tu contraseña de GitHub.",
+  cookieAcceptAll: "Aceptar todas",
+  cookieRejectNonEssential: "Solo esenciales",
+  cookieCustomize: "Personalizar",
+  cookieSaveChoices: "Guardar preferencias",
+  cookieBack: "Volver",
+  cookieEssential: "Esenciales",
+  cookieEssentialDesc: "Mantienen tu sesión, la seguridad del sitio y recuerdan tu elección de cookies.",
+  cookieAnalytics: "Analítica",
+  cookieAnalyticsDesc: "Nos ayuda a entender cómo se usa YearOnGit. Es opcional y se puede desactivar.",
+  cookiePreferences: "Preferencias",
+  cookiePreferencesDesc: "Guardan opciones opcionales del sitio. El idioma y algunos ajustes de interfaz ya se guardan en tu dispositivo.",
+  cookieSettings: "Ajustes de cookies",
 } as const;

@@ -54,7 +54,7 @@ export function StreakWatermarkCard() {
   if (!stats) return null;
 
   return (
-    <div className="pointer-events-none absolute top-[38%] left-1/2 z-10 w-[188px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/8 bg-white/[0.03] p-4 opacity-40 blur-[6px] max-[390px]:top-[36%] max-[390px]:w-[156px] max-[390px]:p-3">
+    <div className="pointer-events-none absolute top-[34%] left-1/2 z-10 w-[168px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/8 bg-white/[0.03] p-3 opacity-40 blur-[6px] max-[390px]:top-[32%] max-[390px]:w-[140px] max-[390px]:p-2.5">
       <div className="flex flex-col items-center">
         <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#39d353]/15 text-[#39d353]">
           <IconFlame className="h-3.5 w-3.5" />
@@ -171,11 +171,11 @@ export function HeatmapCard() {
 
   return (
     <div
-      className="glass-card glass-card-front pointer-events-none absolute right-full bottom-[-6px] z-30 mr-[34px] w-[300px] rounded-2xl p-4 max-[390px]:right-auto max-[390px]:bottom-[-8px] max-[390px]:left-[-28px] max-[390px]:mr-0 max-[390px]:w-[190px] max-[390px]:p-3 md:mr-[38px]"
+      className="glass-card glass-card-front pointer-events-none absolute right-full bottom-2 z-30 mr-[28px] w-[260px] rounded-2xl p-3 max-[390px]:right-auto max-[390px]:bottom-1 max-[390px]:left-[-22px] max-[390px]:mr-0 max-[390px]:w-[168px] max-[390px]:p-2.5 md:mr-[32px]"
       style={{ rotate: "-4deg" }}
       aria-hidden
     >
-      <div className="mb-3 flex items-start justify-between gap-1">
+      <div className="mb-2 flex items-start justify-between gap-1">
         <div className="text-left">
           <h3 className="i18n-text font-display text-sm font-bold text-[#39d353] max-[390px]:text-xs">
             {t("globalImpact")}
@@ -205,14 +205,14 @@ export function LanguagesCard() {
 
   return (
     <div
-      className="glass-card glass-card-front pointer-events-none absolute bottom-[-6px] left-full z-30 ml-[34px] w-[300px] rounded-2xl p-4 max-[390px]:left-auto max-[390px]:right-[-28px] max-[390px]:bottom-[-8px] max-[390px]:ml-0 max-[390px]:w-[190px] max-[390px]:p-3 md:ml-[38px]"
+      className="glass-card glass-card-front pointer-events-none absolute bottom-2 left-full z-30 ml-[28px] w-[260px] rounded-2xl p-3 max-[390px]:left-auto max-[390px]:right-[-22px] max-[390px]:bottom-1 max-[390px]:ml-0 max-[390px]:w-[168px] max-[390px]:p-2.5 md:ml-[32px]"
       style={{ rotate: "4deg" }}
       aria-hidden
     >
-      <h3 className="mb-3 text-left font-display text-sm font-bold max-[390px]:mb-2 max-[390px]:text-xs">
+      <h3 className="mb-2 text-left font-display text-sm font-bold max-[390px]:mb-1.5 max-[390px]:text-xs">
         {t("languages")}
       </h3>
-      <div className="space-y-3 max-[390px]:space-y-2">
+      <div className="space-y-2 max-[390px]:space-y-1.5">
         {stats.languages.map((lang) => (
           <div key={lang.name}>
             <div className="mb-1 flex justify-between text-xs max-[390px]:text-[10px]">
@@ -256,15 +256,15 @@ export function LandingCardCluster({ children }: LandingCardClusterProps) {
 
   return (
     <LandingPreviewContext.Provider value={stats}>
-      <section className="flex w-full flex-1 items-center justify-center overflow-visible px-4 pt-10 pb-6 max-[390px]:px-3 max-[390px]:pt-8 max-[390px]:pb-5 md:pt-14 md:pb-8">
+      <section className="flex w-full items-start justify-center overflow-visible px-4 pt-5 pb-5 max-[390px]:px-3 max-[390px]:pt-4 max-[390px]:pb-4 md:pt-7 md:pb-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.7, delay: 0.05 }}
-          className="relative isolate mx-auto w-full max-w-[520px] max-[390px]:max-w-[340px]"
+          className="relative isolate mx-auto w-full max-w-[480px] max-[390px]:max-w-[320px]"
         >
           <div
-            className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(57,211,83,0.18)_0%,rgba(57,211,83,0.06)_40%,transparent_70%)] blur-[2px] max-[390px]:h-[400px] max-[390px]:w-[400px]"
+            className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(57,211,83,0.18)_0%,rgba(57,211,83,0.06)_40%,transparent_70%)] blur-[2px] max-[390px]:h-[300px] max-[390px]:w-[300px]"
             aria-hidden
           />
           <CodeParticles />

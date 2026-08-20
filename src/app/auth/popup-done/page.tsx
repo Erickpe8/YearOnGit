@@ -1,19 +1,9 @@
-"use client";
+import type { Metadata } from "next";
+import AuthPopupDonePage from "./popup-done-client";
 
-import { useEffect } from "react";
+export const metadata: Metadata = {
+  title: "Signing in",
+  robots: { index: false, follow: false },
+};
 
-const MESSAGE = { type: "yearongit:oauth" } as const;
-
-export default function AuthPopupDonePage() {
-  useEffect(() => {
-    try {
-      window.opener?.postMessage(MESSAGE, window.location.origin);
-    } catch {}
-    window.close();
-    window.setTimeout(() => {
-      window.location.replace("/loading");
-    }, 250);
-  }, []);
-
-  return null;
-}
+export default AuthPopupDonePage;

@@ -19,6 +19,9 @@ import {
 } from "@/lib/i18n/supported-locales";
 import { brandName } from "@/lib/brand/assets";
 import { OfflineNotice } from "@/components/ui/offline-notice";
+import { CookieConsentBanner } from "@/components/legal/cookie-consent-banner";
+import { GoogleAnalytics } from "@/components/seo/google-analytics";
+import { ConsentProvider } from "@/providers/consent-provider";
 import { SfxProvider } from "@/providers/sfx-provider";
 import { ToastProvider } from "@/providers/toast-provider";
 
@@ -134,12 +137,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      <SfxProvider>
-        <ToastProvider>
-          <OfflineNotice />
-          {children}
-        </ToastProvider>
-      </SfxProvider>
+      <ConsentProvider>
+        <SfxProvider>
+          <ToastProvider>
+            <OfflineNotice />
+            {children}
+            <CookieConsentBanner />
+            <GoogleAnalytics />
+          </ToastProvider>
+        </SfxProvider>
+      </ConsentProvider>
     </AppContext.Provider>
   );
 }

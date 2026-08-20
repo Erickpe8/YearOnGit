@@ -15,6 +15,10 @@ import {
   LanguagesCard,
   ReposDecorCard,
 } from "./landing-card-cluster";
+import {
+  LandingShareButton,
+  MobileStickyCta,
+} from "./landing-sticky-cta";
 import type { PublicSiteConfig } from "@/lib/admin/settings";
 import { useLiveWrappedConfig } from "@/lib/admin/use-live-config";
 
@@ -116,85 +120,93 @@ export function LandingHero({ siteConfig }: { siteConfig: PublicSiteConfig }) {
   }, [unlock]);
 
   return (
-    <LandingCardCluster>
-      <div className="relative z-40 mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-[#39d353]/20 bg-[#39d353]/5 px-4 py-1.5 max-[390px]:mb-4">
-        <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#39d353]" />
-        <span className="i18n-badge font-display text-[10px] font-bold uppercase text-[#39d353] max-[390px]:text-[9px]">
-          {wrappedLive ? t("editionLive") : t("wrappedSoonBadge")}
-        </span>
-      </div>
-
-      <div className="relative z-40 mb-4 max-[390px]:mb-3">
-        <CommitsDecorCard />
-        <ReposDecorCard />
-        <h1 className="hero-headline i18n-text relative z-40 font-display text-[32px] font-extrabold text-on-surface max-[390px]:text-[26px] md:text-[48px]">
-          {waitingForLaunch ? (
-            t("wrappedSoonNotifyTitle")
-          ) : wrappedLive ? (
-            isAuthenticated && displayName ? (
-              t("welcomeBack", { name: displayName })
-            ) : (
-              <>
-                {t("taglinePrefix")}
-                <span className="text-[#39d353] italic"> GitHub</span>
-                {t("taglineSuffix")}
-              </>
-            )
-          ) : (
-            t("wrappedSoonTitle")
-          )}
-        </h1>
-      </div>
-
-      <p className="hero-headline i18n-text relative z-40 mb-6 text-base leading-relaxed text-on-surface-variant max-[390px]:mb-5 max-[390px]:text-sm">
-        {waitingForLaunch
-          ? t("wrappedSoonNotifyBody")
-          : wrappedLive
-            ? t("landingDescription")
-            : t("wrappedSoonBody")}
-      </p>
-
-      <div className="relative z-40 mx-auto flex w-full max-w-sm flex-col items-center gap-3 max-[390px]:max-w-[300px]">
-        <div className="relative w-full">
-          <HeatmapCard />
-          <LanguagesCard />
-          {wrappedLive && isAuthenticated ? (
-            <Link
-              href="/loading"
-              onClick={() => {
-                unlock();
-              }}
-              className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
-            >
-              <span className="i18n-cta text-center">{t("viewMyWrapped")}</span>
-              <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
-            </Link>
-          ) : waitingForLaunch ? (
-            <p className="relative z-40 text-center font-display text-sm font-semibold text-primary/80">
-              {t("comingSoon")}
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={handleGitHub}
-              className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-3 max-[390px]:text-sm"
-            >
-              <GitHubIcon />
-              <span className="i18n-cta text-center">
-                {t("continueWithGitHub")}
-              </span>
-              <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
-            </button>
-          )}
+    <>
+      <LandingCardCluster>
+        <div className="relative z-40 mb-3 inline-flex max-w-full items-center gap-2 rounded-full border border-[#39d353]/20 bg-[#39d353]/5 px-3.5 py-1 max-[390px]:mb-2.5">
+          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#39d353]" />
+          <span className="i18n-badge font-display text-[10px] font-bold uppercase text-[#39d353] max-[390px]:text-[9px]">
+            {wrappedLive ? t("editionLive") : t("wrappedSoonBadge")}
+          </span>
         </div>
 
-        {!isAuthenticated ? (
-          <p className="i18n-micro relative z-40 flex max-w-xs flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-display text-[10px] font-semibold text-on-surface-variant/70 max-[390px]:max-w-[280px] max-[390px]:text-[9px]">
-            <IconLock className="h-3.5 w-3.5 shrink-0" />
-            <span>{t("privacyNote")}</span>
-          </p>
-        ) : null}
-      </div>
-    </LandingCardCluster>
+        <div className="relative z-40 mb-3 max-[390px]:mb-2">
+          <CommitsDecorCard />
+          <ReposDecorCard />
+          <h1 className="hero-headline i18n-text relative z-40 font-display text-[28px] font-extrabold text-on-surface max-[390px]:text-[24px] md:text-[40px]">
+            {waitingForLaunch ? (
+              t("wrappedSoonNotifyTitle")
+            ) : wrappedLive ? (
+              isAuthenticated && displayName ? (
+                t("welcomeBack", { name: displayName })
+              ) : (
+                <>
+                  {t("taglinePrefix")}
+                  <span className="text-[#39d353] italic"> GitHub</span>
+                  {t("taglineSuffix")}
+                </>
+              )
+            ) : (
+              t("wrappedSoonTitle")
+            )}
+          </h1>
+        </div>
+
+        <p className="hero-headline i18n-text relative z-40 mb-4 text-sm leading-relaxed text-on-surface-variant max-[390px]:mb-3.5 max-[390px]:text-[13px] md:text-base">
+          {waitingForLaunch
+            ? t("wrappedSoonNotifyBody")
+            : wrappedLive
+              ? t("landingDescription")
+              : t("wrappedSoonBody")}
+        </p>
+
+        <div className="relative z-40 mx-auto flex w-full max-w-sm flex-col items-center gap-2.5 max-[390px]:max-w-[300px]">
+          <div className="relative w-full">
+            <HeatmapCard />
+            <LanguagesCard />
+            {wrappedLive && isAuthenticated ? (
+              <Link
+                href="/loading"
+                onClick={() => {
+                  unlock();
+                }}
+                className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-2.5 max-[390px]:text-sm"
+              >
+                <span className="i18n-cta text-center">{t("viewMyWrapped")}</span>
+                <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+              </Link>
+            ) : waitingForLaunch ? (
+              <p className="relative z-40 text-center font-display text-sm font-semibold text-primary/80">
+                {t("comingSoon")}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleGitHub}
+                className="btn-primary btn-primary-glow group relative z-40 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-bold text-white transition-all hover:scale-[1.02] active:scale-95 max-[390px]:px-5 max-[390px]:py-2.5 max-[390px]:text-sm"
+              >
+                <GitHubIcon />
+                <span className="i18n-cta text-center">
+                  {t("continueWithGitHub")}
+                </span>
+                <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+              </button>
+            )}
+          </div>
+
+          {!isAuthenticated ? (
+            <p className="i18n-micro relative z-40 flex max-w-xs flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-display text-[10px] font-semibold text-on-surface-variant/70 max-[390px]:max-w-[280px] max-[390px]:text-[9px]">
+              <IconLock className="h-3.5 w-3.5 shrink-0" />
+              <span>{t("privacyNote")}</span>
+            </p>
+          ) : null}
+
+          <div className="relative z-40">
+            <LandingShareButton />
+          </div>
+        </div>
+      </LandingCardCluster>
+
+      <MobileStickyCta siteConfig={liveConfig} onGitHub={handleGitHub} />
+    </>
   );
 }

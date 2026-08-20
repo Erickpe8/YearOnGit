@@ -72,12 +72,12 @@ export function ErrorPage({
 
   return (
     <main className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center max-[390px]:px-3">
-      <div className="glass-card w-full max-w-lg rounded-3xl px-6 py-8 max-[390px]:px-5 max-[390px]:py-6 md:px-10 md:py-10">
+      <div className="glass-card w-full max-w-lg rounded-3xl px-6 py-6 max-[390px]:px-5 max-[390px]:py-5 md:px-8 md:py-7">
         {icon ?? <ErrorIllustration mood={mood} emphasized={Number(statusCode) === 500} />}
-        <div className="mt-4">
+        <div className="mt-3">
           <ErrorCode code={statusCode} />
         </div>
-        <div className="mt-4">
+        <div className="mt-3">
           <ErrorContent
             title={title}
             description={description}

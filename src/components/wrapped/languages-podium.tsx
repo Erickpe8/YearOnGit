@@ -73,7 +73,7 @@ export function LanguagesPodium({ languages, t }: LanguagesPodiumProps) {
 
   return (
     <div className="flex min-h-0 w-full max-w-lg flex-1 flex-col justify-center gap-4 px-1">
-      <div className="flex min-h-[200px] items-end justify-center gap-2 md:min-h-[240px] md:gap-3">
+      <div className="flex min-h-[170px] items-end justify-center gap-2 md:min-h-[200px] md:gap-3">
         {podiumOrder.map((entry, visualIndex) => {
           const height = podiumHeightPx(entry.rank, entry.pct, maxPct);
           const delay = reducedMotion ? 0 : 0.15 + visualIndex * 0.12;

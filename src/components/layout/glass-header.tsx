@@ -21,15 +21,17 @@ export function GlassHeader() {
   const accountLabel = displayName ? `@${displayName}` : t("headerGreeting");
 
   return (
-    <AnimatePresence>
-      {headerVisible && (
-        <motion.header
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-header sticky top-0 z-50 w-full"
-        >
+    <>
+      <div className="glass-header-spacer" aria-hidden />
+      <AnimatePresence>
+        {headerVisible && (
+          <motion.header
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-header w-full"
+          >
           <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-3 max-[390px]:gap-2 md:h-16 md:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <GlassTooltip label={t("goHome")} align="start">
@@ -96,8 +98,9 @@ export function GlassHeader() {
               </GlassTooltip>
             </div>
           </div>
-        </motion.header>
-      )}
-    </AnimatePresence>
+          </motion.header>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

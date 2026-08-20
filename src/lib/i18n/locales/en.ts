@@ -5,7 +5,7 @@ export const en = {
   continueWithGitHub: "Continue with GitHub",
   viewMyWrapped: "View my Wrapped",
   welcomeBack: "Welcome back, @{name}",
-  privacyNote: "Includes public and private repos. Read-only — no passwords stored.",
+  privacyNote: "We only read your public and private activity. We never ask for or store your password.",
   editionLive: "RECAP 2026 NOW LIVE",
   privacy: "Privacy",
   terms: "Terms",
@@ -300,4 +300,62 @@ export const en = {
   rateLimitDescription: "Too many requests were made. Please try again shortly.",
   errorReference: "Reference: {id}",
   wrappedUpdated: "Wrapped updated",
+  landingTldrLabel: "Key takeaways",
+  landingTldrBody:
+    "Connect GitHub once, get a year-in-review of commits, languages, and streaks, then share a public link or README card — free and read-only.",
+  landingHowTitle: "How it works",
+  landingHowIntro:
+    "Three simple steps: sign in with GitHub, see your year in slides, and share it if you want.",
+  landingHowStepLabel: "Step {step}",
+  landingHowStep1Title: "Sign in with GitHub",
+  landingHowStep1Body:
+    "We only ask for read access to your activity. We never store your password or write to your repos.",
+  landingHowStep2Title: "We build your year",
+  landingHowStep2Body:
+    "We gather commits, languages, streaks, and highlights and show them in slides.",
+  landingHowStep3Title: "Share your card",
+  landingHowStep3Body:
+    "Copy a share link or a card for your GitHub profile.",
+  landingFaqTitle: "FAQ",
+  landingFaq1Q: "Is YearOnGit free?",
+  landingFaq1A:
+    "Yes. Signing in with GitHub and viewing your Wrapped is free. We do not charge to generate or view your recap.",
+  landingFaq2Q: "Do I need access to private repositories?",
+  landingFaq2A:
+    "We ask for read-only permission so public and private activity can appear in your Wrapped. We never ask for permission to change anything.",
+  landingFaq3Q: "How is the profile card generated?",
+  landingFaq3A:
+    "When your Wrapped is ready, you can create a link and copy a short snippet. That snippet shows an image of your year stats on your GitHub profile README.",
+  landingFaq4Q: "Can I share my Wrapped publicly?",
+  landingFaq4A:
+    "Yes. From the summary you can create a link. Anyone who opens it can see that year's recap without signing in.",
+  landingFaq5Q: "What data do you store?",
+  landingFaq5A:
+    "We keep what you need to stay signed in and reopen your Wrapped. If you create a public share link or a profile card, we store that too. We never save your GitHub password—access stays on the server. See Privacy for full details.",
+  landingFaqMoreTitle: "Have another question?",
+  landingFaqMoreBody:
+    "If you didn’t find what you needed, ask in our GitHub Discussions (Q&A / Preguntas).",
+  landingFaqMoreCta: "Open Q&A on GitHub",
+  landingRelatedTitle: "Explore YearOnGit",
+  landingShareSite: "Share YearOnGit",
+  landingShareTitle: "YearOnGit — Your GitHub Wrapped",
+  landingShareText: "Generate your GitHub year-in-review with YearOnGit.",
+  landingShareDone: "Link ready",
+  landingShareError: "Couldn't share",
+  landingStickyCta: "Generate my Wrapped",
+  cookieBannerTitle: "Cookies & privacy",
+  cookieBannerBody:
+    "We use necessary cookies to keep you signed in and remember this choice. Analytics loads only if you accept it. We never store your GitHub password.",
+  cookieAcceptAll: "Accept all",
+  cookieRejectNonEssential: "Essential only",
+  cookieCustomize: "Customize",
+  cookieSaveChoices: "Save choices",
+  cookieBack: "Back",
+  cookieEssential: "Essential",
+  cookieEssentialDesc: "Keep your session, site security, and this cookie choice.",
+  cookieAnalytics: "Analytics",
+  cookieAnalyticsDesc: "Helps us understand how YearOnGit is used. Optional and can be turned off.",
+  cookiePreferences: "Preferences",
+  cookiePreferencesDesc: "Optional site settings. Language and some UI choices already stay on your device.",
+  cookieSettings: "Cookie settings",
 } as const;
