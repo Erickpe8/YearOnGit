@@ -41,31 +41,31 @@ export function runIndexCli(
   const log = runtime.log ?? ((s) => process.stdout.write(`${s}\n`));
   const err = runtime.err ?? ((s) => process.stderr.write(`${s}\n`));
 
-  const store = new IndexStore(projectDir);
-  const indexer = new Indexer({ root, store });
-
-  if (args.installHooks) {
-    const result = new GitHookInstaller(root).install();
-    if (!args.ifStale && !args.check) {
-      log(stringifyPretty({ hooks: result }).trimEnd());
-    }
-  }
-
-  if (args.check) {
-    const report = indexer.checkStale();
-    log(stringifyPretty(report).trimEnd());
-    return report.stale ? 1 : 0;
-  }
-
-  if (args.ifStale) {
-    const result = indexer.refreshIfStale();
-    if (result.refreshed) {
-      log(`Índice actualizado (${result.mode})`);
-    }
-    return 0;
-  }
-
   try {
+    const store = new IndexStore(projectDir);
+    const indexer = new Indexer({ root, store });
+
+    if (args.installHooks) {
+      const result = new GitHookInstaller(root).install();
+      if (!args.ifStale && !args.check) {
+        log(stringifyPretty({ hooks: result }).trimEnd());
+      }
+    }
+
+    if (args.check) {
+      const report = indexer.checkStale();
+      log(stringifyPretty(report).trimEnd());
+      return report.stale ? 1 : 0;
+    }
+
+    if (args.ifStale) {
+      const result = indexer.refreshIfStale();
+      if (result.refreshed) {
+        log(`Índice actualizado (${result.mode})`);
+      }
+      return 0;
+    }
+
     const result = indexer.build({ full: Boolean(args.full) || !store.hasIndex() });
     const orphans = indexer.orphanSourceFiles();
     log(
@@ -81,6 +81,9 @@ export function runIndexCli(
     }
     return 0;
   } catch (e) {
+    if (args.noInteraction && (args.ifStale || args.installHooks)) {
+      return 0;
+    }
     err(e instanceof Error ? e.message : String(e));
     return 1;
   }
