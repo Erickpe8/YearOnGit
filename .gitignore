@@ -61,3 +61,6 @@ skills-lock.json
 
 # prisma
 /src/generated/prisma
+
+# project intelligence (local cache only)
+.project/fingerprints.json

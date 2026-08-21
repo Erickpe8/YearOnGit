@@ -1,0 +1,223 @@
+{
+  "project": {
+    "id": "yearongit",
+    "name": "YearOnGit",
+    "summary": "Wrapped anual de GitHub: OAuth, stats GraphQL, slides, shares y profile cards."
+  },
+  "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad.",
+  "context_budget": {
+    "prefer_levels": [
+      0,
+      1,
+      2
+    ],
+    "max_initial_files": 5,
+    "note": "Leer overview → relevant/context → entrypoints; ampliar solo si hace falta."
+  },
+  "how_to_query": [
+    "npm run project:query -- overview",
+    "npm run project:query -- relevant --q=\"tu tarea\"",
+    "npm run project:query -- context <id>",
+    "npm run project:query -- files <id>",
+    "npm run project:query -- stale"
+  ],
+  "domains": [
+    {
+      "id": "domain.product",
+      "name": "Producto Wrapped",
+      "summary": "Experiencia de usuario: landing, loading, slides, share y cards.",
+      "children": [
+        {
+          "id": "feature.app-shell",
+          "type": "feature",
+          "name": "App shell",
+          "summary": "Layout raíz, providers globales y superficies de error de Next."
+        },
+        {
+          "id": "feature.landing",
+          "type": "feature",
+          "name": "Landing",
+          "summary": "Página de bienvenida y CTAs para iniciar el Wrapped."
+        },
+        {
+          "id": "feature.info-pages",
+          "type": "feature",
+          "name": "How it works y FAQ",
+          "summary": "Páginas informativas de producto fuera de la landing."
+        },
+        {
+          "id": "feature.loading",
+          "type": "feature",
+          "name": "Loading del Wrapped",
+          "summary": "Pantalla que solicita stats y prepara la transición a slides."
+        },
+        {
+          "id": "feature.wrapped-stats",
+          "type": "feature",
+          "name": "Cálculo de WrappedStats",
+          "summary": "Fetch GraphQL, normalización y cálculo de estadísticas del año."
+        },
+        {
+          "id": "feature.wrapped-player",
+          "type": "feature",
+          "name": "Player de slides",
+          "summary": "UI cinematográfica que renderiza el plan de slides del Wrapped."
+        },
+        {
+          "id": "feature.share",
+          "type": "feature",
+          "name": "Shares públicos",
+          "summary": "Snapshot público de stats y ruta /share/[slug]."
+        },
+        {
+          "id": "feature.profile-card",
+          "type": "feature",
+          "name": "Profile Card",
+          "summary": "Imagen year-scoped, Markdown README y refresh vía cron."
+        },
+        {
+          "id": "feature.live-status",
+          "type": "feature",
+          "name": "Estado live",
+          "summary": "Endpoint público de estado del producto para clientes."
+        }
+      ]
+    },
+    {
+      "id": "domain.integrations",
+      "name": "Integraciones",
+      "summary": "Auth GitHub, cliente GraphQL y persistencia Postgres/Prisma.",
+      "children": [
+        {
+          "id": "feature.auth",
+          "type": "feature",
+          "name": "GitHub OAuth",
+          "summary": "Auth.js + proveedor GitHub; sesión y token solo en servidor."
+        },
+        {
+          "id": "feature.github-api",
+          "type": "feature",
+          "name": "GitHub GraphQL",
+          "summary": "Cliente y queries GraphQL de actividad del año."
+        },
+        {
+          "id": "service.db",
+          "type": "service",
+          "name": "Prisma / Neon Postgres",
+          "summary": "Cliente Prisma y schema de sesiones, shares y cards."
+        }
+      ]
+    },
+    {
+      "id": "domain.platform",
+      "name": "Plataforma",
+      "summary": "i18n, SEO, cookies, legal, errores, UI compartida y audio.",
+      "children": [
+        {
+          "id": "feature.i18n",
+          "type": "feature",
+          "name": "Internacionalización",
+          "summary": "Locales, traducciones y helpers de UI multi-idioma."
+        },
+        {
+          "id": "feature.seo",
+          "type": "feature",
+          "name": "SEO",
+          "summary": "Metadata de páginas, sitemap, robots y JSON-LD/GA."
+        },
+        {
+          "id": "feature.consent",
+          "type": "feature",
+          "name": "Consentimiento de cookies",
+          "summary": "Preferencias de cookies y activación condicional de analítica."
+        },
+        {
+          "id": "feature.legal",
+          "type": "feature",
+          "name": "Privacidad y términos",
+          "summary": "Contenido y páginas legales EN/ES."
+        },
+        {
+          "id": "feature.errors",
+          "type": "feature",
+          "name": "Errores y resiliencia",
+          "summary": "Catálogo de errores, pantallas y utilidades de reintento."
+        },
+        {
+          "id": "feature.brand-ui",
+          "type": "feature",
+          "name": "Brand, layout y UI",
+          "summary": "Marca, shell de página, header/footer y primitivas visuales."
+        },
+        {
+          "id": "feature.audio",
+          "type": "feature",
+          "name": "Audio / SFX",
+          "summary": "Motor de efectos de sonido y provider de mute."
+        },
+        {
+          "id": "feature.http",
+          "type": "feature",
+          "name": "HTTP helpers",
+          "summary": "Respuestas API y fetch JSON tipado para el cliente."
+        }
+      ]
+    },
+    {
+      "id": "domain.admin",
+      "name": "Administración",
+      "summary": "Panel y APIs internas de configuración del Wrapped.",
+      "children": [
+        {
+          "id": "feature.admin-panel",
+          "type": "feature",
+          "name": "Panel admin",
+          "summary": "UI de administración y preview de slides/config."
+        },
+        {
+          "id": "feature.admin-api",
+          "type": "feature",
+          "name": "API y librería admin",
+          "summary": "Route Handlers y lógica de acceso/config/auditoría admin."
+        }
+      ]
+    },
+    {
+      "id": "domain.tooling",
+      "name": "Tooling",
+      "summary": "Índice de inteligencia, docs, config de build y artefactos públicos.",
+      "children": [
+        {
+          "id": "infrastructure.project-index",
+          "type": "infrastructure",
+          "name": "Project Intelligence Index",
+          "summary": "Catálogo, indexer y CLI de navegación para agentes."
+        },
+        {
+          "id": "configuration.app",
+          "type": "configuration",
+          "name": "Configuración de app",
+          "summary": "package.json, Next, env de ejemplo, Vercel cron y tsconfig."
+        },
+        {
+          "id": "documentation.root",
+          "type": "documentation",
+          "name": "Documentación",
+          "summary": "README, reglas de agentes y docs de SEO/privacidad."
+        },
+        {
+          "id": "infrastructure.static-assets",
+          "type": "infrastructure",
+          "name": "Assets estáticos",
+          "summary": "Favicon, OG e iconos públicos fuera de brand."
+        },
+        {
+          "id": "test.suites",
+          "type": "test",
+          "name": "Suites de test",
+          "summary": "Tests unitarios ejecutados con tsx --test."
+        }
+      ]
+    }
+  ]
+}

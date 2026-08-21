@@ -1,0 +1,520 @@
+{
+  "nodes": {
+    "feature.app-shell": {
+      "entrypoints": [
+        "src/app/layout.tsx",
+        "src/providers/app-provider.tsx",
+        "src/app/globals.css"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/error.tsx",
+        "src/app/forbidden.tsx",
+        "src/app/global-error.tsx",
+        "src/app/globals.css",
+        "src/app/layout.tsx",
+        "src/app/not-found.tsx",
+        "src/app/unauthorized.tsx",
+        "src/providers/app-provider.tsx",
+        "src/providers/auth-session-provider-server.tsx",
+        "src/providers/auth-session-provider.tsx",
+        "src/providers/consent-provider.tsx",
+        "src/providers/sfx-provider.tsx"
+      ],
+      "tests": []
+    },
+    "feature.landing": {
+      "entrypoints": [
+        "src/app/page.tsx",
+        "src/components/landing/landing-page.tsx",
+        "src/components/landing/landing-hero.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/page.tsx",
+        "src/components/landing/code-particles.tsx",
+        "src/components/landing/cursor-code-trail.tsx",
+        "src/components/landing/landing-card-cluster.tsx",
+        "src/components/landing/landing-floating-cards.tsx",
+        "src/components/landing/landing-hero.tsx",
+        "src/components/landing/landing-page.tsx",
+        "src/components/landing/landing-preview.tsx",
+        "src/components/landing/landing-sticky-cta.tsx",
+        "src/lib/wrapped/landing-preview-stats.ts"
+      ],
+      "tests": []
+    },
+    "feature.info-pages": {
+      "entrypoints": [
+        "src/app/how-it-works/page.tsx",
+        "src/app/faq/page.tsx",
+        "src/components/info/how-it-works-page.tsx",
+        "src/components/info/faq-page.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/faq/page.tsx",
+        "src/app/how-it-works/page.tsx",
+        "src/components/info/faq-page.tsx",
+        "src/components/info/how-it-works-page.tsx"
+      ],
+      "tests": []
+    },
+    "feature.loading": {
+      "entrypoints": [
+        "src/app/loading/page.tsx",
+        "src/components/loading/loading-screen.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/loading/page.tsx",
+        "src/components/loading/loading-screen.tsx"
+      ],
+      "tests": []
+    },
+    "feature.wrapped-stats": {
+      "entrypoints": [
+        "src/app/api/wrapped/route.ts",
+        "src/lib/wrapped/fetch-viewer-wrapped.ts",
+        "src/lib/wrapped/build-stats.ts",
+        "src/lib/wrapped/plan-slides.ts",
+        "src/lib/wrapped/types.ts"
+      ],
+      "dirs": [
+        "src/lib/wrapped/"
+      ],
+      "files": [
+        "src/app/api/wrapped/route.ts",
+        "src/lib/wrapped/modules/achievements.ts",
+        "src/lib/wrapped/modules/calendar.ts",
+        "src/lib/wrapped/modules/compose.ts",
+        "src/lib/wrapped/modules/highlights.ts",
+        "src/lib/wrapped/modules/types.ts"
+      ],
+      "tests": [
+        "src/lib/wrapped/modules/achievements.test.ts"
+      ]
+    },
+    "feature.wrapped-player": {
+      "entrypoints": [
+        "src/app/wrapped/page.tsx",
+        "src/components/wrapped/wrapped-experience.tsx",
+        "src/components/wrapped/shared-wrapped-experience.tsx",
+        "src/lib/wrapped/plan-slides.ts"
+      ],
+      "dirs": [
+        "src/components/wrapped/"
+      ],
+      "files": [
+        "src/app/wrapped/page.tsx",
+        "src/components/wrapped/slides/commits-slide.tsx",
+        "src/lib/wrapped/burst-confetti.ts",
+        "src/lib/wrapped/use-prefers-reduced-motion.ts",
+        "src/lib/wrapped/use-stories-navigation.ts",
+        "src/lib/wrapped/use-swipe-navigation.ts",
+        "src/lib/wrapped/wrapped-ui.tsx"
+      ],
+      "tests": []
+    },
+    "feature.share": {
+      "entrypoints": [
+        "src/app/api/share/route.ts",
+        "src/app/share/[slug]/page.tsx",
+        "src/lib/wrapped/share.ts",
+        "src/lib/wrapped/load-share.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/api/share/route.ts",
+        "src/app/share/[slug]/card/route.tsx",
+        "src/app/share/[slug]/not-found.tsx",
+        "src/app/share/[slug]/opengraph-image.tsx",
+        "src/app/share/[slug]/page.tsx",
+        "src/components/wrapped/share-copy-button.tsx",
+        "src/components/wrapped/share-markdown-button.tsx",
+        "src/lib/wrapped/ensure-share-client.ts",
+        "src/lib/wrapped/load-share.ts",
+        "src/lib/wrapped/share.ts"
+      ],
+      "tests": [
+        "src/lib/wrapped/share.test.ts"
+      ]
+    },
+    "feature.profile-card": {
+      "entrypoints": [
+        "src/app/api/profile-card/route.ts",
+        "src/lib/profile-card/store.ts",
+        "src/lib/profile-card/refresh.ts",
+        "src/lib/profile-card/card-image.tsx",
+        "src/app/api/cron/refresh-profile-cards/route.ts"
+      ],
+      "dirs": [
+        "src/lib/profile-card/"
+      ],
+      "files": [
+        "src/app/api/cron/refresh-profile-cards/route.ts",
+        "src/app/api/profile-card/route.ts",
+        "src/app/cards/[username]/[year]/route.tsx",
+        "src/app/cards/[username]/route.tsx"
+      ],
+      "tests": [
+        "src/lib/profile-card/copy.test.ts",
+        "src/lib/profile-card/urls.test.ts"
+      ]
+    },
+    "feature.live-status": {
+      "entrypoints": [
+        "src/app/api/live/route.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/api/live/route.ts"
+      ],
+      "tests": []
+    },
+    "feature.auth": {
+      "entrypoints": [
+        "src/auth.ts",
+        "src/app/api/auth/[...nextauth]/route.ts",
+        "src/lib/auth/session.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/api/auth/[...nextauth]/route.ts",
+        "src/app/auth/popup-done/page.tsx",
+        "src/app/auth/popup-done/popup-done-client.tsx",
+        "src/auth.ts",
+        "src/lib/auth/session.ts",
+        "src/providers/auth-session-provider-server.tsx",
+        "src/providers/auth-session-provider.tsx",
+        "src/types/next-auth.d.ts"
+      ],
+      "tests": []
+    },
+    "feature.github-api": {
+      "entrypoints": [
+        "src/lib/github/client.ts",
+        "src/lib/github/queries.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "src/lib/github/client.ts",
+        "src/lib/github/queries.ts"
+      ],
+      "tests": []
+    },
+    "service.db": {
+      "entrypoints": [
+        "src/lib/db.ts",
+        "prisma/schema.prisma"
+      ],
+      "dirs": [],
+      "files": [
+        "prisma/migrations/20260812000000_auth_js/migration.sql",
+        "prisma/migrations/20260812120000_wrapped_share/migration.sql",
+        "prisma/migrations/20260817000000_profile_card/migration.sql",
+        "prisma/migrations/20260817120000_profile_card_year_scope/migration.sql",
+        "prisma/migrations/20260818000000_app_settings/migration.sql",
+        "prisma/migrations/20260819000000_app_settings_config/migration.sql",
+        "prisma/migrations/20260819010000_admin_audit_log/migration.sql",
+        "prisma/migrations/migration_lock.toml",
+        "prisma/schema.prisma",
+        "src/lib/db.ts"
+      ],
+      "tests": []
+    },
+    "feature.i18n": {
+      "entrypoints": [
+        "src/lib/i18n/translations.ts",
+        "src/lib/i18n/supported-locales.ts",
+        "src/lib/i18n/use-view-i18n.ts"
+      ],
+      "dirs": [
+        "src/lib/i18n/locales/"
+      ],
+      "files": [
+        "src/components/i18n/locale-flag.tsx",
+        "src/lib/i18n/interpolate.ts",
+        "src/lib/i18n/language-cache.ts",
+        "src/lib/i18n/language-types.ts",
+        "src/lib/i18n/locale-region.ts",
+        "src/lib/i18n/supported-locales.ts",
+        "src/lib/i18n/translation-views.ts",
+        "src/lib/i18n/translations.ts",
+        "src/lib/i18n/use-view-i18n.ts"
+      ],
+      "tests": [
+        "src/lib/i18n/interpolate.test.ts"
+      ]
+    },
+    "feature.seo": {
+      "entrypoints": [
+        "src/lib/seo/pages.ts",
+        "src/app/sitemap.ts",
+        "src/app/robots.ts",
+        "src/lib/app-url.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "docs/SEO.md",
+        "public/llms.txt",
+        "src/app/robots.ts",
+        "src/app/sitemap.ts",
+        "src/components/seo/google-analytics.tsx",
+        "src/components/seo/json-ld.tsx",
+        "src/lib/app-url.ts",
+        "src/lib/seo/pages.ts"
+      ],
+      "tests": []
+    },
+    "feature.consent": {
+      "entrypoints": [
+        "src/lib/consent/cookies.ts",
+        "src/providers/consent-provider.tsx",
+        "src/components/legal/cookie-consent-banner.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/components/legal/cookie-consent-banner.tsx",
+        "src/lib/consent/cookies.ts",
+        "src/providers/consent-provider.tsx"
+      ],
+      "tests": []
+    },
+    "feature.legal": {
+      "entrypoints": [
+        "src/lib/legal/content.ts",
+        "src/app/privacy/page.tsx",
+        "src/app/terms/page.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "docs/PRIVACY-COOKIES.md",
+        "src/app/privacy/page.tsx",
+        "src/app/terms/page.tsx",
+        "src/components/legal/legal-page.tsx",
+        "src/lib/legal/content.ts"
+      ],
+      "tests": []
+    },
+    "feature.errors": {
+      "entrypoints": [
+        "src/lib/errors/catalog.ts",
+        "src/lib/errors/app-error.ts",
+        "src/components/error/error-screen.tsx",
+        "src/app/errors/[code]/page.tsx"
+      ],
+      "dirs": [
+        "src/lib/errors/"
+      ],
+      "files": [
+        "src/app/errors/[code]/page.tsx",
+        "src/components/error/error-actions.tsx",
+        "src/components/error/error-background.tsx",
+        "src/components/error/error-code.tsx",
+        "src/components/error/error-content.tsx",
+        "src/components/error/error-footer.tsx",
+        "src/components/error/error-illustration.tsx",
+        "src/components/error/error-page.tsx",
+        "src/components/error/error-screen.tsx"
+      ],
+      "tests": [
+        "src/lib/errors/catalog.test.ts",
+        "src/lib/errors/resilience.test.ts"
+      ]
+    },
+    "feature.brand-ui": {
+      "entrypoints": [
+        "src/components/layout/page-shell.tsx",
+        "src/components/layout/glass-header.tsx",
+        "src/components/brand/brand-wordmark.tsx",
+        "src/lib/brand/assets.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "public/brand/yearongit-mark.svg",
+        "src/components/brand/brand-logo.tsx",
+        "src/components/brand/brand-wordmark.tsx",
+        "src/components/layout/glass-header.tsx",
+        "src/components/layout/header-restore-pill.tsx",
+        "src/components/layout/language-toggle.tsx",
+        "src/components/layout/page-shell.tsx",
+        "src/components/layout/site-footer.tsx",
+        "src/components/layout/sound-toggle.tsx",
+        "src/components/ui/ambient-background.tsx",
+        "src/components/ui/glass-tooltip.tsx",
+        "src/components/ui/icons.tsx"
+      ],
+      "tests": []
+    },
+    "feature.audio": {
+      "entrypoints": [
+        "src/lib/audio/sfx-engine.ts",
+        "src/providers/sfx-provider.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/components/layout/sound-toggle.tsx",
+        "src/lib/audio/score.ts",
+        "src/lib/audio/sfx-engine.ts",
+        "src/providers/sfx-provider.tsx"
+      ],
+      "tests": []
+    },
+    "feature.http": {
+      "entrypoints": [
+        "src/lib/http/api-response.ts",
+        "src/lib/http/fetch-json.ts"
+      ],
+      "dirs": [],
+      "files": [
+        "src/lib/http/api-response.ts",
+        "src/lib/http/fetch-json.ts"
+      ],
+      "tests": []
+    },
+    "feature.admin-panel": {
+      "entrypoints": [
+        "src/app/admin/page.tsx",
+        "src/components/admin/admin-panel.tsx",
+        "src/app/admin/preview/page.tsx"
+      ],
+      "dirs": [],
+      "files": [
+        "src/app/admin/page.tsx",
+        "src/app/admin/preview/page.tsx",
+        "src/components/admin/admin-catalog-modules.tsx",
+        "src/components/admin/admin-list.tsx",
+        "src/components/admin/admin-panel.tsx",
+        "src/components/admin/admin-preview-client.tsx",
+        "src/components/admin/admin-slide-preview-modal.tsx",
+        "src/components/admin/admin-ui.tsx"
+      ],
+      "tests": []
+    },
+    "feature.admin-api": {
+      "entrypoints": [
+        "src/lib/admin/require-admin.ts",
+        "src/lib/admin/access.ts",
+        "src/lib/admin/wrapped-config.ts",
+        "src/lib/admin/settings.ts"
+      ],
+      "dirs": [
+        "src/lib/admin/"
+      ],
+      "files": [
+        "src/app/api/admin/editions/route.ts",
+        "src/app/api/admin/features/route.ts",
+        "src/app/api/admin/health/route.ts",
+        "src/app/api/admin/logs/route.ts",
+        "src/app/api/admin/maintenance/route.ts",
+        "src/app/api/admin/settings/route.ts",
+        "src/app/api/admin/slides/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/users/route.ts"
+      ],
+      "tests": [
+        "src/lib/admin/access.test.ts",
+        "src/lib/admin/config-changelog.test.ts",
+        "src/lib/admin/list-query.test.ts",
+        "src/lib/admin/wrapped-config.test.ts"
+      ]
+    },
+    "infrastructure.project-index": {
+      "entrypoints": [
+        "src/lib/project-index/catalog.ts",
+        "src/lib/project-index/indexer.ts",
+        "src/lib/project-index/index-query.ts",
+        "src/lib/project-index/cli/index-cmd.ts",
+        "src/lib/project-index/cli/query-cmd.ts"
+      ],
+      "dirs": [],
+      "files": [
+        ".project/README.md",
+        "src/lib/project-index/catalog.ts",
+        "src/lib/project-index/cli/index-cmd.ts",
+        "src/lib/project-index/cli/query-cmd.ts",
+        "src/lib/project-index/git-hook-installer.ts",
+        "src/lib/project-index/import-scanner.ts",
+        "src/lib/project-index/index-query.ts",
+        "src/lib/project-index/index-store.ts",
+        "src/lib/project-index/indexer.ts",
+        "src/lib/project-index/path-utils.ts",
+        "src/lib/project-index/stopwords.ts",
+        "src/lib/project-index/types.ts"
+      ],
+      "tests": [
+        "src/lib/project-index/project-index.test.ts"
+      ]
+    },
+    "configuration.app": {
+      "entrypoints": [
+        "package.json",
+        "vercel.json",
+        ".env.example"
+      ],
+      "dirs": [],
+      "files": [
+        ".env.example",
+        "next.config.ts",
+        "package.json",
+        "tsconfig.json",
+        "vercel.json"
+      ],
+      "tests": []
+    },
+    "documentation.root": {
+      "entrypoints": [
+        "README.md",
+        "AGENTS.md"
+      ],
+      "dirs": [],
+      "files": [
+        "AGENTS.md",
+        "README.md",
+        "docs/PRIVACY-COOKIES.md",
+        "docs/SEO.md",
+        "public/llms.txt"
+      ],
+      "tests": []
+    },
+    "infrastructure.static-assets": {
+      "entrypoints": [
+        "public/llms.txt"
+      ],
+      "dirs": [],
+      "files": [
+        "public/brand/yearongit-mark.svg",
+        "public/file.svg",
+        "public/globe.svg",
+        "public/llms.txt",
+        "public/next.svg",
+        "public/noise.svg",
+        "public/vercel.svg",
+        "public/window.svg"
+      ],
+      "tests": []
+    },
+    "test.suites": {
+      "entrypoints": [
+        "package.json"
+      ],
+      "dirs": [],
+      "files": [],
+      "tests": [
+        "src/lib/admin/access.test.ts",
+        "src/lib/admin/config-changelog.test.ts",
+        "src/lib/admin/list-query.test.ts",
+        "src/lib/admin/wrapped-config.test.ts",
+        "src/lib/errors/catalog.test.ts",
+        "src/lib/errors/resilience.test.ts",
+        "src/lib/i18n/interpolate.test.ts",
+        "src/lib/profile-card/copy.test.ts",
+        "src/lib/profile-card/urls.test.ts",
+        "src/lib/project-index/project-index.test.ts",
+        "src/lib/wrapped/modules/achievements.test.ts",
+        "src/lib/wrapped/share.test.ts"
+      ]
+    }
+  }
+}

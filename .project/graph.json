@@ -1,0 +1,1311 @@
+{
+  "edges": [
+    {
+      "from": "feature.app-shell",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.consent",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.errors",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.brand-ui",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.seo",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.wrapped-stats",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.github-api",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.wrapped-stats",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.share",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.profile-card",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.wrapped-stats",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.share",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.wrapped-stats",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.github-api",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.live-status",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.auth",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.github-api",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.consent",
+      "to": "feature.seo",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.legal",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.i18n",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.audio",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.admin-api",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.auth",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "service.db",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.wrapped-stats",
+      "type": "depends_on",
+      "confidence": 1,
+      "source": "catalog",
+      "inferred": false
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 13
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.github-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.live-status",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.http",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.share",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 12
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.share",
+      "to": "service.db",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.http",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 9
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.http",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.legal",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.profile-card",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.auth",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.auth",
+      "to": "feature.admin-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.auth",
+      "to": "service.db",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.admin-panel",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.i18n",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 6
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.info-pages",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 6
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.audio",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.consent",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.audio",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 6
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.brand-ui",
+      "to": "feature.consent",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.audio",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.audio",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.consent",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.consent",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.consent",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.legal",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.legal",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.http",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.loading",
+      "to": "feature.audio",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.seo",
+      "to": "feature.consent",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 18
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 33
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.audio",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 14
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.share",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.wrapped-player",
+      "to": "feature.share",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.admin-api",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "service.db",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.admin-api",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.audio",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.errors",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.errors",
+      "to": "feature.github-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.github-api",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 5
+    },
+    {
+      "from": "feature.http",
+      "to": "feature.errors",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 9
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.i18n",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.i18n",
+      "to": "feature.app-shell",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.profile-card",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "service.db",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.github-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.profile-card",
+      "to": "feature.seo",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.seo",
+      "to": "feature.brand-ui",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.wrapped-stats",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.github-api",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 4
+    },
+    {
+      "from": "feature.landing",
+      "to": "feature.wrapped-stats",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "test.suites",
+      "to": "feature.share",
+      "type": "tests",
+      "confidence": 0.9,
+      "source": "path-map",
+      "inferred": true
+    },
+    {
+      "from": "feature.wrapped-stats",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.consent",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 2
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.i18n",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 3
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.audio",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.audio",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    },
+    {
+      "from": "feature.app-shell",
+      "to": "feature.wrapped-player",
+      "type": "uses",
+      "confidence": 0.85,
+      "source": "import-analysis",
+      "inferred": true,
+      "weight": 1
+    }
+  ]
+}

@@ -501,10 +501,11 @@ flowchart TB
 src/
   app/            # Rutas UI + API + sitemap/robots
   components/     # Landing, wrapped, legal, seo…
-  lib/            # GitHub client, wrapped, auth helpers, errors…
+  lib/            # GitHub client, wrapped, auth, project-index…
   providers/      # App, consent, toasts, sfx…
 prisma/           # Schema y migraciones
 public/           # Assets estáticos + llms.txt
+.project/         # Project Intelligence Index (mapa para agentes; ver .project/README.md)
 ```
 
 ---
@@ -578,7 +579,8 @@ Convenciones al modificar este repo:
 2. Preferir GraphQL agrupado (`contributionsCollection`) frente a muchas llamadas REST.  
 3. UI dark / slides cinematográficas.  
 4. Responder en español si el usuario escribe en español.  
-5. Endpoints centrales de producto: `/api/auth/*`, `/api/wrapped`.
+5. Endpoints centrales de producto: `/api/auth/*`, `/api/wrapped`.  
+6. Antes de explorar a ciegas: `npm run project:query -- relevant --q="…"` (índice en `.project/`).
 
 ---
 
@@ -589,6 +591,11 @@ Convenciones al modificar este repo:
 npm run dev
 npm run lint
 npm run typecheck
+
+# Project Intelligence Index
+npm run project:query -- relevant --q="wrapped"
+npm run project:index -- --full
+npm run index
 
 # Base de datos
 npm run db:generate
